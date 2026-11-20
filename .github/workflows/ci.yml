@@ -1,4 +1,4 @@
-name: Sennet CI
+name: Seneternal CI
 on:
   push:
     branches: [main]
