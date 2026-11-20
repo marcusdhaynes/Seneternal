@@ -1,4 +1,4 @@
-name: Deploy Sennet Web
+name: Deploy Seneternal Web
 on:
   push:
     branches: [main]
@@ -8,7 +8,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: sennet-pages
+  group: seneternal-pages
   cancel-in-progress: true
 jobs:
   build-and-deploy:
@@ -26,13 +26,13 @@ jobs:
       - run: npm run build
         env:
           GITHUB_PAGES: 'true'
-          VITE_SENNET_WS_URL: ${{ vars.SENNET_RELAY_WSS_URL }}
+          VITE_SENETERNAL_WS_URL: ${{ vars.SENETERNAL_RELAY_WSS_URL }}
       - name: Verify the case-sensitive GitHub Pages asset base
         run: |
-          grep -Eq 'src="/Sennet/assets/[^"]+\.js"' apps/web/dist/index.html
-          grep -Eq 'href="/Sennet/assets/[^"]+\.css"' apps/web/dist/index.html
-          if grep -q '="/sennet/' apps/web/dist/index.html; then
-            echo "ERROR: lowercase /sennet/ would break the canonical /Sennet/ Pages URL" >&2
+          grep -Eq 'src="/Seneternal/assets/[^"]+\.js"' apps/web/dist/index.html
+          grep -Eq 'href="/Seneternal/assets/[^"]+\.css"' apps/web/dist/index.html
+          if grep -q '="/seneternal/' apps/web/dist/index.html; then
+            echo "ERROR: lowercase /seneternal/ would break the canonical /Seneternal/ Pages URL" >&2
             exit 1
           fi
       - uses: actions/configure-pages@v5
