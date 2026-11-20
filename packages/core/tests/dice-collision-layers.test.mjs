@@ -31,6 +31,22 @@ test('two dice physically repel and exchange momentum rather than passing throug
   assert.ok(a.position.x<b.position.x,'dice must not tunnel through one another');
   assert.ok(a.velocity.x<0&&b.velocity.x>0,'collision must reverse their head-on velocities');
 });
+test('a newly thrown die cannot ghost through a previously settled die',()=>{
+  const world=new CANNON.World({gravity:new CANNON.Vec3(0,0,0)});
+  world.defaultContactMaterial.restitution=.45;
+  const settled=new CANNON.Body({mass:0,
+    collisionFilterGroup:DIE_COLLISION_LAYER,
+    collisionFilterMask:DIE_COLLISION_LAYER,
+    shape:new CANNON.Sphere(5)});
+  settled.position.set(35,0,40);
+  const incoming=die(0,0,40,100);
+  world.addBody(settled);world.addBody(incoming);
+  for(let i=0;i<100;i++)world.step(1/120);
+  assert.ok(incoming.position.x<settled.position.x,
+    'an incoming die stays on the approach side of the settled die');
+  assert.ok(incoming.velocity.x<=0,
+    'the incoming die must stop or rebound on contact');
+});
 test('a screen wall still physically blocks and reflects thrown dice',()=>{
   const world=new CANNON.World({gravity:new CANNON.Vec3(0,0,0)});
   const wall=boundary(new CANNON.Box(new CANNON.Vec3(1,100,100)),40,0,40);
