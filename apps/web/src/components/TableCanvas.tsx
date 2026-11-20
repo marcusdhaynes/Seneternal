@@ -1834,10 +1834,14 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
     const automaticAim=!gentleDrop&&Math.hypot(dx,dy)<1&&Math.hypot(defaultX,defaultY)>1;
     const aimX=automaticAim?defaultX:dx;
     const aimY=automaticAim?defaultY:dy;
-    const obstacles=[...visuals.current.entries()].filter(([id])=>{
+    const obstacles=[...visuals.current.entries()].flatMap(([id,visual])=>{
       const obj=currentState.current.objects.find(o=>o.id===id);
-      return !!obj&&(obj.tokenCoin||obj.throwDice||obj.kind==='die');
-    }).slice(-60).map(([,visual])=>convert(visual.toGlobal(new Point(0,0))));
+      if(!obj||(obj.kind!=='die'&&!obj.throwDice))return [];
+      const point=visual.toGlobal(new Point(0,0));
+      const edge=visual.toGlobal(new Point(1,0));
+      return [{...convert(point),sides:obj.sides??6,
+        scale:Math.hypot(edge.x-point.x,edge.y-point.y)*Math.max(sx,sy)}];
+    }).slice(-60);
     if(!release){
       diceQuantitiesRef.current={};setDiceQuantities({});
       for(const sides of DICE_TYPES)staticDice3D.current?.setSourceQuantity(sides,0);
@@ -1927,10 +1931,14 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
         right:Math.max(...corners.map(p=>p.x)),
         top:Math.min(...corners.map(p=>p.y)),bottom:Math.max(...corners.map(p=>p.y))};
     });
-    const obstacles=[...visuals.current.entries()].filter(([otherId])=>{
+    const obstacles=[...visuals.current.entries()].flatMap(([otherId,piece])=>{
       const other=currentState.current.objects.find(o=>o.id===otherId);
-      return otherId!==id&&!!other&&(other.tokenCoin||other.throwDice||other.kind==='die');
-    }).slice(-70).map(([,piece])=>toScreen(piece.toGlobal(new Point(0,0))));
+      if(otherId===id||!other||(other.kind!=='die'&&!other.throwDice))return [];
+      const point=piece.toGlobal(new Point(0,0));
+      const edge=piece.toGlobal(new Point(1,0));
+      return [{...toScreen(point),sides:other.sides??6,
+        scale:Math.hypot(edge.x-point.x,edge.y-point.y)*Math.max(sx,sy)}];
+    }).slice(-60);
     const parent=visual.parent??board;
     let rerollCommitted=false;
     const commitReroll=(results:RollFallbackResult[])=>{
