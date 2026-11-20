@@ -2925,3 +2925,11 @@ body>.reader-backdrop{
 @media(prefers-reduced-motion:reduce){
  .seneternal-held-card{transition:none}
 }
+
+/* A foreground book must physically cover the table beneath it.
+   Body-level magnified previews cannot outrank an open book or dialog. */
+body:has(.reader-backdrop) > :is(
+  .seneternal-dice-hover-top-layer,
+  .seneternal-coin-hover-top-layer,
+  .seneternal-book-hover-top-layer
+){display:none!important}
