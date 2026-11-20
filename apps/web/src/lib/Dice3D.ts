@@ -43,7 +43,7 @@ export interface Dice3DOptions {
   gentleDrop?:boolean;
   /** Source was picked up and released at this exact screen coordinate. */
   heldRelease?:boolean;
-  trays:Dice3DRect[];obstacles:{x:number;y:number}[];
+  trays:Dice3DRect[];obstacles:{x:number;y:number;sides?:number;scale?:number}[];
   done:(results:Dice3DResult[])=>void;
   /** A GPU/context/physics failure must never strand the roll in flight. */
   onError?:(error:unknown)=>void;
@@ -156,7 +156,21 @@ export function roll3DDice(opts:Dice3DOptions):()=>void{
   let currentScreenBounds=visibleViewport();
   moveScreenWalls(currentScreenBounds);
   // Trays, coins, playmat accessories, and cards remain visuals only.
-  // Every thrown die is a rigid body that can strike other thrown dice.
+  // Previously settled dice are static contact bodies: new dice cannot
+  // ghost through them, while their saved outcome remains authoritative.
+  for(const oldDie of opts.obstacles.slice(-60)){
+    if(!Number.isFinite(oldDie.x)||!Number.isFinite(oldDie.y))continue;
+    const scale=Number.isFinite(oldDie.scale)?Math.max(.08,Math.min(4,oldDie.scale??1)):1;
+    const sides=Number.isFinite(oldDie.sides)?Math.max(2,oldDie.sides??6):6;
+    const radius=radiusFor(sides)*scale;
+    const settled=new CANNON.Body({mass:0,material:dieMat,
+      collisionFilterGroup:DIE_COLLISION_LAYER,
+      collisionFilterMask:DIE_COLLISION_LAYER,
+      shape:new CANNON.Sphere(Math.max(5,radius*.78))});
+    settled.position.set(oldDie.x,h-oldDie.y,Math.max(5,radius*.78));
+    world.addBody(settled);
+  }
+  // Every newly thrown die is a dynamic body that can strike its peers.
   // All dice launch using the same measured screen-space gesture. Physics
   // receives Y-up coordinates, but the direction is never randomized.
   const gentleDrop=opts.gentleDrop===true;
