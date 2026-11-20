@@ -392,6 +392,10 @@ export function createStaticDice3D(
     const logical=pixiSize();
     const transform=diceToCssTransform(w,h,logical.width,logical.height);
     const xScale=transform.x,yScale=transform.y;
+    // A reader/dialog is a solid foreground surface. Never promote a die
+    // underneath it to the body-level hover stage, even if Pixi still has
+    // that die's pointer emphasis from a previous frame.
+    const foregroundDialogOpen=!!document.querySelector('.reader-backdrop');
     let hoverTarget:HoverTarget|null=null;
     for(let i=0;i<visuals.length;i++){
       const visual=visuals[i],entry=entries[i];
@@ -451,7 +455,7 @@ export function createStaticDice3D(
         looseDieOpacity(Date.now()-(entry.shownAt??Date.now()),entry.fadeAfterMs??0);
       visual.group.visible=opacity>0;
       if(visual.caption)visual.caption.visible=opacity>0;
-      if(entry.id===activeHoverId&&opacity>0&&exposed){
+      if(!foregroundDialogOpen&&entry.id===activeHoverId&&opacity>0&&exposed){
         hoverTarget={visual,entry,x,y,scale:sf};
       }
       // Unlike hiding the whole canvas, material alpha fades only the
