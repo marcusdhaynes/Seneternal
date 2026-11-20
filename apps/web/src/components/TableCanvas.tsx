@@ -100,7 +100,7 @@ import {formatDiceSelection} from '../lib/actionDisplay';
 import {fallbackDiceResults,type RollFallbackResult} from '../lib/diceFallback';
 import {expandDiceSources} from '../lib/diceSourceExpansion';
 import {DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET,diceRackLocations} from '../lib/diceCoordinates';
-import {bookOpenPoseX,bookSavedOffset,drawerInnerWell,isBookWithinDrawer,isBookCenterWithinDrawer} from '../lib/bookDrawerPlacement';
+import {bookOpenPoseX,bookSavedOffset,drawerInnerWell,isBookWithinDrawer,isBookCenterWithinDrawer,tableBookHome} from '../lib/bookDrawerPlacement';
 import {fitActionScreenToWheel,actionScreenContactCenter,ACTION_LCD_HEIGHT} from '../lib/actionScreenFit';
 import {fitMatAttachedRadial,fitSelfMatWithHud,fitBattleRadialZoom,
   EYE_CONTROL_DIAMETER_PX,eyeOpponentReferencePixels} from '../lib/actionRadialFit';
@@ -332,6 +332,7 @@ function drawTcgMats(
     const topLeft=cells.find(c=>c.column===0&&c.row===0)!;
     const bottomRight=cells.find(c=>c.column===2&&c.row===3)!;
     const mat=new Container();
+    const seatDrawers=new Map<number,Container>();
     mat.position.set((topLeft.x+bottomRight.x)/2,(topLeft.y+bottomRight.y)/2);
     mat.rotation=topLeft.angle;
     parent.addChild(mat);
@@ -404,6 +405,7 @@ function drawTcgMats(
         drawerGroup.eventMode='auto';
         drawerGroup.addChild(tray);
         mat.addChild(drawerGroup);
+        seatDrawers.set(side,drawerGroup);
         layers.accessories.attach(drawerGroup);
         if(seat===viewerSeat)drawerGroups.set(side,drawerGroup);
         // The drawer slides UNDER the mat. Only the genuine outer wooden
@@ -476,19 +478,29 @@ function drawTcgMats(
       }
       if(seat!==viewerSeat&&seatActor){
         const style=remoteAppearance?.bookDesign??'dragon';
-        const dock=remoteAppearance?.bookDock==='left'?-1:1;
-        const tray=drawerGroups.get(dock);
-        // The opponent's actual book is visible, but never intercepts our
-        // pointer events or opens another player's settings.
-        if(tray){
-          const bw=TCG_MAT.cardWidth-8,bh=bw/.76;
-          const accessory=makePseudo3DBook(style,bw,bh);
-          const shift=remoteAppearance?.bookOffset??{x:0,y:0};
-          accessory.position.set(dock*(TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3)+shift.x,
-            TCG_MAT_HEIGHT/2-bh*.44-10+shift.y);
-          accessory.eventMode='none';
-          tray.addChild(accessory);
-        }
+        const dock=remoteAppearance?.bookDock??'free';
+        const side=dock==='left'?-1:1;
+        const bw=TCG_MAT.cardWidth-8,bh=bw/.76;
+        const home=dock==='free'?tableBookHome(TCG_MAT_WIDTH,TCG_MAT_HEIGHT,bw,bh):
+          {x:side*(TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3),
+            y:TCG_MAT_HEIGHT/2-bh*.44-10};
+        const shift=remoteAppearance?.bookOffset??{x:0,y:0};
+        const x=home.x+shift.x,y=home.y+shift.y;
+        const accessory=makePseudo3DBook(style,bw,bh);
+        accessory.position.set(x,y);
+        // Each opponent owns independent drawers. Never try to attach their
+        // book to the VIEWER'S drawer map (which has no remote seats).
+        const tray=([-1,1] as const).find(s=>{
+          const d=seatDrawers.get(s);
+          if(!d)return false;
+          const trayTop=-TCG_MAT_HEIGHT/2+TCG_MAT.rowHeight+TCG_MAT.gap;
+          return isBookWithinDrawer(x,y,bw*1.06,bh*1.06,
+            drawerInnerWell(s*(TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3),
+              (trayTop+TCG_MAT_HEIGHT/2)/2,TCG_MAT.cardWidth,TCG_MAT_HEIGHT/2-trayTop));
+        });
+        accessory.eventMode='none';
+        if(tray!==undefined)seatDrawers.get(tray)?.addChild(accessory);
+        else{mat.addChild(accessory);layers.objects.attach(accessory);}
       }
     }
     if(seat===viewerSeat){
@@ -499,8 +511,11 @@ function drawTcgMats(
       const bw=TCG_MAT.cardWidth-8;
       const bh=bw/.76;
       const trayBottom=TCG_MAT_HEIGHT/2;
-      const bx=side*(TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3)+bookOffset.x;
-      const by=trayBottom-bh*.44-10+bookOffset.y;
+      const home=bookDock==='free'?tableBookHome(TCG_MAT_WIDTH,TCG_MAT_HEIGHT,bw,bh):
+        {x:side*(TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3),
+          y:trayBottom-bh*.44-10};
+      const bx=home.x+bookOffset.x;
+      const by=home.y+bookOffset.y;
       const book=makePseudo3DBook(bookDesign,bw,bh);
       book.position.set(bx,by);
       // A physical book can be loose on the felt OR stowed in EITHER
