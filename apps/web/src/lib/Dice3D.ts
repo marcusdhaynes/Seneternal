@@ -43,7 +43,7 @@ export interface Dice3DOptions {
   gentleDrop?:boolean;
   /** Source was picked up and released at this exact screen coordinate. */
   heldRelease?:boolean;
-  trays:Dice3DRect[];obstacles:{x:number;y:number}[];
+  trays:Dice3DRect[];obstacles:{x:number;y:number;sides?:number;scale?:number}[];
   done:(results:Dice3DResult[])=>void;
   /** A GPU/context/physics failure must never strand the roll in flight. */
   onError?:(error:unknown)=>void;
@@ -72,10 +72,10 @@ export function convexShape(geom:THREE.BufferGeometry):CANNON.Shape{
   }
   return new CANNON.ConvexPolyhedron({vertices,faces});
 }
-/** Dice only collide with the floor and visible screen walls.
- * Separate collision groups make dice pass through one another. */
+/** Dice collide with each other AND with the supporting floor/screen walls. */
 export const DIE_COLLISION_LAYER=1;
 export const SCREEN_BOUNDARY_LAYER=2;
+export const DIE_COLLISION_MASK=DIE_COLLISION_LAYER|SCREEN_BOUNDARY_LAYER;
 function boxAt(world:CANNON.World,x:number,y:number,z:number,
   wx:number,wy:number,wz:number,friction:CANNON.Material):CANNON.Body{
   const body=new CANNON.Body({mass:0,material:friction,
@@ -106,8 +106,10 @@ export function roll3DDice(opts:Dice3DOptions):()=>void{
   const dieMat=new CANNON.Material('polyhedral'),wallMat=new CANNON.Material('felt');
   world.addContactMaterial(new CANNON.ContactMaterial(dieMat,wallMat,
     {friction:.43,restitution:.35}));
-  // The supporting floor is retained so the dice can tumble, settle,
-  // and display a physical face. No die-to-die contact exists.
+  world.addContactMaterial(new CANNON.ContactMaterial(dieMat,dieMat,
+    {friction:.32,restitution:.4}));
+  // The floor and walls contain all dice; the shared die collision mask
+  // also produces proper pairwise impulses, friction, and separation.
   const floor=new CANNON.Body({mass:0,shape:new CANNON.Plane(),material:wallMat,
     collisionFilterGroup:SCREEN_BOUNDARY_LAYER,collisionFilterMask:DIE_COLLISION_LAYER});
   world.addBody(floor);
@@ -153,9 +155,22 @@ export function roll3DDice(opts:Dice3DOptions):()=>void{
   };
   let currentScreenBounds=visibleViewport();
   moveScreenWalls(currentScreenBounds);
-  // Trays, coins, playmat accessories, cards, and other tabletop pieces are
-  // visuals only; none creates a Cannon collider. Only screen walls and the
-  // supporting floor participate in physics.
+  // Trays, coins, playmat accessories, and cards remain visuals only.
+  // Previously settled dice are static contact bodies: new dice cannot
+  // ghost through them, while their saved outcome remains authoritative.
+  for(const oldDie of opts.obstacles.slice(-60)){
+    if(!Number.isFinite(oldDie.x)||!Number.isFinite(oldDie.y))continue;
+    const scale=Number.isFinite(oldDie.scale)?Math.max(.08,Math.min(4,oldDie.scale??1)):1;
+    const sides=Number.isFinite(oldDie.sides)?Math.max(2,oldDie.sides??6):6;
+    const radius=radiusFor(sides)*scale;
+    const settled=new CANNON.Body({mass:0,material:dieMat,
+      collisionFilterGroup:DIE_COLLISION_LAYER,
+      collisionFilterMask:DIE_COLLISION_LAYER,
+      shape:new CANNON.Sphere(Math.max(5,radius*.78))});
+    settled.position.set(oldDie.x,h-oldDie.y,Math.max(5,radius*.78));
+    world.addBody(settled);
+  }
+  // Every newly thrown die is a dynamic body that can strike its peers.
   // All dice launch using the same measured screen-space gesture. Physics
   // receives Y-up coordinates, but the direction is never randomized.
   const gentleDrop=opts.gentleDrop===true;
@@ -176,7 +191,7 @@ export function roll3DDice(opts:Dice3DOptions):()=>void{
     const screenRadius=Math.max(32,safeDiceFootprint(r,geom.boundingSphere?.radius??r));
     const body=new CANNON.Body({mass:side===2?.85:1.05+side/170,
       material:dieMat,collisionFilterGroup:DIE_COLLISION_LAYER,
-      collisionFilterMask:SCREEN_BOUNDARY_LAYER,
+      collisionFilterMask:DIE_COLLISION_MASK,
       linearDamping:.13,angularDamping:.14,
       allowSleep:true,sleepSpeedLimit:.22,sleepTimeLimit:.7});
     body.addShape(side===2?
@@ -184,9 +199,8 @@ export function roll3DDice(opts:Dice3DOptions):()=>void{
       undefined,side===2?new CANNON.Quaternion().setFromAxisAngle(
         new CANNON.Vec3(1,0,0),Math.PI/2):undefined);
     let startX=source.x,startY=source.y;
-    // Spawn a mixed throw as a close but NON-intersecting cluster. Widely
-    // separated dice started in different storage slots rarely collided.
-    // These small staggered offsets give Cannon real die-to-die contacts.
+    // Spawn mixed throws as a staggered cluster, with sufficient clearance
+    // for genuine Cannon die-to-die contact rather than mesh overlap.
     if(!opts.reroll&&opts.sources.length>1){
       const meanX=opts.sources.reduce((n,s)=>n+s.x,0)/opts.sources.length;
       const meanY=opts.sources.reduce((n,s)=>n+s.y,0)/opts.sources.length;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {drawerInnerWell,isBookWithinDrawer,isBookCenterWithinDrawer,bookOpenPoseX,bookSavedOffset} from
+import {drawerInnerWell,isBookWithinDrawer,isBookCenterWithinDrawer,bookOpenPoseX,bookSavedOffset,tableBookHome} from
   '../../../apps/web/src/lib/bookDrawerPlacement.ts';
 
 test('a book centered in the open drawer belongs to that drawer',()=>{
@@ -62,4 +62,20 @@ test('widened right-drawer book fits and spans the top-row coin pair',()=>{
   const y=194-height*.44-10;
   assert.equal(isBookWithinDrawer(320,y,width*1.06,height*1.06,well),true);
   assert.ok(width>=2*15+2*(16*1.08*.9*.72)-.5);
+});
+
+
+test('default Seneternal book is always on exposed tabletop felt',()=>{
+  const matWidth=586,matHeight=388,bookWidth=54,bookHeight=54/.76;
+  const home=tableBookHome(matWidth,matHeight,bookWidth,bookHeight);
+  assert.ok(home.x-bookWidth/2>matWidth/2,
+    'book sits outside the playmat card pockets');
+  assert.ok(home.y+bookHeight/2<-matHeight/2,
+    'book sits in the upper felt, above the two box openings');
+  const drawer=drawerInnerWell(matWidth/2+62/2+3,49,62,290);
+  assert.equal(isBookWithinDrawer(home.x,home.y,bookWidth,bookHeight,drawer),false,
+    'closing the right drawer cannot hide the default book');
+  assert.equal(isBookWithinDrawer(home.x,home.y,bookWidth,bookHeight,
+    drawerInnerWell(-(matWidth/2+62/2+3),49,62,290)),false,
+    'closing the left drawer cannot hide the default book');
 });

@@ -22,6 +22,28 @@ import {choosePseudoBotAction} from './lib/bot';
 import {directUpload,downloadText,getPacks,importPackFile,importPackUrl,rememberPack} from './lib/storage';
 
 type Book = 'seneternal'|'games'|'settings';
+type BookDock='left'|'right'|'free'|'hidden';
+type BookOffset={x:number;y:number};
+const BOOK_POSITION_KEY='seneternal.book.position.v3';
+/** Preserve deliberately moved books while migrating the old default
+ * (inside a drawer) to a visible home on the table. */
+function initialBookPlacement():{dock:BookDock;offset:BookOffset}{
+  try{
+    const saved=JSON.parse(localStorage.getItem(BOOK_POSITION_KEY)||'null');
+    if(saved&&['left','right','free','hidden'].includes(saved.dock)&&
+      Number.isFinite(saved.offset?.x)&&Number.isFinite(saved.offset?.y))
+      return {dock:saved.dock,offset:{x:saved.offset.x,y:saved.offset.y}};
+  }catch{/* Invalid settings should never hide the book. */}
+  let offset:BookOffset={x:0,y:0};
+  try{
+    const old=JSON.parse(localStorage.getItem('seneternal.book.offset.v2')||'null');
+    if(Number.isFinite(old?.x)&&Number.isFinite(old?.y))
+      offset={x:old.x,y:old.y};
+  }catch{/* Default placement. */}
+  const raw=localStorage.getItem('seneternal.book.dock.v2');
+  const dock:BookDock=raw==='left'?'left':raw==='free'?'free':'right';
+  return {dock:dock==='right'&&offset.x===0&&offset.y===0?'free':dock,offset};
+}
 type GamePage = 'all'|'recent'|'library'|'tools';
 type SettingsPage = 'general'|'playmat'|'deckbuilder'|'multiplayer'|'scripting';
 type SavedSession = {id:string;title:string;updated:number;initial:GameState;game:GameState;history:EventRecord[];seat?:number;
@@ -162,13 +184,14 @@ export default function App(){
   const [recent,setRecent]=useState<SavedSession[]>(recentGames);
   const [book,setBook]=useState<Book|null>(null);
   const [bookDesign,setBookDesign]=useState<'tiny'|'dragon'|'journal'|'arcane'|'strapped'>(()=>(localStorage.getItem('seneternal.book.design') as 'tiny'|'dragon'|'journal'|'arcane'|'strapped')||'dragon');
-  // New book footprint starts at the bottom of the RIGHT tray even when an
-  // earlier version saved the old miniature's position or left dock.
-  const [bookDock,setBookDock]=useState<'left'|'right'|'free'>(()=>(localStorage.getItem('seneternal.book.dock.v2') as 'left'|'right'|'free')||'right');
-  const [bookOffset,setBookOffset]=useState<{x:number;y:number}>(()=>{try{return JSON.parse(localStorage.getItem('seneternal.book.offset.v2')||'{"x":0,"y":0}');}catch{return {x:0,y:0};}});
+  // New games expose the physical tome on the felt; an intentional move
+  // into a drawer (or Hidden setting) remains persistent across sessions.
+  const [bookDock,setBookDock]=useState<BookDock>(()=>initialBookPlacement().dock);
+  const [bookOffset,setBookOffset]=useState<BookOffset>(()=>initialBookPlacement().offset);
   useEffect(()=>{localStorage.setItem('seneternal.book.design',bookDesign)},[bookDesign]);
   useEffect(()=>{localStorage.setItem('seneternal.book.dock.v2',bookDock)},[bookDock]);
   useEffect(()=>{localStorage.setItem('seneternal.book.offset.v2',JSON.stringify(bookOffset))},[bookOffset]);
+  useEffect(()=>{localStorage.setItem(BOOK_POSITION_KEY,JSON.stringify({dock:bookDock,offset:bookOffset}))},[bookDock,bookOffset]);
   // Token appearance and the Custom generator are independent user preferences.
   // Physical coin copies live in the normal replayable game state instead.
 
@@ -958,9 +981,15 @@ export default function App(){
               <label>Book Design<select value={bookDesign} onChange={e=>setBookDesign(e.target.value as typeof bookDesign)}>
                 <option value="tiny">Tiny Tome · Leather & Brass</option><option value="dragon">Dragon Codex · Azure Enamel</option><option value="journal">Campaign Journal · Crimson</option><option value="arcane">Arcane Notebook · Gold Sigil</option><option value="strapped">Strapped Journal · Aged Hide</option>
               </select></label>
-              <h4>Dock Position</h4><label>Left Box<select value={bookDock==='left'?'book':'empty'} onChange={e=>{setBookDock(e.target.value==='book'?'left':'right');setBookOffset({x:0,y:0});}}><option value="empty">Empty</option><option value="book">Book</option></select></label>
-              <label>Right Box<select value={bookDock==='right'?'book':'empty'} onChange={e=>{setBookDock(e.target.value==='book'?'right':'left');setBookOffset({x:0,y:0});}}><option value="empty">Empty</option><option value="book">Book</option></select></label>
-              <button className="reader-secondary" onClick={()=>{setBookDock('right');setBookOffset({x:0,y:0});}}>Reset book to right box</button>
+              <h4>Book Position</h4>
+              <label>Resting Place<select value={bookDock} onChange={e=>{setBookDock(e.target.value as BookDock);setBookOffset({x:0,y:0});}}>
+                <option value="free">On Table · Always Visible</option>
+                <option value="left">Inside Left Drawer</option>
+                <option value="right">Inside Right Drawer</option>
+                <option value="hidden">Hidden</option>
+              </select></label>
+              <p>Drag the book freely, or place it in a drawer and close the drawer to stow it. Hidden books can always be restored here.</p>
+              <button className="reader-secondary" onClick={()=>{setBookDock('free');setBookOffset({x:0,y:0});}}>Return Book to Table</button>
               </div>}
             {settingsPage==='general'&&<><div className="reader-heading"><div><h2>Your perspective</h2><p>Your own seat is always positioned at the bottom. The table rotates around it.</p></div></div>
               <div className="reader-block"><h3>Player</h3><label>Display name<input value={playerName} maxLength={32} onChange={e=>setPlayerName(e.target.value)}/></label><label>My seat<select value={seat} onChange={e=>setSeat(Number(e.target.value))}>{Array.from({length:12},(_,i)=><option key={i} value={i}>Player {String(i+1).padStart(2,'0')}</option>)}</select></label></div>

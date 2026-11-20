@@ -46,3 +46,13 @@ export function isBookCenterWithinDrawer(
     Math.abs(x-(well.x+slideX))<=well.width/2+4&&
     Math.abs(y-well.y)<=well.height/2+4;
 }
+
+/** Default home for the Seneternal tome on exposed felt, adjacent to the
+ * top-right of the player's mat. It must not inherit a drawer mask or
+ * disappear when the player closes either drawer. */
+export function tableBookHome(
+  matWidth:number,matHeight:number,bookWidth:number,bookHeight:number
+):{x:number;y:number}{
+  return {x:matWidth/2+bookWidth/2+14,
+    y:-matHeight/2-bookHeight/2-14};
+}
