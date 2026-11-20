@@ -1,4 +1,4 @@
-import type {EventRecord,GameState} from '@sennet/core';
+import type {EventRecord,GameState} from '@seneternal/core';
 type Roll={sides:number;rolls:number[]};
 function isRoll(value:unknown):value is Roll{
   if(!value||typeof value!=='object')return false;

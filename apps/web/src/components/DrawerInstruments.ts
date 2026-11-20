@@ -41,7 +41,7 @@ export function buildLifeCounter(seat=0):Container{
  liveLcd.eventMode='none';root.addChild(liveLcd);
  const turn=label('TURN 1',6);turn.y=-29;root.addChild(turn);
  const player=label('Player 1',7);player.y=-13;root.addChild(player);
- const storageKey='sennet.life-counter.v1.'+seat;
+ const storageKey='seneternal.life-counter.v1.'+seat;
  let saved:{total:number;round:number;active:number}|null=null;
  try{saved=JSON.parse(localStorage.getItem(storageKey)||'null');}catch{/* private session */}
  let total=Number.isFinite(saved?.total)?saved!.total:40;

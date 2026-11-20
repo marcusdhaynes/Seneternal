@@ -2,8 +2,8 @@ import {useEffect,useMemo,useRef,useState,type ChangeEvent} from 'react';
 import {createPortal} from 'react-dom';
 import {UpdateBanner,UpdatesSection} from './updates';
 import {ArrowLeft,BookOpen,Check,ChevronRight,Code2,Copy,Dices,Download,FlipHorizontal,Globe2,Layers,Link2,Minus,Package,Play,Plus,RotateCw,Save,Search,Settings2,ShieldCheck,Shuffle,SkipForward,Trash2,Upload,Users,Wifi,WifiOff,X,Zap} from 'lucide-react';
-import {applyCommand,createGame,createId,gameFromPack,parseGamePack,replay,expireThrownDice,thrownDieDeadlines,THROWN_DIE_LIFETIME_MS,type Command,type EventRecord,type GameKind,type GamePack,type GameState,type PlayMode,type TableObject,BOARD_CENTER,tcgMatCells,tcgMatLocal,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,isTcgRemoveDrop,cardStackMembers,defaultPlaymatAppearance,normalizePlaymatAppearance,type PlaymatAppearance,type SharedAppearance} from '@sennet/core';
-import {runLua,SAMPLE_LUA} from '@sennet/lua';
+import {applyCommand,createGame,createId,gameFromPack,parseGamePack,replay,expireThrownDice,thrownDieDeadlines,THROWN_DIE_LIFETIME_MS,type Command,type EventRecord,type GameKind,type GamePack,type GameState,type PlayMode,type TableObject,BOARD_CENTER,tcgMatCells,tcgMatLocal,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,isTcgRemoveDrop,cardStackMembers,defaultPlaymatAppearance,normalizePlaymatAppearance,type PlaymatAppearance,type SharedAppearance} from '@seneternal/core';
+import {runLua,SAMPLE_LUA} from '@seneternal/lua';
 import TableCanvas from './components/TableCanvas';
 import {formatActionDisplay} from './lib/actionDisplay';
 import {mergeReceipt,parseReplayFile,receiptForCommand,receiptTimestamp,RECEIPT_SCHEMA,
@@ -21,7 +21,7 @@ import {RoomConnection} from './lib/network';
 import {choosePseudoBotAction} from './lib/bot';
 import {directUpload,downloadText,getPacks,importPackFile,importPackUrl,rememberPack} from './lib/storage';
 
-type Book = 'sennet'|'games'|'settings';
+type Book = 'seneternal'|'games'|'settings';
 type GamePage = 'all'|'recent'|'library'|'tools';
 type SettingsPage = 'general'|'playmat'|'deckbuilder'|'multiplayer'|'scripting';
 type SavedSession = {id:string;title:string;updated:number;initial:GameState;game:GameState;history:EventRecord[];seat?:number;
@@ -36,9 +36,9 @@ const KINDS:{id:GameKind;label:string;description:string;symbol:string}[]=[
   {id:'party',label:'Party Games',description:'Quick games with friends.',symbol:'✦'},
   {id:'custom',label:'Custom Games',description:'Build whatever you can imagine.',symbol:'✳'}
 ];
-const ACTOR_KEY='sennet.actor.v1';
-const TOKEN_KEY='sennet.player-token.v1';
-const ONLINE_ROOMS_KEY='sennet.online-rooms.v1';
+const ACTOR_KEY='seneternal.actor.v1';
+const TOKEN_KEY='seneternal.player-token.v1';
+const ONLINE_ROOMS_KEY='seneternal.online-rooms.v1';
 type OnlineRoom={room:string;endpoint:string;updated:number;seat:number|null};
 function onlineRooms():OnlineRoom[]{
   try{
@@ -61,8 +61,8 @@ function normalizeRelay(raw:string):string{
   const url=new URL(value);
   if(url.protocol==='https:')url.protocol='wss:';
   if(url.protocol==='http:')url.protocol='ws:';
-  if(url.protocol!=='ws:'&&url.protocol!=='wss:')throw Error('Enter the HTTPS or WSS address of your Sennet relay.');
-  if(location.protocol==='https:'&&url.protocol!=='wss:')throw Error('Online Sennet requires a secure HTTPS or WSS address.');
+  if(url.protocol!=='ws:'&&url.protocol!=='wss:')throw Error('Enter the HTTPS or WSS address of your Seneternal relay.');
+  if(location.protocol==='https:'&&url.protocol!=='wss:')throw Error('Online Seneternal requires a secure HTTPS or WSS address.');
   return url.origin;
 }
 function inviteUrl(room:string,endpoint:string):string{
@@ -71,14 +71,14 @@ function inviteUrl(room:string,endpoint:string):string{
   url.searchParams.set('relay',endpoint);
   return url.href;
 }
-const RECENT_KEY='sennet.recent.v1';
-const LAST_SESSION_KEY='sennet.last-play-session.v1';
-const REWIND_SESSION_KEY='sennet.rewind-play-session.v1';
-const MERGE_OPACITY_KEY='sennet.merge-control-opacity.v1';
-const MERGE_DELAY_KEY='sennet.merge-hover-delay.v2';
-const PREVIOUS_MERGE_DELAY_KEY='sennet.merge-hover-delay.v1';
-const LEGACY_PLAYMAT_KEY='sennet.playmat.appearance.v1';
-const PLAYMAT_KEY_PREFIX='sennet.playmat.appearance.v2.';
+const RECENT_KEY='seneternal.recent.v1';
+const LAST_SESSION_KEY='seneternal.last-play-session.v1';
+const REWIND_SESSION_KEY='seneternal.rewind-play-session.v1';
+const MERGE_OPACITY_KEY='seneternal.merge-control-opacity.v1';
+const MERGE_DELAY_KEY='seneternal.merge-hover-delay.v2';
+const PREVIOUS_MERGE_DELAY_KEY='seneternal.merge-hover-delay.v1';
+const LEGACY_PLAYMAT_KEY='seneternal.playmat.appearance.v1';
+const PLAYMAT_KEY_PREFIX='seneternal.playmat.appearance.v2.';
 const scopedPlaymatKey=(playerId:string)=>PLAYMAT_KEY_PREFIX+encodeURIComponent(playerId);
 function storedPlaymatAppearance(playerId:string):PlaymatAppearance{
   try{
@@ -161,14 +161,14 @@ export default function App(){
   const sessionId=useRef(restored?.id??createId());
   const [recent,setRecent]=useState<SavedSession[]>(recentGames);
   const [book,setBook]=useState<Book|null>(null);
-  const [bookDesign,setBookDesign]=useState<'tiny'|'dragon'|'journal'|'arcane'|'strapped'>(()=>(localStorage.getItem('sennet.book.design') as 'tiny'|'dragon'|'journal'|'arcane'|'strapped')||'dragon');
+  const [bookDesign,setBookDesign]=useState<'tiny'|'dragon'|'journal'|'arcane'|'strapped'>(()=>(localStorage.getItem('seneternal.book.design') as 'tiny'|'dragon'|'journal'|'arcane'|'strapped')||'dragon');
   // New book footprint starts at the bottom of the RIGHT tray even when an
   // earlier version saved the old miniature's position or left dock.
-  const [bookDock,setBookDock]=useState<'left'|'right'|'free'>(()=>(localStorage.getItem('sennet.book.dock.v2') as 'left'|'right'|'free')||'right');
-  const [bookOffset,setBookOffset]=useState<{x:number;y:number}>(()=>{try{return JSON.parse(localStorage.getItem('sennet.book.offset.v2')||'{"x":0,"y":0}');}catch{return {x:0,y:0};}});
-  useEffect(()=>{localStorage.setItem('sennet.book.design',bookDesign)},[bookDesign]);
-  useEffect(()=>{localStorage.setItem('sennet.book.dock.v2',bookDock)},[bookDock]);
-  useEffect(()=>{localStorage.setItem('sennet.book.offset.v2',JSON.stringify(bookOffset))},[bookOffset]);
+  const [bookDock,setBookDock]=useState<'left'|'right'|'free'>(()=>(localStorage.getItem('seneternal.book.dock.v2') as 'left'|'right'|'free')||'right');
+  const [bookOffset,setBookOffset]=useState<{x:number;y:number}>(()=>{try{return JSON.parse(localStorage.getItem('seneternal.book.offset.v2')||'{"x":0,"y":0}');}catch{return {x:0,y:0};}});
+  useEffect(()=>{localStorage.setItem('seneternal.book.design',bookDesign)},[bookDesign]);
+  useEffect(()=>{localStorage.setItem('seneternal.book.dock.v2',bookDock)},[bookDock]);
+  useEffect(()=>{localStorage.setItem('seneternal.book.offset.v2',JSON.stringify(bookOffset))},[bookOffset]);
   // Token appearance and the Custom generator are independent user preferences.
   // Physical coin copies live in the normal replayable game state instead.
 
@@ -184,9 +184,9 @@ export default function App(){
   // can never be loaded as the default for another player identity.
   const actor=useMemo(localActor,[]);
   const [playmat,setPlaymat]=useState<PlaymatAppearance>(()=>storedPlaymatAppearance(actor));
-  const [labelScale,setLabelScale]=useState<number>(()=>storedPreference('sennet.mat.label-scale.v1',1.25,.75,2));
+  const [labelScale,setLabelScale]=useState<number>(()=>storedPreference('seneternal.mat.label-scale.v1',1.25,.75,2));
   const [coinAppearance,setCoinAppearance]=useState<CoinAppearance>(()=>{try{
-    const saved=JSON.parse(localStorage.getItem('sennet.coin.appearance.v1')||'null');
+    const saved=JSON.parse(localStorage.getItem('seneternal.coin.appearance.v1')||'null');
     return saved&&['polished','brushed','matte','enamel'].includes(saved.finish)&&
       Number.isFinite(saved.shine)&&Number.isFinite(saved.bevel)&&Number.isFinite(saved.size)
       ?{finish:saved.finish,shine:Math.max(0,Math.min(100,saved.shine)),
@@ -194,46 +194,46 @@ export default function App(){
       :DEFAULT_COIN_APPEARANCE;
   }catch{return DEFAULT_COIN_APPEARANCE;}});
   const [diceHoldMs,setDiceHoldMs]=useState(()=>{
-    try{const n=Number(localStorage.getItem('sennet.dice.hold.ms'));
+    try{const n=Number(localStorage.getItem('seneternal.dice.hold.ms'));
       return n>=100&&n<=1500?n:250;}catch{return 250;}
   });
-  const [autoDeselect,setAutoDeselect]=useState(()=>localStorage.getItem('sennet.selection.auto')!=='false');
+  const [autoDeselect,setAutoDeselect]=useState(()=>localStorage.getItem('seneternal.selection.auto')!=='false');
   const [deselectMs,setDeselectMs]=useState(()=>{
-    const n=Number(localStorage.getItem('sennet.selection.idle.ms'));
+    const n=Number(localStorage.getItem('seneternal.selection.idle.ms'));
     return Number.isFinite(n)&&n>=500&&n<=30000?n:3000;
   });
   const [cardViewHoldMs,setCardViewHoldMs]=useState(()=>{
-    const n=Number(localStorage.getItem('sennet.card.inspect.hold.ms'));
+    const n=Number(localStorage.getItem('seneternal.card.inspect.hold.ms'));
     return Number.isFinite(n)&&n>=100&&n<=1500?n:250;
   });
   // The held-hand presentation and the stationary-card selection gesture
   // are independent. Earlier versions accidentally wired one switch to both.
-  const [handHoldView,setHandHoldView]=useState(()=>localStorage.getItem('sennet.hand.hold.view')==='true');
-  const [holdSelectStacks,setHoldSelectStacks]=useState(()=>localStorage.getItem('sennet.cards.hold.select')==='true');
-  const [handPlayMode,setHandPlayMode]=useState(()=>localStorage.getItem('sennet.hand.play00')==='true');
+  const [handHoldView,setHandHoldView]=useState(()=>localStorage.getItem('seneternal.hand.hold.view')==='true');
+  const [holdSelectStacks,setHoldSelectStacks]=useState(()=>localStorage.getItem('seneternal.cards.hold.select')==='true');
+  const [handPlayMode,setHandPlayMode]=useState(()=>localStorage.getItem('seneternal.hand.play00')==='true');
   useEffect(()=>{try{
-    localStorage.setItem('sennet.selection.auto',String(autoDeselect));
-    localStorage.setItem('sennet.selection.idle.ms',String(deselectMs));
-    localStorage.setItem('sennet.card.inspect.hold.ms',String(cardViewHoldMs));
-    localStorage.setItem('sennet.hand.hold.view',String(handHoldView));
-    localStorage.setItem('sennet.cards.hold.select',String(holdSelectStacks));
-    localStorage.setItem('sennet.hand.play00',String(handPlayMode));
+    localStorage.setItem('seneternal.selection.auto',String(autoDeselect));
+    localStorage.setItem('seneternal.selection.idle.ms',String(deselectMs));
+    localStorage.setItem('seneternal.card.inspect.hold.ms',String(cardViewHoldMs));
+    localStorage.setItem('seneternal.hand.hold.view',String(handHoldView));
+    localStorage.setItem('seneternal.cards.hold.select',String(holdSelectStacks));
+    localStorage.setItem('seneternal.hand.play00',String(handPlayMode));
   }catch{}},[autoDeselect,deselectMs,cardViewHoldMs,handHoldView,holdSelectStacks,handPlayMode]);
   // Thrown pieces are removed permanently at exactly 10 seconds.
   // The built-in dice/flipcoin generators in the tray are not disposable.
   const diceFadeMs=THROWN_DIE_LIFETIME_MS;
   const [diceAppearance,setDiceAppearance]=useState<DiceAppearance>(()=>{
-    try{return normalizeDiceAppearance(JSON.parse(localStorage.getItem('sennet.dice.appearance.v1')||'null'));}
+    try{return normalizeDiceAppearance(JSON.parse(localStorage.getItem('seneternal.dice.appearance.v1')||'null'));}
     catch{return {...DEFAULT_DICE_APPEARANCE};}
   });
   const [customCoinText,setCustomCoinText]=useState<string>(()=>{
     try{
-      const text=localStorage.getItem('sennet.coin.custom.text.v1');
+      const text=localStorage.getItem('seneternal.coin.custom.text.v1');
       return text!==null&&/^[0-9,+-]{0,20}$/.test(text)?text:'1';
     }catch{return '1';}
   });
   const [customCoinValue,setCustomCoinValue]=useState<number>(()=>{
-    try{const saved=Number(localStorage.getItem('sennet.coin.custom.v1'));
+    try{const saved=Number(localStorage.getItem('seneternal.coin.custom.v1'));
       return Number.isInteger(saved)&&saved>=1&&saved<=9999?saved:1;
     }catch{return 1;}
   });
@@ -252,9 +252,9 @@ export default function App(){
   const [script,setScript]=useState(SAMPLE_LUA);
   const [scriptOutput,setScriptOutput]=useState('');
   const [endpoint,setEndpoint]=useState(()=>new URLSearchParams(window.location.search).get('relay')||
-    localStorage.getItem('sennet.ws')||import.meta.env.VITE_SENNET_WS_URL||'wss://sennet-multiplayer.onrender.com');
+    localStorage.getItem('seneternal.ws')||import.meta.env.VITE_SENETERNAL_WS_URL||'wss://seneternal-multiplayer.onrender.com');
   const [room,setRoom]=useState(()=>new URLSearchParams(window.location.search).get('room')||'');
-  const [playerName,setPlayerName]=useState(()=>localStorage.getItem('sennet.name')||'Player');
+  const [playerName,setPlayerName]=useState(()=>localStorage.getItem('seneternal.name')||'Player');
   const [onlineStatus,setOnlineStatus]=useState(()=>endpoint?'Ready to connect':'Hosting not configured · local table only');
   const [joinInput,setJoinInput]=useState(()=>new URLSearchParams(window.location.search).get('room')||'');
   const [showHosting,setShowHosting]=useState(()=>!endpoint);
@@ -353,7 +353,7 @@ export default function App(){
       if(!/^[a-z0-9_-]{3,48}$/i.test(roomId))throw new Error('Room code must be 3–48 letters, numbers, dashes or underscores.');
       connection.current?.close();connection.current=null;setConnected(false);
       setEndpoint(address);setRoom(roomId);setJoinInput(roomId);setOnlineStatus('Connecting…');
-      try{localStorage.setItem('sennet.ws',address);localStorage.setItem('sennet.name',playerName);}catch{}
+      try{localStorage.setItem('seneternal.ws',address);localStorage.setItem('seneternal.name',playerName);}catch{}
       window.history.replaceState({},'',inviteUrl(roomId,address));
       connection.current=new RoomConnection(address,roomId,game.kind==='sandbox'&&!options?.room?'tcg':game.kind,actor,seat,playerName,playerToken(),{
         onJoined:(assigned,joinedRoom)=>{
@@ -402,7 +402,7 @@ export default function App(){
         const link=new URL(value);
         const roomCode=link.searchParams.get('room');
         const relayUrl=link.searchParams.get('relay');
-        if(!roomCode)throw Error('The link does not contain a Sennet room code.');
+        if(!roomCode)throw Error('The link does not contain a Seneternal room code.');
         if(!relayUrl&&!endpoint){setShowHosting(true);throw Error('This invitation does not include a hosting address.');}
         joinRoom({room:roomCode,endpoint:relayUrl||endpoint});
       }else joinRoom({room:value});
@@ -416,22 +416,22 @@ export default function App(){
       const response=await fetch(check,{mode:'cors',cache:'no-store',signal:AbortSignal.timeout(8000)});
       if(!response.ok)throw Error('Server returned HTTP '+response.status);
       const json=await response.json();
-      if(json?.ok!==true)throw Error('This address is not a Sennet multiplayer relay.');
-      try{localStorage.setItem('sennet.ws',address);}catch{}
+      if(json?.ok!==true)throw Error('This address is not a Seneternal multiplayer relay.');
+      try{localStorage.setItem('seneternal.ws',address);}catch{}
       setEndpoint(address);setHostingHealth('ready');setShowHosting(false);
       setOnlineStatus('Relay reachable · ready to connect');
       if(createAfterSetup){setCreateAfterSetup(false);joinRoom({room:'',endpoint:address});}
       else inform('Relay connected and saved. You can create or join a table.');
     }catch(error){
       setHostingHealth('error');setShowHosting(true);
-      inform('Cannot reach Sennet relay: '+(error instanceof Error?error.message:String(error)));
+      inform('Cannot reach Seneternal relay: '+(error instanceof Error?error.message:String(error)));
     }finally{setHostingBusy(false);}
   }
   async function shareRoom(){
     if(!room||!endpoint){inform('Create or join a room before sharing.');return;}
     const url=inviteUrl(room,endpoint);
     try{
-      if(navigator.share)await navigator.share({title:'Join my Sennet table',url});
+      if(navigator.share)await navigator.share({title:'Join my Seneternal table',url});
       else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);inform('Invitation link copied!');}
       else{window.prompt('Copy this invite link',url);}
     }catch{/* User dismissed system share sheet. */}
@@ -463,15 +463,15 @@ export default function App(){
     return()=>window.clearTimeout(timeout);
   },[game,history]);
   useEffect(()=>{try{localStorage.setItem(MERGE_OPACITY_KEY,String(mergeOpacity));}catch{/* Storage unavailable. */}},[mergeOpacity]);
-  useEffect(()=>{try{localStorage.setItem('sennet.coin.custom.v1',String(customCoinValue));}catch{}},[customCoinValue]);
-  useEffect(()=>{try{localStorage.setItem('sennet.mat.label-scale.v1',String(labelScale));}catch{}},[labelScale]);
+  useEffect(()=>{try{localStorage.setItem('seneternal.coin.custom.v1',String(customCoinValue));}catch{}},[customCoinValue]);
+  useEffect(()=>{try{localStorage.setItem('seneternal.mat.label-scale.v1',String(labelScale));}catch{}},[labelScale]);
   useEffect(()=>{
     connection.current?.publishAppearance(appearanceRef.current());
   },[playmat,diceAppearance,coinAppearance,customCoinText,customCoinValue,labelScale,bookDesign,bookDock,bookOffset]);
-  useEffect(()=>{try{localStorage.setItem('sennet.coin.custom.text.v1',customCoinText);}catch{}},[customCoinText]);
-  useEffect(()=>{try{localStorage.setItem('sennet.coin.appearance.v1',JSON.stringify(coinAppearance));}catch{}},[coinAppearance]);
-  useEffect(()=>{try{localStorage.setItem('sennet.dice.appearance.v1',JSON.stringify(diceAppearance));}catch{}},[diceAppearance]);
-  useEffect(()=>{try{localStorage.setItem('sennet.dice.hold.ms',String(diceHoldMs));}catch{}},[diceHoldMs]);
+  useEffect(()=>{try{localStorage.setItem('seneternal.coin.custom.text.v1',customCoinText);}catch{}},[customCoinText]);
+  useEffect(()=>{try{localStorage.setItem('seneternal.coin.appearance.v1',JSON.stringify(coinAppearance));}catch{}},[coinAppearance]);
+  useEffect(()=>{try{localStorage.setItem('seneternal.dice.appearance.v1',JSON.stringify(diceAppearance));}catch{}},[diceAppearance]);
+  useEffect(()=>{try{localStorage.setItem('seneternal.dice.hold.ms',String(diceHoldMs));}catch{}},[diceHoldMs]);
   useEffect(()=>{try{localStorage.setItem(MERGE_DELAY_KEY,String(mergeHoverMs));}catch{/* Storage unavailable. */}},[mergeHoverMs]);
   useEffect(()=>{
     try{localStorage.setItem(scopedPlaymatKey(actor),JSON.stringify(playmat));}
@@ -505,7 +505,7 @@ export default function App(){
     try{
       if(file.size>25_000_000)throw Error('Game file must be 25 MB or smaller.');
       const raw=JSON.parse(await file.text()) as {schema?:string};
-      if(raw.schema==='sennet.replay/1'||raw.schema===RECEIPT_SCHEMA){
+      if(raw.schema==='seneternal.replay/1'||raw.schema===RECEIPT_SCHEMA){
         const loaded=parseReplayFile(raw);
         if(isConnected)disconnect();
         resetWith(loaded.game!,loaded.id||createId(),loaded.history,loaded.initial,
@@ -524,7 +524,7 @@ export default function App(){
     schema:RECEIPT_SCHEMA,id:sessionId.current,exportedAt:Date.now(),
     initial,history,redoStack,receipt,seat,game:current.current
   });
-  const exportReceipt=()=>downloadText('sennet-session-'+sessionId.current+'.json',json(replayFile()));
+  const exportReceipt=()=>downloadText('seneternal-session-'+sessionId.current+'.json',json(replayFile()));
   async function importReceipt(event:ChangeEvent<HTMLInputElement>){
     const file=event.target.files?.[0];event.target.value='';
     if(!file)return;
@@ -540,7 +540,7 @@ export default function App(){
     }catch(e){inform(e instanceof Error?e.message:String(e));}
   }
   function exportGame(){
-    const pack:GamePack={schema:'sennet.pack/1',id:'sennet.'+createId().slice(0,8),name:packTitle,author:playerName,kind:game.kind,objects:game.objects,centerMerges:game.centerMerges,license:'Creator supplied'};
+    const pack:GamePack={schema:'seneternal.pack/1',id:'seneternal.'+createId().slice(0,8),name:packTitle,author:playerName,kind:game.kind,objects:game.objects,centerMerges:game.centerMerges,license:'Creator supplied'};
     downloadText(pack.id+'.json',json(pack));rememberPack(pack);setPacks(getPacks());inform('Game exported. You can host it on your own storage.');
   }
   function placeDeckBox(){
@@ -566,7 +566,7 @@ export default function App(){
   }
   async function uploadDirect(){
     if(!uploadFile){inform('Choose a file first.');return;}
-    try{await directUpload(uploadFile,signedUrl);inform('File uploaded directly to your storage, not Sennet.');}
+    try{await directUpload(uploadFile,signedUrl);inform('File uploaded directly to your storage, not Seneternal.');}
     catch(e){inform(String(e));}
   }
   function undo(){
@@ -681,16 +681,16 @@ export default function App(){
       setScriptOutput('Lua completed · '+actions.length+' action(s) submitted.');
     }catch(e){setScriptOutput('Lua error: '+String(e));}
   }
-  return <div className="sennet-home"><UpdateBanner/>
-    <div className="sennet-multiplayer-dock" role="group" aria-label="Multiplayer quick access">
-      <button type="button" className="sennet-multiplayer-open" onClick={()=>{
+  return <div className="seneternal-home"><UpdateBanner/>
+    <div className="seneternal-multiplayer-dock" role="group" aria-label="Multiplayer quick access">
+      <button type="button" className="seneternal-multiplayer-open" onClick={()=>{
         setSettingsPage('multiplayer');setBook('settings');
       }} title="Host or join a table">
         {isConnected?<Wifi size={15}/>:<Users size={15}/>}
         <span>{isConnected?'Table '+room:'Play together'}</span>
         {isConnected&&<small>{game.players.filter(p=>p.online).length} online</small>}
       </button>
-      {isConnected&&<button type="button" className="sennet-multiplayer-share"
+      {isConnected&&<button type="button" className="seneternal-multiplayer-share"
         onClick={shareRoom} title="Share invitation"><Link2 size={16}/></button>}
     </div>
     <div className="table-world">
@@ -698,7 +698,7 @@ export default function App(){
           writeReceipt('Move','Book · '+Math.round(bookOffset.x)+','+Math.round(bookOffset.y)+
             ' → '+Math.round(point.x)+','+Math.round(point.y),'Reposition');
           setBookOffset(point);
-        }} onBookOpen={()=>{writeReceipt('Open','Book','Sennet');setBook('sennet');}} state={viewedGame} labelScale={labelScale} seat={seat} playerName={playerName} actorId={actor} selected={selected}
+        }} onBookOpen={()=>{writeReceipt('Open','Book','Seneternal');setBook('seneternal');}} state={viewedGame} labelScale={labelScale} seat={seat} playerName={playerName} actorId={actor} selected={selected}
         onSelect={setSelected} wheelMode="docked"
         autoDeselect={autoDeselect} deselectMs={deselectMs} cardViewHoldMs={cardViewHoldMs}
         handHoldView={handHoldView} holdSelectStacks={holdSelectStacks} handPlayMode={handPlayMode}
@@ -814,39 +814,39 @@ export default function App(){
           }
         }} readonly={replayAt!==null}/>
     </div>
-    {actionLogOpen&&createPortal(<div className="sennet-receipt-backdrop"
+    {actionLogOpen&&createPortal(<div className="seneternal-receipt-backdrop"
       onPointerDown={event=>{if(event.target===event.currentTarget)setActionLogOpen(false);}}>
-      <section className="sennet-receipt" role="dialog" aria-modal="true"
-        aria-label="Sennet action log">
-        <header className="sennet-receipt-header">
-          <div className="sennet-receipt-insignia">S</div>
-          <div><span className="sennet-receipt-eyebrow">SENNET · TABLE ACTIVITY</span>
+      <section className="seneternal-receipt" role="dialog" aria-modal="true"
+        aria-label="Seneternal action log">
+        <header className="seneternal-receipt-header">
+          <div className="seneternal-receipt-insignia">S</div>
+          <div><span className="seneternal-receipt-eyebrow">SENETERNAL · TABLE ACTIVITY</span>
             <h2>Action Log</h2><small>{orderedReceipt.length} actions · Full session</small></div>
-          <button type="button" className="sennet-receipt-close"
+          <button type="button" className="seneternal-receipt-close"
             aria-label="Close receipt" onClick={()=>setActionLogOpen(false)}>×</button>
         </header>
-        <div className="sennet-receipt-scroll">
-          <table className="sennet-receipt-table">
-            <colgroup><col className="sennet-receipt-time-column"/><col className="sennet-receipt-type-column"/>
-              <col className="sennet-receipt-location-column"/><col/></colgroup>
+        <div className="seneternal-receipt-scroll">
+          <table className="seneternal-receipt-table">
+            <colgroup><col className="seneternal-receipt-time-column"/><col className="seneternal-receipt-type-column"/>
+              <col className="seneternal-receipt-location-column"/><col/></colgroup>
             <thead><tr><th scope="col">Time</th><th scope="col">Type</th>
               <th scope="col">Location</th><th scope="col">Description</th></tr></thead>
             <tbody>{orderedReceipt.map(row=>{
               const date=receiptTimestamp(row.at);
               return <tr key={row.id}>
-                <td className="sennet-receipt-timestamp">
+                <td className="seneternal-receipt-timestamp">
                   <span>{date.date}</span><span>{date.time}</span></td>
                 <td><strong>{row.type}</strong></td>
                 <td>{row.location}</td><td>{row.description}</td>
               </tr>;
             })}</tbody>
           </table>
-          {!orderedReceipt.length&&<p className="sennet-receipt-empty">
+          {!orderedReceipt.length&&<p className="seneternal-receipt-empty">
             No actions recorded yet. Table actions appear here automatically.</p>}
         </div>
-        <footer className="sennet-receipt-footer">
+        <footer className="seneternal-receipt-footer">
           <small>YYYYMMDD · HHMMSSTT<br/>Full commands and undo/redo saved in session JSON</small>
-          <div className="sennet-receipt-actions">
+          <div className="seneternal-receipt-actions">
             <input ref={receiptUpload} hidden type="file" accept=".json,application/json"
               onChange={importReceipt}/>
             <button type="button" onClick={()=>receiptUpload.current?.click()}>Import</button>
@@ -864,25 +864,25 @@ export default function App(){
       <section className={"reader unified-tome reader-open-book tome-"+bookDesign} role="dialog" aria-modal="true" aria-label={book+' book'}>
         <div className="reader-cover-board" aria-hidden="true"/>
         <div className="reader-page-stack" aria-hidden="true"/>
-        <div className="unified-tome-tabs" role="tablist" aria-label="Tome sections">{(['sennet','games','settings'] as const).map(tab=><button key={tab} type="button" role="tab" aria-selected={book===tab} className={book===tab?'active':''} onClick={()=>setBook(tab)}>{tab==='sennet'?'Sennet':tab==='games'?'Games':'Settings'}</button>)}</div>
+        <div className="unified-tome-tabs" role="tablist" aria-label="Tome sections">{(['seneternal','games','settings'] as const).map(tab=><button key={tab} type="button" role="tab" aria-selected={book===tab} className={book===tab?'active':''} onClick={()=>setBook(tab)}>{tab==='seneternal'?'Seneternal':tab==='games'?'Games':'Settings'}</button>)}</div>
         <div className="reader-spread">
           <section className="reader-page reader-page-left" aria-label="Left page">
-            <div className="reader-page-topline"><span>✦ &nbsp; SENNET &nbsp; ✦</span><span>VOL. {book==='sennet'?'I':book==='games'?'II':'III'}</span></div>
+            <div className="reader-page-topline"><span>✦ &nbsp; SENETERNAL &nbsp; ✦</span><span>VOL. {book==='seneternal'?'I':book==='games'?'II':'III'}</span></div>
             <header className="reader-header">
               <span className="reader-mark">S</span>
-              <div><span className="reader-eyebrow">THE SENNET LIBRARY · VOLUME {book==='sennet'?'01':book==='games'?'02':'03'}</span><h1>{book==='sennet'?'Sennet':book==='games'?'Games':'Settings'}</h1></div>
+              <div><span className="reader-eyebrow">THE SENETERNAL LIBRARY · VOLUME {book==='seneternal'?'01':book==='games'?'02':'03'}</span><h1>{book==='seneternal'?'Seneternal':book==='games'?'Games':'Settings'}</h1></div>
             </header>
             <div className="reader-left-content">
               <div className="reader-engraving" aria-hidden="true"><span>❧</span><i/><span>❧</span></div>
-              <p className="reader-left-kicker">{book==='sennet'?'The tabletop companion':book==='games'?'The games collection':'The settings folio'}</p>
-              <p className="reader-lead">{book==='sennet'?'Your tabletop. Your rules. A living guide to the world of Sennet.':
+              <p className="reader-left-kicker">{book==='seneternal'?'The tabletop companion':book==='games'?'The games collection':'The settings folio'}</p>
+              <p className="reader-lead">{book==='seneternal'?'Your tabletop. Your rules. A living guide to the world of Seneternal.':
                 book==='games'?'Every tabletop begins with a choice. Open a game, resume a session, or shape your own.':
                 'The finer details of your table, carefully bound in one place.'}</p>
               <div className="reader-printed-rule" aria-hidden="true"><span>✦</span></div>
-              {book==='sennet'&&<nav className="reader-chapter-index" aria-label="Manual chapters">
+              {book==='seneternal'&&<nav className="reader-chapter-index" aria-label="Manual chapters">
                 <h2>Contents</h2>
                 {['Start with Games','Move & zoom','Your seat & books','Individual TCG mats','Bring your own games','Multiplayer'].map((chapter,i)=>
-                  <button type="button" key={chapter} onClick={()=>document.getElementById('sennet-guide-'+(i+1))?.scrollIntoView({behavior:'smooth',block:'start'})}>
+                  <button type="button" key={chapter} onClick={()=>document.getElementById('seneternal-guide-'+(i+1))?.scrollIntoView({behavior:'smooth',block:'start'})}>
                     <span>{String(i+1).padStart(2,'0')}</span><span>{chapter}</span><span className="reader-index-dots" aria-hidden="true"/></button>)}
               </nav>}
               {book==='games'&&<nav className="reader-chapter-index reader-volume-navigation" aria-label="Game chapters">
@@ -895,24 +895,24 @@ export default function App(){
               </nav>}
               <div className="reader-seal" aria-hidden="true"><span>✧</span><strong>S</strong><span>✧</span></div>
             </div>
-            <footer className="reader-page-number"><span>SENNET · YOUR TABLETOP, YOUR RULES</span><span>— {book==='sennet'?'1':book==='games'?'3':'5'} —</span></footer>
+            <footer className="reader-page-number"><span>SENETERNAL · YOUR TABLETOP, YOUR RULES</span><span>— {book==='seneternal'?'1':book==='games'?'3':'5'} —</span></footer>
           </section>
           <div className="reader-spine-gutter" aria-hidden="true"/>
           <section className="reader-page reader-page-right" aria-label="Right page">
             <header className="reader-right-header">
-              <span>{book==='sennet'?'THE TABLETOP MANUAL':book==='games'?'GAMES & SESSIONS':'CUSTOMIZATION & CONTROLS'}</span>
+              <span>{book==='seneternal'?'THE TABLETOP MANUAL':book==='games'?'GAMES & SESSIONS':'CUSTOMIZATION & CONTROLS'}</span>
               <button className="reader-close" onClick={()=>setBook(null)} aria-label="Close book"><X size={20}/></button>
             </header>
             <div className="reader-content">
-          {book==='sennet'&&<div className="guide">
+          {book==='seneternal'&&<div className="guide">
             <p className="intro">Your tabletop. Your rules. Your player name and seat tab contains three books.</p>
             <div className="guide-grid">
-              <article id="sennet-guide-1"><span>01</span><h3>Start with Games</h3><p>Open the Games book to choose a game type, resume a recent table, or load a community game from your library.</p></article>
-              <article id="sennet-guide-2"><span>02</span><h3>Move &amp; zoom</h3><p>Drag pieces across the felt. Mouse-wheel scroll or two-finger touchpad scrolling zooms around the pointer. Pinch on a touchscreen to zoom. Click and drag empty table space to move the camera; grab a card to move only that card. Double-click the table (or press 0) to reset the view.</p></article>
-              <article id="sennet-guide-3"><span>03</span><h3>Your seat &amp; books</h3><p>The compact gold Player ## tab tucks against the bottom of the screen. Clicking it expands the drawer upward and outward: the gold tag stays on top, with the books below. The green section and any custom display name appear only when expanded; the extra word Player is omitted from that green name label. Click the tag again to collapse it. Hovering does nothing. Choose your seat in Settings.</p></article>
-              <article id="sennet-guide-4"><span>04</span><h3>Individual TCG mats</h3><p>Every seat has its own four-row mat with seven original horizontal card slots in each PLAY and HAND row plus six in-between positions, for 13 selectable positions per row. Tap the Eye centered on the top line of your Play 03 zone to focus it. Hold it for 0.25 seconds, then select any opponent to bring both mats together in a full-height opposing view: theirs above, yours below, separated by the battlefield divider. Other players have a small retractable name/seat tag. Your own gold Player ## tab rises when clicked, revealing Sennet, Games, and Settings underneath it. The green book section stays concealed when collapsed. There is no caret, hover activation, auto-close timer, or separate bookshelf. In Opponent Mode, every other visible player's mat has a Sword and Shield pair whose circle centers sit directly on the Play 03 zone's top boundary from that player's perspective. Tap that player's Sword to mark them as an Enemy across the divider, or their Shield to place them beside you facing your direction. The Eye and Castle sit side by side, evenly centered on the top line of your Play 03 zone, with each circle straddling that line. The Eye keeps its original tap-and-hold controls and shows a one-on-one view with exactly one selected opponent always across from you; Castle defaults to All View: every marked Ally is placed in an optimally scaled grid to the right of your full-size mat, which stays anchored on the left. Hold Castle for 0.25 seconds to toggle BOTH groups to Single View: one Ally beside you and one Enemy across the divider. Both have left/right arrows that cycle independently through their own teammates or opponents. Hold Castle again to return BOTH groups to All View. In Castle All View, click an Ally mat to focus just that Ally while all Enemies remain in their unchanged All grid; click an Enemy mat to focus just that Enemy while all Allies remain as they were. You may focus both sides independently, leaving exactly three mats: yours, one Ally, and one Enemy. Each focused mat has its Sword/Shield and same-role left/right arrows. Focus is neither Single nor All; tap Castle to leave or hold Castle to resume toggling from the previous broad mode. Marked Enemies remain opposite you above the divider in both modes, and unclassified players stay hidden. Tap Castle to enter or leave the battlefield. Only one of Sword or Shield can be selected; tap the active icon again to clear it. Each opponent keeps their own setting. Eye always places the one selected opponent across the divider, even when marked Ally; only Castle puts all marked allies beside you and all marked enemies across from you. Use the circular left/right arrows centered on the selected opponent mat’s left and right edges to cycle counter-clockwise or clockwise through the numbered seats. While facing an opponent the camera is fixed—dragging or zooming the view is disabled, but cards can still be moved. Tap the eye again for the full table, or hold it to return to your mat alone. Hover over + or − to join or separate center sections. All changes can be replayed. The mat retains the original LOCATIONS, RESERVE, WAIT, RESOURCE, LEADERS, DECK, DISCARD and REMOVE pockets, three PLAY rows and HAND. Use the DECK arrow or D to draw; select a card and press T to tap/untap or F to flip. Drop a card or token into your REMOVE pocket to remove it.</p></article>
-              <article id="sennet-guide-5"><span>05</span><h3>Bring your own games</h3><p>Import JSON game packs and externally hosted sprite sheets. Large creator files stay on their own hosting.</p></article>
-              <article id="sennet-guide-6"><span>06</span><h3>Multiplayer</h3><p>Click Play together to create a table, invite friends with one link, and resume any saved seat from the same browser. Online games need a separately hosted WebSocket relay; shared progress is saved there.</p></article>
+              <article id="seneternal-guide-1"><span>01</span><h3>Start with Games</h3><p>Open the Games book to choose a game type, resume a recent table, or load a community game from your library.</p></article>
+              <article id="seneternal-guide-2"><span>02</span><h3>Move &amp; zoom</h3><p>Drag pieces across the felt. Mouse-wheel scroll or two-finger touchpad scrolling zooms around the pointer. Pinch on a touchscreen to zoom. Click and drag empty table space to move the camera; grab a card to move only that card. Double-click the table (or press 0) to reset the view.</p></article>
+              <article id="seneternal-guide-3"><span>03</span><h3>Your seat &amp; books</h3><p>The compact gold Player ## tab tucks against the bottom of the screen. Clicking it expands the drawer upward and outward: the gold tag stays on top, with the books below. The green section and any custom display name appear only when expanded; the extra word Player is omitted from that green name label. Click the tag again to collapse it. Hovering does nothing. Choose your seat in Settings.</p></article>
+              <article id="seneternal-guide-4"><span>04</span><h3>Individual TCG mats</h3><p>Every seat has its own four-row mat with seven original horizontal card slots in each PLAY and HAND row plus six in-between positions, for 13 selectable positions per row. Tap the Eye centered on the top line of your Play 03 zone to focus it. Hold it for 0.25 seconds, then select any opponent to bring both mats together in a full-height opposing view: theirs above, yours below, separated by the battlefield divider. Other players have a small retractable name/seat tag. Your own gold Player ## tab rises when clicked, revealing Seneternal, Games, and Settings underneath it. The green book section stays concealed when collapsed. There is no caret, hover activation, auto-close timer, or separate bookshelf. In Opponent Mode, every other visible player's mat has a Sword and Shield pair whose circle centers sit directly on the Play 03 zone's top boundary from that player's perspective. Tap that player's Sword to mark them as an Enemy across the divider, or their Shield to place them beside you facing your direction. The Eye and Castle sit side by side, evenly centered on the top line of your Play 03 zone, with each circle straddling that line. The Eye keeps its original tap-and-hold controls and shows a one-on-one view with exactly one selected opponent always across from you; Castle defaults to All View: every marked Ally is placed in an optimally scaled grid to the right of your full-size mat, which stays anchored on the left. Hold Castle for 0.25 seconds to toggle BOTH groups to Single View: one Ally beside you and one Enemy across the divider. Both have left/right arrows that cycle independently through their own teammates or opponents. Hold Castle again to return BOTH groups to All View. In Castle All View, click an Ally mat to focus just that Ally while all Enemies remain in their unchanged All grid; click an Enemy mat to focus just that Enemy while all Allies remain as they were. You may focus both sides independently, leaving exactly three mats: yours, one Ally, and one Enemy. Each focused mat has its Sword/Shield and same-role left/right arrows. Focus is neither Single nor All; tap Castle to leave or hold Castle to resume toggling from the previous broad mode. Marked Enemies remain opposite you above the divider in both modes, and unclassified players stay hidden. Tap Castle to enter or leave the battlefield. Only one of Sword or Shield can be selected; tap the active icon again to clear it. Each opponent keeps their own setting. Eye always places the one selected opponent across the divider, even when marked Ally; only Castle puts all marked allies beside you and all marked enemies across from you. Use the circular left/right arrows centered on the selected opponent mat’s left and right edges to cycle counter-clockwise or clockwise through the numbered seats. While facing an opponent the camera is fixed—dragging or zooming the view is disabled, but cards can still be moved. Tap the eye again for the full table, or hold it to return to your mat alone. Hover over + or − to join or separate center sections. All changes can be replayed. The mat retains the original LOCATIONS, RESERVE, WAIT, RESOURCE, LEADERS, DECK, DISCARD and REMOVE pockets, three PLAY rows and HAND. Use the DECK arrow or D to draw; select a card and press T to tap/untap or F to flip. Drop a card or token into your REMOVE pocket to remove it.</p></article>
+              <article id="seneternal-guide-5"><span>05</span><h3>Bring your own games</h3><p>Import JSON game packs and externally hosted sprite sheets. Large creator files stay on their own hosting.</p></article>
+              <article id="seneternal-guide-6"><span>06</span><h3>Multiplayer</h3><p>Click Play together to create a table, invite friends with one link, and resume any saved seat from the same browser. Online games need a separately hosted WebSocket relay; shared progress is saved there.</p></article>
             </div>
             <button className="reader-primary" onClick={()=>{setBook('games');setGamesPage('all');}}>Open Games <ChevronRight size={17}/></button>
           </div>}
@@ -928,13 +928,13 @@ export default function App(){
             {gamesPage==='library'&&<>
               <div className="reader-heading"><div><h2>Game library</h2><p>Community game packs and your own creations.</p></div></div>
               {packs.length?<div className="entry-list">{packs.map(p=><button key={p.id} onClick={()=>loadPack(p)}><BookOpen size={21}/><span><strong>{p.name}</strong><small>{p.author} · {nameFor(p.kind)} · {p.objects.length} objects</small></span><ChevronRight size={19}/></button>)}</div>:<p className="reader-empty">Your library is empty. Import a game to add it here.</p>}
-              <div className="reader-block"><h3>Import a game</h3><p>Use a direct HTTPS link to a Sennet JSON game pack, or select one from your device.</p>
+              <div className="reader-block"><h3>Import a game</h3><p>Use a direct HTTPS link to a Seneternal JSON game pack, or select one from your device.</p>
                 <div className="field-row"><input value={packUrl} onChange={e=>setPackUrl(e.target.value)} placeholder="https://your-storage/game.json"/><button onClick={importRemote}>Import URL</button></div>
                 <label className="file-picker"><Upload size={18}/> Import JSON game pack <input type="file" accept=".json,application/json" onChange={importLocal}/></label>
               </div>
               <details className="reader-details"><summary>Export your current game</summary><div><label>Game name<input value={packTitle} onChange={e=>setPackTitle(e.target.value)}/></label><button className="reader-secondary" onClick={exportGame}><Download size={16}/> Export portable game pack</button></div></details>
               <details className="reader-details"><summary>Add a sprite-based miniature</summary><div><label>Miniature name<input value={assetName} onChange={e=>setAssetName(e.target.value)}/></label><label>Image URLs (one per line)<textarea rows={3} value={spriteUrls} onChange={e=>setSpriteUrls(e.target.value)} placeholder="https://your-storage/frame-00.webp"/></label><button className="reader-secondary" onClick={addSprite}><Plus size={16}/> Place miniature on table</button></div></details>
-              <details className="reader-details"><summary>Upload to your own storage</summary><div><p>Files go directly from your browser to your storage provider, not to Sennet. Provide a short-lived presigned PUT URL.</p><label>Signed upload URL<input type="password" value={signedUrl} onChange={e=>setSignedUrl(e.target.value)}/></label><label className="file-picker"><Upload size={16}/>{uploadFile?uploadFile.name:'Choose file'}<input type="file" accept=".json,.png,.webp,.glb,.gltf,.zip" onChange={e=>setUploadFile(e.target.files?.[0]||null)}/></label><button className="reader-secondary" onClick={uploadDirect}>Upload directly</button></div></details>
+              <details className="reader-details"><summary>Upload to your own storage</summary><div><p>Files go directly from your browser to your storage provider, not to Seneternal. Provide a short-lived presigned PUT URL.</p><label>Signed upload URL<input type="password" value={signedUrl} onChange={e=>setSignedUrl(e.target.value)}/></label><label className="file-picker"><Upload size={16}/>{uploadFile?uploadFile.name:'Choose file'}<input type="file" accept=".json,.png,.webp,.glb,.gltf,.zip" onChange={e=>setUploadFile(e.target.files?.[0]||null)}/></label><button className="reader-secondary" onClick={uploadDirect}>Upload directly</button></div></details>
             </>}
             {gamesPage==='tools'&&<><div className="reader-heading"><div><h2>Table tools</h2><p>All tabletop actions live inside your books.</p></div></div>
               <div className="tool-section"><h3>Place an object</h3><div className="tool-buttons"><button onClick={()=>takeAction('ADD',{object:{id:createId(),kind:'card',name:'New card',x:BOARD_CENTER,y:BOARD_CENTER,faceUp:true,color:'#b49acb'}})}><Plus size={17}/> Card</button><button onClick={()=>takeAction('ADD',{object:{id:createId(),kind:'token',name:'Token',x:BOARD_CENTER,y:BOARD_CENTER,color:'#b1bb8c'}})}><Plus size={17}/> Token</button><button onClick={()=>takeAction('ADD',{object:{id:createId(),kind:'die',name:'D6',x:BOARD_CENTER,y:BOARD_CENTER,color:'#dbd8c4',sides:6,value:1}})}><Dices size={17}/> Die</button><button onClick={placeDeckBox} title="Place a small top-down raised deck box on your table"><Package size={17}/> Deck box</button></div></div>
@@ -1023,16 +1023,16 @@ export default function App(){
                   Use Undo or return it to the drawer before the deadline to
                   remove or recover it. Source generators never disappear.</p>
               </div>
-              <div className="reader-block sennet-dice-appearance-settings">
+              <div className="reader-block seneternal-dice-appearance-settings">
                 <h3>Dice Appearance</h3>
                 <p>Choose the finish for every die and the flip coin. Styles use lightweight, procedurally rendered materials—no texture downloads. The same finish appears in the tray, during 3D rolls, and after landing.</p>
-                <div className="sennet-dice-theme-grid" role="group" aria-label="Dice designs">
+                <div className="seneternal-dice-theme-grid" role="group" aria-label="Dice designs">
                   {DICE_THEMES.map(theme=>
                     <button type="button" key={theme.id}
-                      className={'sennet-dice-theme-card'+(diceAppearance.all===theme.id?' selected':'')}
+                      className={'seneternal-dice-theme-card'+(diceAppearance.all===theme.id?' selected':'')}
                       aria-pressed={diceAppearance.all===theme.id}
                       onClick={()=>setDiceAppearance(p=>({...p,all:theme.id}))}>
-                      <span className="sennet-dice-theme-preview" style={{
+                      <span className="seneternal-dice-theme-preview" style={{
                         background:`radial-gradient(circle at 26% 23%, ${theme.second}, ${theme.base} 57%, #161926 100%)`,
                         borderColor:theme.edge,
                         boxShadow:`inset -5px -6px 7px #0007,inset 3px 3px 5px #fff6,0 4px 10px #0006`,
@@ -1043,7 +1043,7 @@ export default function App(){
                 </div>
                 <h4>Individual die designs</h4>
                 <p>Optional overrides let each die have its own appearance. “Use set” follows the selected theme above.</p>
-                <div className="sennet-dice-per-die">
+                <div className="seneternal-dice-per-die">
                   {DICE_SIDES.map(sides=><label key={sides}>
                     <span>{diceLabel(sides)}</span>
                     <select aria-label={diceLabel(sides)+' appearance'}
@@ -1112,23 +1112,23 @@ export default function App(){
               </>
             }
             {settingsPage==='deckbuilder'&&<div className="reader-block"><h2>Deckbuilder</h2><p>Build, import, and load decks directly onto the table.</p><button className="reader-primary" onClick={()=>{setBook(null);setTcgStudioOpen(true);}}>Open Deckbuilder</button></div>}
-            {settingsPage==='multiplayer'&&<div className="sennet-play-together">
+            {settingsPage==='multiplayer'&&<div className="seneternal-play-together">
               <div className="reader-heading"><div><h2>Play Together</h2>
                 <p>Create a table, share its link, and pick up any game later. No accounts needed for invited friends.</p></div></div>
-              <section className="sennet-multi-status" aria-live="polite">
-                <span className={'sennet-multi-status-led '+(isConnected?'online':endpoint?'waiting':'missing')}/>
+              <section className="seneternal-multi-status" aria-live="polite">
+                <span className={'seneternal-multi-status-led '+(isConnected?'online':endpoint?'waiting':'missing')}/>
                 <div><strong>{isConnected?'Connected to '+room:endpoint?'Ready for multiplayer':'Online hosting not connected'}</strong>
                   <small>{onlineStatus}{isConnected?' · Your table autosaves on the server':''}</small></div>
               </section>
-              <div className="sennet-online-cards">
-                <section className="sennet-online-card">
-                  <div className="sennet-online-card-mark"><Plus size={19}/></div>
+              <div className="seneternal-online-cards">
+                <section className="seneternal-online-card">
+                  <div className="seneternal-online-card-mark"><Plus size={19}/></div>
                   <strong>Start a table</strong>
                   <p>Make a new shared room. Friends join using one invitation link.</p>
                   <button type="button" className="reader-primary" onClick={createOnlineTable}>Create online table <ChevronRight size={17}/></button>
                 </section>
-                <section className="sennet-online-card">
-                  <div className="sennet-online-card-mark"><Users size={19}/></div>
+                <section className="seneternal-online-card">
+                  <div className="seneternal-online-card-mark"><Users size={19}/></div>
                   <strong>Join a friend</strong>
                   <p>Paste the invitation link or room code.</p>
                   <input value={joinInput} onChange={e=>setJoinInput(e.target.value)}
@@ -1137,34 +1137,34 @@ export default function App(){
                   <button type="button" className="reader-secondary" onClick={joinEnteredTable}>Join table <ChevronRight size={17}/></button>
                 </section>
               </div>
-              {isConnected&&<section className="sennet-online-current">
-                <div className="sennet-online-current-header"><strong>Current table</strong><span>{room}</span></div>
+              {isConnected&&<section className="seneternal-online-current">
+                <div className="seneternal-online-current-header"><strong>Current table</strong><span>{room}</span></div>
                 <div className="tool-buttons">
                   <button type="button" className="reader-primary" onClick={shareRoom}><Link2 size={16}/> Copy / share invitation</button>
                   <button type="button" onClick={disconnect}><WifiOff size={16}/> Leave table</button>
                 </div>
-                <div className="sennet-online-players" aria-label="Saved players">
+                <div className="seneternal-online-players" aria-label="Saved players">
                   {game.players.map(player=><span key={player.id} className={player.online?'online':'away'}>
                     <i/>{player.name} · seat {player.seat+1}{player.id===actor?' (you)':''}{!player.online?' · away':''}
                   </span>)}
                 </div>
                 <small>Shared pieces and seats are saved automatically. Leaving does not erase your place.</small>
               </section>}
-              {onlineRoomsList.length>0&&<section className="sennet-saved-rooms">
+              {onlineRoomsList.length>0&&<section className="seneternal-saved-rooms">
                 <h3>Continue a saved game</h3>
                 {onlineRoomsList.map(previous=><button type="button" key={previous.endpoint+'|'+previous.room}
                   onClick={()=>joinRoom({room:previous.room,endpoint:previous.endpoint})}>
                   <RotateCw size={15}/><span>{previous.room}</span><small>{previous.seat===null?'Spectator':'Seat '+((previous.seat??0)+1)}</small>
                 </button>)}
               </section>}
-              <details className="sennet-hosting-panel" open={showHosting}
+              <details className="seneternal-hosting-panel" open={showHosting}
                 onToggle={event=>setShowHosting(event.currentTarget.open)}>
                 <summary><Settings2 size={15}/><span>{endpoint?'Multiplayer connection settings':'Set up online hosting once'}</span>
                   <small>{endpoint?'Edit or test server':'Required to create online rooms'}</small></summary>
-                <div className="sennet-hosting-body">
-                  <p>Sennet needs one online server for everyone's shared games. This is not a VPN error. Once hosted, friends never need to set up a server.</p>
-                  <a className="sennet-hosting-deploy" href="https://render.com/deploy?repo=https://github.com/marcusdhaynes/Sennet"
-                    target="_blank" rel="noopener noreferrer">Deploy Sennet relay on Render <ChevronRight size={15}/></a>
+                <div className="seneternal-hosting-body">
+                  <p>Seneternal needs one online server for everyone's shared games. This is not a VPN error. Once hosted, friends never need to set up a server.</p>
+                  <a className="seneternal-hosting-deploy" href="https://render.com/deploy?repo=https://github.com/marcusdhaynes/Seneternal"
+                    target="_blank" rel="noopener noreferrer">Deploy Seneternal relay on Render <ChevronRight size={15}/></a>
                   <small>Render may charge for the persistent disk and hosting. The preconfigured blueprint keeps games saved between restarts.</small>
                   <label>Multiplayer server address
                     <input value={endpoint} onChange={e=>{setEndpoint(e.target.value);setHostingHealth('untested');}}
@@ -1172,8 +1172,8 @@ export default function App(){
                   </label>
                   <button type="button" className="reader-primary" disabled={hostingBusy||!endpoint.trim()}
                     onClick={testRelay}>{hostingBusy?'Checking connection…':'Save & test connection'} <Wifi size={16}/></button>
-                  {hostingHealth==='ready'&&<small className="sennet-hosting-ok"><Check size={14}/> Server is reachable.</small>}
-                  {hostingHealth==='error'&&<small className="sennet-hosting-error">Unable to connect. Check the server's /health page and deployment status.</small>}
+                  {hostingHealth==='ready'&&<small className="seneternal-hosting-ok"><Check size={14}/> Server is reachable.</small>}
+                  {hostingHealth==='error'&&<small className="seneternal-hosting-error">Unable to connect. Check the server's /health page and deployment status.</small>}
                   <small>Uses secure WSS for real-time play, with HTTPS fallback for compatible VPN and firewall connections.</small>
                 </div>
               </details>
@@ -1185,7 +1185,7 @@ export default function App(){
             <UpdatesSection/>
           </>}
             </div>
-            <footer className="reader-footer"><span>✧ &nbsp; SENNET LIBRARY &nbsp; ✧</span><span>— {book==='sennet'?'2':book==='games'?'4':'6'} —</span></footer>
+            <footer className="reader-footer"><span>✧ &nbsp; SENETERNAL LIBRARY &nbsp; ✧</span><span>— {book==='seneternal'?'2':book==='games'?'4':'6'} —</span></footer>
           </section>
         </div>
       </section>

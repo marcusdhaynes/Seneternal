@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 
-export type CommandBook='sennet'|'games'|'settings';
+export type CommandBook='seneternal'|'games'|'settings';
 
 
 /** The invisible name/number hit target IS the book drawer. Click Player 01 (or the
@@ -39,7 +39,7 @@ export default function PersonalDrawer({openBook,activeBook,seat,name,onLog,onRe
     </button>
     <div id={shelfId} className="player-hub-content" aria-hidden={!open}>
       {displayName&&<div className="player-hub-name">{displayName}</div>}
-      <div className="player-hub-books"><button type="button" className="unified-book-shortcut" onClick={()=>{setOpen(false);openBook('sennet');}}>Open Sennet Tome</button></div>
+      <div className="player-hub-books"><button type="button" className="unified-book-shortcut" onClick={()=>{setOpen(false);openBook('seneternal');}}>Open Seneternal Tome</button></div>
       <nav className="player-hub-utilities" aria-label="Table utilities"><button type="button" onClick={()=>{setOpen(false);onLog();}} tabIndex={open?0:-1} title="Show action log">▤ <span>Log</span></button><button type="button" onClick={()=>{setOpen(false);onRecall();}} tabIndex={open?0:-1} title="Restore previous table">↶ <span>Recall</span></button></nav>
     </div>
   </div>;

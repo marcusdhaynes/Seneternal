@@ -43,7 +43,7 @@ function installTopLayerBookHover(){
   remove();
   active=original;
   wrapper=document.createElement('div');
-  wrapper.className='sennet-book-hover-top-layer';
+  wrapper.className='seneternal-book-hover-top-layer';
   const clone=original.cloneNode(true) as HTMLElement;
   clone.removeAttribute('id');
   clone.setAttribute('aria-hidden','true');
@@ -110,7 +110,7 @@ import {stepDicePhysics,throwVelocity,type DiceBody,type CollisionRect} from '..
 import {makePseudo3DBook} from './Pseudo3DBook';
 import {wheelPosition,radialMembership,radialTapMembership,type RadialAction} from '../lib/radialWheel.ts';
 import {cardGestureOptions,isDoubleCardTap,GESTURE_HOLD_MS,GESTURE_MOVE_THRESHOLD,type CardGestureAction} from '../lib/cardGestures';
-import {cardStackMembers,nearestFrameIndex,playerSeatRotation,viewerTableRotation,tcgMatCells,tcgMatRegions,tcgMatOrigin,opponentAtTablePoint,groupedMatchupLayout,oneOnOneMatchupLayout,castleGridLayout,castleIndependentFocusLayout,castleArrowsVisible,nextCastleAllySeat,nextCastleFocusedSeat,type CastleSideFocus,opponentAcrossDivider,BATTLEFIELD_PLAYMAT_PADDING,battlefieldFitBounds,toggleOpponentRelation,type OpponentRelation,type CastleMode,neighboringOpponentSeat,centerMergeKey,tcgSnapPoint,tcgPlacementPoint,tcgDropZone,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,TCG_ROW_COLORS,isTcgRemoveDrop,tcgRegionLabel,tcgMatLocal,tcgMatWorld,THROWN_DIE_LIFETIME_MS,BOARD_CENTER,BOARD_W,TABLE_APOTHEM,TABLE_SEAT_RADIUS,TABLE_VIEW_RADIUS,MIN_TABLE_ZOOM,clampTableZoom,clampTablePan,type GameState,type Player,type TableObject,type PlaymatAppearance,type PlaymatSectionStyle,playmatSectionIndex,playmatAppearanceForSeat,opponentRelationButtonPosition,OPPONENT_RELATION_COLORS,OPPONENT_RELATION_BUTTON_RADIUS,OPPONENT_RELATION_BUTTON_HIT_RADIUS,viewButtonPosition,VIEW_BUTTON_RADIUS,VIEW_BUTTON_HIT_RADIUS,tcgSettingsButtonPosition,coinNumericValue,validCoinText} from '@sennet/core';
+import {cardStackMembers,nearestFrameIndex,playerSeatRotation,viewerTableRotation,tcgMatCells,tcgMatRegions,tcgMatOrigin,opponentAtTablePoint,groupedMatchupLayout,oneOnOneMatchupLayout,castleGridLayout,castleIndependentFocusLayout,castleArrowsVisible,nextCastleAllySeat,nextCastleFocusedSeat,type CastleSideFocus,opponentAcrossDivider,BATTLEFIELD_PLAYMAT_PADDING,battlefieldFitBounds,toggleOpponentRelation,type OpponentRelation,type CastleMode,neighboringOpponentSeat,centerMergeKey,tcgSnapPoint,tcgPlacementPoint,tcgDropZone,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,TCG_ROW_COLORS,isTcgRemoveDrop,tcgRegionLabel,tcgMatLocal,tcgMatWorld,THROWN_DIE_LIFETIME_MS,BOARD_CENTER,BOARD_W,TABLE_APOTHEM,TABLE_SEAT_RADIUS,TABLE_VIEW_RADIUS,MIN_TABLE_ZOOM,clampTableZoom,clampTablePan,type GameState,type Player,type TableObject,type PlaymatAppearance,type PlaymatSectionStyle,playmatSectionIndex,playmatAppearanceForSeat,opponentRelationButtonPosition,OPPONENT_RELATION_COLORS,OPPONENT_RELATION_BUTTON_RADIUS,OPPONENT_RELATION_BUTTON_HIT_RADIUS,viewButtonPosition,VIEW_BUTTON_RADIUS,VIEW_BUTTON_HIT_RADIUS,tcgSettingsButtonPosition,coinNumericValue,validCoinText} from '@seneternal/core';
 interface Props{autoDeselect:boolean;deselectMs:number;cardViewHoldMs:number;handHoldView:boolean;holdSelectStacks:boolean;handPlayMode:boolean;diceHoldMs:number;diceFadeMs:number;latestAction:string;canUndo:boolean;canRedo:boolean;onUndo:()=>void;onRedo:()=>void;onOpenReceipt:()=>void;onInterfaceAction:(type:string,location:string,description:string)=>void;bookDesign:'tiny'|'dragon'|'journal'|'arcane'|'strapped';bookDock:'left'|'right'|'free';bookOffset:{x:number;y:number};onBookMove:(point:{x:number;y:number})=>void;onBookOpen:()=>void;drawer?:ReactNode;wheelMode:'mobile'|'docked'|'hold';state:GameState;seat:number;playerName:string;actorId:string;selected:string|null;onSelect:(id:string|null)=>void;onMove:(id:string,x:number,y:number)=>void;onMoveStack:(id:string,x:number,y:number)=>void;onMoveSelection:(ids:string[],anchorId:string,x:number,y:number)=>void;onDrawMat:()=>void;onDrawReserve:()=>void;onOpenTcgSettings:()=>void;onCardAction:(id:string,action:"tap"|"flip")=>void;onGestureAction:(id:string,action:CardGestureAction)=>void;onRadialAction:(ids:string[],action:RadialAction,destination?:string)=>void;playmat:PlaymatAppearance;labelScale:number;diceAppearance:DiceAppearance;mergeOpacity:number;mergeHoverMs:number;onMergeCenter:(seat:number,boundary:number,merged:boolean)=>void;onViewChange?:(view:{x:number;y:number;scale:number})=>void;coinAppearance:CoinAppearance;customCoinValue:number;customCoinText:string;onCustomCoinText:(text:string)=>void;onCustomCoinValue:(value:number)=>void;onTokenPlace:(value:number,sign:1|-1,x:number,y:number,carrierId?:string,color?:string,coinText?:string)=>void;onCoinModify:(id:string,changes:{delta?:number;color?:string;coinText?:string})=>void;onCoinDuplicate:(id:string)=>void;onTokenAdjust:(ids:string[],value:number,sign:1|-1)=>void;onDicePlace:(sides:number,x:number,y:number)=>void;onDiceThrow:(throws:{sides:number;rolls:number[];x:number;y:number;rotation:number;quaternion?:[number,number,number,number];altitude?:number}[])=>void;
 onDiceReroll:(id:string,rolls:number[],x:number,y:number,rotation:number,quaternion?:[number,number,number,number],altitude?:number)=>void;readonly?:boolean}
 /** Draw ordering is global across all seats, even when Castle mats overlap.
@@ -139,7 +139,7 @@ function createEyeStyleCounter(value:number,finish:string,selectable=true,held=f
   const p=drawerPalette(finish),ns='http://www.w3.org/2000/svg';
   const button=document.createElement('button');
   button.type='button';
-  button.className='sennet-stack-count'+(held?' is-held':'');
+  button.className='seneternal-stack-count'+(held?' is-held':'');
   button.setAttribute('aria-label',selectable
     ?'Select all '+value+' cards in this stack'
     :'Card counter: '+value);
@@ -1164,7 +1164,7 @@ function deckBoxArt(o:TableObject):Container{
     .stroke({color:0x020b0a,width:3,alpha:.45})
     .moveTo(-22,35).lineTo(24,35)
     .stroke({color:0x020c0b,width:2.2,alpha:.56}));
-  // Raised hinge/seam and a centered understated Sennet crest.
+  // Raised hinge/seam and a centered understated Seneternal crest.
   art.addChild(new Graphics()
     .moveTo(-24,-23).lineTo(24,-23)
     .stroke({color:0x020b09,width:2.5,alpha:.66})
@@ -1195,7 +1195,7 @@ function deckBoxArt(o:TableObject):Container{
  */
 function coinDomVisual(value:number|string,sign:1|-1,source:boolean,style:CoinAppearance,color='#d8b979',editable=false,caption?:string):HTMLDivElement{
   const root=document.createElement('div');
-  root.className='sennet-coin-above-card';
+  root.className='seneternal-coin-above-card';
   root.dataset.finish=style.finish;
   if(editable)root.dataset.variant='editable';
   root.style.setProperty('--coin-size',String(style.size));
@@ -1203,10 +1203,10 @@ function coinDomVisual(value:number|string,sign:1|-1,source:boolean,style:CoinAp
   root.style.setProperty('--coin-bevel',String(style.bevel/100));
   root.style.setProperty('--coin-accent',color);
   const face=document.createElement('div');
-  face.className='sennet-coin-above-card-face';
+  face.className='seneternal-coin-above-card-face';
   // The central value is the only face marking. Both halves remain interactive.
   const center=document.createElement('span');
-  center.className='sennet-coin-above-card-number';
+  center.className='seneternal-coin-above-card-number';
   const text=String(value);
   center.textContent=text;
   center.style.fontSize=String((text.length>12?4.2:text.length>9?5.2:text.length>6?6.4:
@@ -1216,7 +1216,7 @@ function coinDomVisual(value:number|string,sign:1|-1,source:boolean,style:CoinAp
     // The label shares its coin's actual DOM visual and clipping polygon;
     // it cannot float into another layer while this drawer retracts.
     const label=document.createElement('span');
-    label.className='sennet-drawer-coin-caption';
+    label.className='seneternal-drawer-coin-caption';
     label.textContent=caption;
     label.setAttribute('aria-hidden','true');
     root.appendChild(label);
@@ -1367,7 +1367,7 @@ function RetractableSeatLabel({side,seat,idleOpacity}:{side:'top'|'bottom';seat:
  * shared game/replay. Record keys are numbered seats on the full table. */
 function readOpponentRelations(actorId:string):Record<number,OpponentRelation>{
   try{
-    const input=JSON.parse(localStorage.getItem('sennet.opponent-relations.v1.'+
+    const input=JSON.parse(localStorage.getItem('seneternal.opponent-relations.v1.'+
       encodeURIComponent(actorId))||'{}') as Record<string,unknown>;
     if(!input||typeof input!=='object'||Array.isArray(input))return {};
     const relations:Record<number,OpponentRelation>={};
@@ -1396,11 +1396,11 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
   const clearDiceQueueRef=useRef<()=>void>(()=>{});
   const [boxClosed,setBoxClosed]=useState<{left:boolean;right:boolean}>(()=>{
     try{
-      const saved=JSON.parse(localStorage.getItem('sennet.box.closed.v1')||'null');
+      const saved=JSON.parse(localStorage.getItem('seneternal.box.closed.v1')||'null');
       return {left:saved?.left===true,right:saved?.right===true};
     }catch{return {left:false,right:false};}
   });
-  useEffect(()=>{try{localStorage.setItem('sennet.box.closed.v1',JSON.stringify(boxClosed));}catch{}},[boxClosed]);
+  useEffect(()=>{try{localStorage.setItem('seneternal.box.closed.v1',JSON.stringify(boxClosed));}catch{}},[boxClosed]);
   const drawerGroups=useRef(new Map<number,Container>());
   const drawerTabs=useRef(new Map<number,Container>());
   const lastBoxClosed=useRef(boxClosed);
@@ -1456,7 +1456,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
   const [relations,setRelations]=useState<Record<number,OpponentRelation>>(()=>readOpponentRelations(actorId));
   const relationsRef=useRef(relations);relationsRef.current=relations;
   useEffect(()=>{
-    try{localStorage.setItem('sennet.opponent-relations.v1.'+
+    try{localStorage.setItem('seneternal.opponent-relations.v1.'+
       encodeURIComponent(actorId),JSON.stringify(relations));}
     catch{/* Local storage unavailable: the current session still works. */}
   },[actorId,relations]);
@@ -1551,11 +1551,11 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
   const [coinEditing,setCoinEditing]=useState<{x:number;y:number;id?:string}|null>(null);
   const [coinDraft,setCoinDraft]=useState('');
   const [coinSources,setCoinSources]=useState<{values:Record<number,number>;colors:Record<number,string>}>(()=>{
-    try{const saved=JSON.parse(localStorage.getItem('sennet.coin.sources.v1')||'null');
+    try{const saved=JSON.parse(localStorage.getItem('seneternal.coin.sources.v1')||'null');
       return {values:saved?.values??{},colors:saved?.colors??{}};}
     catch{return {values:{},colors:{}};}
   });
-  useEffect(()=>{try{localStorage.setItem('sennet.coin.sources.v1',JSON.stringify(coinSources));}catch{}},[coinSources]);
+  useEffect(()=>{try{localStorage.setItem('seneternal.coin.sources.v1',JSON.stringify(coinSources));}catch{}},[coinSources]);
   const [coinMenu,setCoinMenu]=useState<{type:'source'|'copy';index?:number;id?:string;x:number;y:number}|null>(null);
   const [coinColorsOpen,setCoinColorsOpen]=useState(false);
   const radialCenterHold=useRef<number|null>(null);
@@ -1605,7 +1605,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
   };
   const selectedSet=useRef(new Set<string>());
   const [dockPosition,setDockPosition]=useState<{x:number;y:number}|null>(()=>{
-    try {const saved=JSON.parse(localStorage.getItem('sennet.radial.dock-position.v2')||'null');
+    try {const saved=JSON.parse(localStorage.getItem('seneternal.radial.dock-position.v2')||'null');
       return saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y)?saved:null;
     } catch {return null;}
   });
@@ -1614,7 +1614,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
     const next={x:Math.max(radius,Math.min(window.innerWidth-radius,position.x)),
       y:Math.max(radius,Math.min(window.innerHeight-radius,position.y))};
     setDockPosition(next);
-    try{localStorage.setItem('sennet.radial.dock-position.v2',JSON.stringify(next));}catch{/* Private browsing. */}
+    try{localStorage.setItem('seneternal.radial.dock-position.v2',JSON.stringify(next));}catch{/* Private browsing. */}
   };
   const [radialWheel,setRadialWheel]=useState<{
     x:number;y:number;size:number;pointerId:number|null;ids:string[];sendTo:boolean
@@ -1728,7 +1728,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
     const old=rollBubbles.current.get(id);
     if(old){window.clearTimeout(old.timer);old.node.remove();}
     const node=document.createElement('div');
-    node.className='sennet-dice-result-bubble';
+    node.className='seneternal-dice-result-bubble';
     node.textContent=line;node.setAttribute('role','status');
     node.setAttribute('aria-label','Die result: '+line);
     host.appendChild(node);
@@ -1861,7 +1861,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
     };
     setDice3DError(null);dice3DActive.current=true;
     // Independent 3D viewport: no WebGL physics/rendering overhead while
-    // playing cards or editing Sennet's 2D tabletop.
+    // playing cards or editing Seneternal's 2D tabletop.
     Promise.resolve().then(()=>{
       if(session.current?.app!==app){dice3DActive.current=false;return;}
       try{
@@ -2017,7 +2017,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
             width,height,bounds,TCG_MAT_WIDTH,TCG_MAT_HEIGHT);
           // This is set ONCE. It never changes with camera/view zoom,
           // including Castle all-grid and distant overview views.
-          host.style.setProperty('--sennet-control-size',
+          host.style.setProperty('--seneternal-control-size',
             controlReferencePixels.current+'px');
         }
         const referencePixels=controlReferencePixels.current;
@@ -2463,9 +2463,9 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
       if(hoveredCoin?.piece===piece)return;
       clearCoinHover();
       const preview=el.cloneNode(true) as HTMLDivElement;
-      preview.classList.add('sennet-coin-hover-top-layer');
+      preview.classList.add('seneternal-coin-hover-top-layer');
       // Source drawer labels should stay on their normal rack baseline.
-      preview.querySelector('.sennet-drawer-coin-caption')?.remove();
+      preview.querySelector('.seneternal-drawer-coin-caption')?.remove();
       preview.setAttribute('aria-hidden','true');
       preview.style.cssText='position:fixed;left:0;top:0;width:36px;height:36px;'+
         'transform-origin:0 0;clip-path:none;pointer-events:none;user-select:none;'+
@@ -2595,7 +2595,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
           left.addChild(node);
           // When stored, use the same drawer parent as the stowed book.
           // Once on the table, use the book's objects paint layer.
-          const storageKey='sennet.instrument-position.v2.'+seat+'.'+key;
+          const storageKey='seneternal.instrument-position.v2.'+seat+'.'+key;
           try{
             const saved=JSON.parse(localStorage.getItem(storageKey)||'null');
             if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y)){
@@ -3289,7 +3289,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
         if(!piece||animated.has(obj.id)||animated.size>=5)continue;
         animated.add(obj.id);
         const el=document.createElement('div');
-        el.className='sennet-shuffle-fx';
+        el.className='seneternal-shuffle-fx';
         el.setAttribute('aria-hidden','true');
         el.addEventListener('animationend',()=>el.remove(),{once:true});
         mount.current?.appendChild(el);
@@ -4074,7 +4074,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
       }
     };
     const onCardMenu=(target:EventTarget|null)=>target instanceof Element&&
-      !!target.closest('.tcg-card-action-menu, .sennet-coin-radial-layer, .sennet-dice-selection, .sennet-dice-engine-error, .sennet-action-lcd, .card-radial-wheel, .sennet-radial-overlay');
+      !!target.closest('.tcg-card-action-menu, .seneternal-coin-radial-layer, .seneternal-dice-selection, .seneternal-dice-engine-error, .seneternal-action-lcd, .card-radial-wheel, .seneternal-radial-overlay');
     const selectOpponent=(event:PointerEvent)=>{
       if(onCardMenu(event.target)||viewRef.current.kind!=='targeting'||event.button!==0)return;
       const current=session.current;
@@ -4388,14 +4388,14 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
       const item=state.objects.find(o=>o.id===cardPeek);
       if(!item)return null;
       const url=bestCardImage(item.faceUp?item.faceUrl||'':item.backUrl||'');
-      return <div className="sennet-full-card-peek" role="dialog"
+      return <div className="seneternal-full-card-peek" role="dialog"
         aria-label={'Viewing '+item.name} onPointerDown={e=>e.stopPropagation()}
         onClick={()=>setCardPeek(null)}>
-        {url?<img src={url} alt={item.name}/>:<div className="sennet-full-card-fallback">{item.faceUp?item.name:'Card back'}</div>}
+        {url?<img src={url} alt={item.name}/>:<div className="seneternal-full-card-fallback">{item.faceUp?item.name:'Card back'}</div>}
       </div>;
     })()}
     {handHoldView&&state.kind==='tcg'&&!readonly&&
-      <div className="sennet-held-hand" role="region"
+      <div className="seneternal-held-hand" role="region"
         aria-label={'Your held hand, '+localHeldCards.length+' cards'}>
         {localHeldCards.map((card,index)=>{
           const mid=(localHeldCards.length-1)/2;
@@ -4404,7 +4404,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
           const art=bestCardImage(card.faceUrl||card.backUrl||'');
           const isDragging=heldHandDrag?.id===card.id;
           return <button type="button" key={card.id}
-            className={'sennet-held-card'+(selectedSet.current.has(card.id)?' is-selected':'')+
+            className={'seneternal-held-card'+(selectedSet.current.has(card.id)?' is-selected':'')+
               (isDragging?' is-dragging':'')}
             style={{left:`calc(50% + ${offset}px)`,
               transform:`translateX(-50%) rotate(${angle}deg)`,
@@ -4413,10 +4413,10 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
             onPointerDown={e=>beginHeldHandDrag(e,card.id)}
             onContextMenu={e=>e.preventDefault()}>
             {art?<img draggable={false} src={art} alt={card.name}/>:
-              <span className="sennet-held-card-placeholder">{card.name}</span>}
+              <span className="seneternal-held-card-placeholder">{card.name}</span>}
           </button>;
         })}
-        {localHeldCards.length>0&&<div className="sennet-held-hand-count"
+        {localHeldCards.length>0&&<div className="seneternal-held-hand-count"
           aria-hidden="true">{localHeldCards.length} in hand</div>}
       </div>}
     {heldHandDrag&&(()=>{
@@ -4424,13 +4424,13 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
       if(!card)return null;
       const art=bestCardImage(card.faceUrl||card.backUrl||'');
       const rect=mount.current?.getBoundingClientRect();
-      return <div className="sennet-held-drag-ghost" aria-hidden="true"
+      return <div className="seneternal-held-drag-ghost" aria-hidden="true"
         style={{left:heldHandDrag.x-(rect?.left??0),
           top:heldHandDrag.y-(rect?.top??0)}}>
         {art?<img src={art} alt=""/>:<span>{card.name}</span>}
       </div>;
     })()}
-    {coinEditing&&<input autoFocus className="sennet-coin-editor" type="text" inputMode="text" maxLength={20}
+    {coinEditing&&<input autoFocus className="seneternal-coin-editor" type="text" inputMode="text" maxLength={20}
       aria-label="Edit coin inscription" value={coinDraft}
       onFocus={e=>e.currentTarget.select()}
       onChange={e=>{if(validCoinText(e.target.value))setCoinDraft(e.target.value);}}
@@ -4441,7 +4441,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
       }}/>}
 
     {state.kind==='tcg'&&handPlayMode&&!readonly&&
-      <div className="sennet-play00-actions" ref={play00ToolbarRef}
+      <div className="seneternal-play00-actions" ref={play00ToolbarRef}
         style={{transformOrigin:'left top'}}
         role="toolbar" aria-label="Play 00 card actions"
         onPointerDown={event=>event.stopPropagation()}>
@@ -4465,10 +4465,10 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
           node.style.width=(geometry.width/Math.max(.0001,geometry.heightScale))+'px';
           node.style.transform=`translateY(-50%) scale(${geometry.heightScale})`;
         }
-      }} className="sennet-action-lcd" style={{transformOrigin:'left center'}}
+      }} className="seneternal-action-lcd" style={{transformOrigin:'left center'}}
       role="group" aria-label="Latest action with undo and redo"
         onPointerDown={event=>event.stopPropagation()}>
-        <button type="button" className="sennet-action-lcd-button"
+        <button type="button" className="seneternal-action-lcd-button"
           onClick={onUndo} disabled={!canUndo}
           aria-label="Undo last action" title="Undo">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none"
@@ -4478,17 +4478,17 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
             <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>
           </svg>
         </button>
-        <div className="sennet-action-lcd-display" role="button"
+        <div className="seneternal-action-lcd-display" role="button"
           tabIndex={0} aria-label="Open complete action receipt"
           onClick={onOpenReceipt}
           onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onOpenReceipt();}}}
           title="Open complete action receipt">
           <span>{(showDiceSelection&&selectionReadout)||latestAction}</span>
         </div>
-        {(selectionReadout||dicePointer.current)&&<button type="button" className="sennet-action-lcd-roll" title="Throw selected dice"
+        {(selectionReadout||dicePointer.current)&&<button type="button" className="seneternal-action-lcd-roll" title="Throw selected dice"
           onClick={()=>{const die=DICE_TYPES.find(s=>diceQuantities[s]);
             if(die!==undefined)throwDiceNow.current(die,0,0,240);}}>ROLL</button>}
-        <button type="button" className="sennet-action-lcd-button"
+        <button type="button" className="seneternal-action-lcd-button"
           onClick={onRedo} disabled={!canRedo}
           aria-label="Redo last undone action" title="Redo">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none"
@@ -4500,23 +4500,23 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
         </button>
       </div>}
 
-    {dice3DError&&<div className="sennet-dice-engine-error" role="alert">
+    {dice3DError&&<div className="seneternal-dice-engine-error" role="alert">
       {dice3DError}<button onClick={()=>setDice3DError(null)}>Dismiss</button>
     </div>}
-    {coinMenu&&<div className="sennet-coin-radial-layer" onPointerDown={e=>{
+    {coinMenu&&<div className="seneternal-coin-radial-layer" onPointerDown={e=>{
       if(e.target===e.currentTarget){setCoinMenu(null);setCoinColorsOpen(false);}
       e.stopPropagation();
     }}>
-      <div className="sennet-coin-radial" style={{left:coinMenu.x,top:coinMenu.y}}>
-        <svg viewBox={`0 0 ${COIN_RADIAL_SIZE} ${COIN_RADIAL_SIZE}`} aria-hidden="true" focusable="false" className="sennet-coin-ring">
+      <div className="seneternal-coin-radial" style={{left:coinMenu.x,top:coinMenu.y}}>
+        <svg viewBox={`0 0 ${COIN_RADIAL_SIZE} ${COIN_RADIAL_SIZE}`} aria-hidden="true" focusable="false" className="seneternal-coin-ring">
           {COIN_ACTIONS.map((_,i)=><path key={i} d={coinSector(i).d}
-            className="sennet-coin-sector"/>)}
+            className="seneternal-coin-sector"/>)}
         </svg>
         {COIN_ACTIONS.map((action,i)=>{
           const p=coinSector(i);
           const shown=COIN_RADIAL_LABELS[i];
           return <button type="button" key={i}
-            className="sennet-coin-action-button"
+            className="seneternal-coin-action-button"
             aria-label={action}
             title={action}
             style={{left:p.x,top:p.y}}
@@ -4525,7 +4525,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
             {shown}
           </button>;
         })}
-        <button type="button" className="sennet-coin-radial-center-hold"
+        <button type="button" className="seneternal-coin-radial-center-hold"
           title="Hold for 0.25 seconds to close"
           aria-label="Hold coin center to close radial"
           onPointerDown={e=>{
@@ -4550,9 +4550,9 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
           (coinMenu.index===0?'#c4d8d9':'#d8b979')}
       onApply={applyCoinColor} onCancel={()=>setCoinColorsOpen(false)}
     />,document.body)}
-    {drawer&&<div data-outward={playerTagGeometry.outward} className="sennet-player-tag-anchor" style={{left:playerTagGeometry.x,top:playerTagGeometry.y,'--seat-scale':playerTagGeometry.scale,'--drawer-width':`${playerTagGeometry.width}px`} as React.CSSProperties}>{drawer}</div>}
+    {drawer&&<div data-outward={playerTagGeometry.outward} className="seneternal-player-tag-anchor" style={{left:playerTagGeometry.x,top:playerTagGeometry.y,'--seat-scale':playerTagGeometry.scale,'--drawer-width':`${playerTagGeometry.width}px`} as React.CSSProperties}>{drawer}</div>}
     {false&&state.kind==='tcg'&&!readonly&&wheelMode==='docked'&&seat>=0&&seat<12&&
-      <div className="sennet-radial-overlay" style={{pointerEvents:'none'}}>
+      <div className="seneternal-radial-overlay" style={{pointerEvents:'none'}}>
         <div ref={attachDockedWheel} style={{position:'absolute',left:0,top:0,
           width:180,height:180,transformOrigin:'top left',pointerEvents:'auto',
           zIndex:120}}>
@@ -4573,8 +4573,8 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
               expanded?'Show actions':'Hide actions')}/>
         </div>
       </div>}
-    {state.kind==='tcg'&&!readonly&&!handPlayMode&&seat>=0&&seat<12&&wheelMode!=='docked'&&(wheelMode!=='hold'||radialWheel)&&<div className="sennet-radial-overlay">
-      <div className={'sennet-radial-free-anchor'}
+    {state.kind==='tcg'&&!readonly&&!handPlayMode&&seat>=0&&seat<12&&wheelMode!=='docked'&&(wheelMode!=='hold'||radialWheel)&&<div className="seneternal-radial-overlay">
+      <div className={'seneternal-radial-free-anchor'}
         ref={undefined}>
       <CardRadialWheel
         x={wheelMode==='mobile'?Math.max(76,Math.min(viewport.width-76,dockPosition?.x??viewport.width-88)):radialWheel!.x} y={wheelMode==='mobile'?Math.max(76,Math.min(viewport.height-76,dockPosition?.y??viewport.height-88)):radialWheel!.y} size={wheelMode==='mobile'?152:radialWheel!.size} docked={wheelMode==='mobile'} half={false} onMoveDock={saveDockPosition}

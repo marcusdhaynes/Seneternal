@@ -1,4 +1,4 @@
-import type {TableObject} from '@sennet/core';
+import type {TableObject} from '@seneternal/core';
 export type CardGestureAction=
   'tap'|'flip'|'rotate-cw'|'rotate-ccw'|'rotate-180'|
   'counter-add'|'counter-remove'|'duplicate'|'hand'|'deck-top'|'deck-bottom'|

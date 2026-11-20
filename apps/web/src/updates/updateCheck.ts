@@ -1,6 +1,6 @@
 // Uniform auto-update check — see updates/UPDATES_SPEC.md.
 // Fetches the latest GitHub Release for this repo and compares semver.
-export const GITHUB_REPO = 'marcusdhaynes/Sennet';
+export const GITHUB_REPO = 'marcusdhaynes/Seneternal';
 export const CURRENT_VERSION = '0.1.0';
 export const LATEST_RELEASE_URL =
   `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;

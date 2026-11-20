@@ -1,11 +1,11 @@
 {
   "contract_version": 1,
-  "repository": "marcusdhaynes/Sennet",
+  "repository": "marcusdhaynes/Seneternal",
   "backend": {
     "provider": "supabase",
     "project_ref": "tbrqqjrzknhdnwcpkqro",
-    "schema": "app_sennet",
-    "service_role": "app_sennet_executor",
+    "schema": "app_seneternal",
+    "service_role": "app_seneternal_executor",
     "service_role_login_enabled": false,
     "client_access": "disabled_until_per_app_auth_and_rls_are_verified",
     "default_runtime_cutover": false

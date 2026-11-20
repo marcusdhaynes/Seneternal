@@ -1,5 +1,5 @@
 {
-  "name": "@sennet/web",
+  "name": "@seneternal/web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -11,8 +11,8 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@sennet/core": "0.1.0",
-    "@sennet/lua": "0.1.0",
+    "@seneternal/core": "0.1.0",
+    "@seneternal/lua": "0.1.0",
     "pixi.js": "^8.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -5,7 +5,7 @@ html,body,#root{width:100%;height:100%;min-height:100%;margin:0}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #c69d5c;outline-offset:3px}
-.sennet-home{position:relative;isolation:isolate;width:100%;height:100vh;height:100dvh;overflow:hidden;background:radial-gradient(ellipse at 50% 48%,#253c35 0%,#0b1614 73%,#0a1211 100%)}
+.seneternal-home{position:relative;isolation:isolate;width:100%;height:100vh;height:100dvh;overflow:hidden;background:radial-gradient(ellipse at 50% 48%,#253c35 0%,#0b1614 73%,#0a1211 100%)}
 .table-world{position:absolute;inset:0}
 .pixi-host{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 .pixi-host canvas{display:block;width:100%;height:100%;object-fit:contain}
@@ -764,10 +764,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 /* Purple game-style context wheel: 3 inner categories, 9 outer actions.
    The overlay is visually above the pressed card, but never traps ordinary
    tabletop controls outside the wheel. */
-.sennet-radial-overlay{position:absolute;inset:0;z-index:82;pointer-events:none}
+.seneternal-radial-overlay{position:absolute;inset:0;z-index:82;pointer-events:none}
 .card-radial-wheel{position:absolute;pointer-events:auto;touch-action:none;
  border-radius:50%;filter:drop-shadow(0 12px 25px #030308c9);
- animation:sennet-wheel-enter .13s ease-out both}
+ animation:seneternal-wheel-enter .13s ease-out both}
 .card-radial-wheel svg{width:100%;height:100%;display:block;overflow:visible}
 .card-radial-wheel g[role=button]{outline:none;cursor:pointer}
 /* Hover magnification is a non-interactive copy of the selected 1-of-9
@@ -781,54 +781,54 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .card-radial-wheel .card-radial-close{position:absolute;top:5%;left:50%;transform:translateX(-50%);
  border:1px solid #b7a3d2;border-radius:50%;background:#20172b;
  color:#fff;height:28px;width:28px;cursor:pointer;touch-action:manipulation}
-.sennet-wheel-clear{pointer-events:auto;position:absolute;left:50%;bottom:15px;transform:translateX(-50%);
+.seneternal-wheel-clear{pointer-events:auto;position:absolute;left:50%;bottom:15px;transform:translateX(-50%);
  padding:7px 13px;border:1px solid #bda6d6;border-radius:18px;background:#20172fed;color:#f4e5ff;
  font:600 11px system-ui;cursor:pointer;touch-action:manipulation;white-space:nowrap}
-.sennet-wheel-destinations{position:absolute;z-index:2;pointer-events:auto;
+.seneternal-wheel-destinations{position:absolute;z-index:2;pointer-events:auto;
  transform:translate(-50%,-50%);width:min(230px,76vw);display:flex;flex-direction:column;gap:5px;
  background:#221631;border:1px solid #c3a7e2;border-radius:12px;
  box-shadow:0 10px 30px #000c;padding:12px;color:#f4e5ff;
  max-height:min(290px,65vh);overflow:auto;overscroll-behavior:contain}
-.sennet-wheel-destinations strong{text-align:center;font:700 12px system-ui;margin-bottom:4px}
-.sennet-wheel-destinations button{border:1px solid #8c70a9;border-radius:6px;
+.seneternal-wheel-destinations strong{text-align:center;font:700 12px system-ui;margin-bottom:4px}
+.seneternal-wheel-destinations button{border:1px solid #8c70a9;border-radius:6px;
  background:#453064;color:#fff;font:600 12px system-ui;
  padding:8px 7px;cursor:pointer;touch-action:manipulation}
-.sennet-wheel-destinations button:hover{background:#71519b}
-@keyframes sennet-wheel-enter{from{opacity:0;transform:scale(.89)}to{opacity:1;transform:scale(1)}}
+.seneternal-wheel-destinations button:hover{background:#71519b}
+@keyframes seneternal-wheel-enter{from{opacity:0;transform:scale(.89)}to{opacity:1;transform:scale(1)}}
 
 
-.sennet-card-selection-status{position:absolute;z-index:65;left:13px;bottom:16px;
+.seneternal-card-selection-status{position:absolute;z-index:65;left:13px;bottom:16px;
  display:flex;align-items:center;gap:12px;max-width:calc(100% - 26px);
  background:#251c35ed;color:#f0e1fa;border:1px solid #a78ac5;
  border-radius:21px;box-shadow:0 5px 15px #06030b8a;
  padding:7px 9px 7px 14px;font:600 11px system-ui;pointer-events:auto}
-.sennet-card-selection-status b{color:#f9dda5}
-.sennet-card-selection-status button{border:1px solid #a88ac6;border-radius:15px;
+.seneternal-card-selection-status b{color:#f9dda5}
+.seneternal-card-selection-status button{border:1px solid #a88ac6;border-radius:15px;
  color:#fff;background:#493360;padding:4px 9px;font:600 11px system-ui;cursor:pointer}
 @media(max-width:530px){
- .sennet-card-selection-status{bottom:52px;font-size:10px}
+ .seneternal-card-selection-status{bottom:52px;font-size:10px}
 }
 
 
-.sennet-rewind-button{position:absolute;right:46px;bottom:9px;z-index:72;
+.seneternal-rewind-button{position:absolute;right:46px;bottom:9px;z-index:72;
  width:38px;height:38px;padding:0;border-radius:50%;
  background:#0c322e;color:#f4dfae;border:2px solid #f3d69b;
  box-shadow:0 2px 12px #06131199;font:700 27px/1 system-ui;
  display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
-.sennet-rewind-button:hover,.sennet-rewind-button:focus-visible{
+.seneternal-rewind-button:hover,.seneternal-rewind-button:focus-visible{
  background:#245448;outline:2px solid #f1d18a;outline-offset:2px}
 
 /* Compact restore control, visually matched to the circular battlefield buttons. */
-.sennet-rewind-button{right:16px;bottom:16px;width:32px;height:32px;border:1px solid #bba474;border-radius:50%;background:#17382fdd;color:#e9d6a9;font:500 21px/1 system-ui;box-shadow:0 1px 6px #06131180;z-index:75}
-.sennet-action-log{position:absolute;z-index:60;left:12px;bottom:12px;width:min(330px,37vw);max-height:205px;border:1px solid #aa97636b;border-radius:9px;background:#101d1bdf;color:#eee7d7;backdrop-filter:blur(8px);font:11px/1.4 system-ui;display:flex;flex-direction:column;overflow:hidden;pointer-events:auto}
-.sennet-action-log header{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #b69a6350}
-.sennet-action-log header span,.sennet-log-seq{color:#c1b18b}
-.sennet-action-log-entries{overflow-y:auto;min-height:0;max-height:168px}
-.sennet-action-log-entry{display:grid;grid-template-columns:32px minmax(0,1fr) 24px;gap:5px;padding:5px 8px;border-bottom:1px solid #ffffff12;align-items:start}
-.sennet-action-log-entry small{display:block;color:#b9b5ad;overflow-wrap:anywhere;font-size:10px}
-.sennet-action-log-entry button{background:transparent;color:#d3c5a7;border:0;padding:2px}
-.sennet-action-log-entry button:disabled{opacity:.35;cursor:not-allowed}
-@media(max-width:600px){.sennet-action-log{width:min(240px,56vw);max-height:150px}.sennet-action-log-entries{max-height:113px}}
+.seneternal-rewind-button{right:16px;bottom:16px;width:32px;height:32px;border:1px solid #bba474;border-radius:50%;background:#17382fdd;color:#e9d6a9;font:500 21px/1 system-ui;box-shadow:0 1px 6px #06131180;z-index:75}
+.seneternal-action-log{position:absolute;z-index:60;left:12px;bottom:12px;width:min(330px,37vw);max-height:205px;border:1px solid #aa97636b;border-radius:9px;background:#101d1bdf;color:#eee7d7;backdrop-filter:blur(8px);font:11px/1.4 system-ui;display:flex;flex-direction:column;overflow:hidden;pointer-events:auto}
+.seneternal-action-log header{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #b69a6350}
+.seneternal-action-log header span,.seneternal-log-seq{color:#c1b18b}
+.seneternal-action-log-entries{overflow-y:auto;min-height:0;max-height:168px}
+.seneternal-action-log-entry{display:grid;grid-template-columns:32px minmax(0,1fr) 24px;gap:5px;padding:5px 8px;border-bottom:1px solid #ffffff12;align-items:start}
+.seneternal-action-log-entry small{display:block;color:#b9b5ad;overflow-wrap:anywhere;font-size:10px}
+.seneternal-action-log-entry button{background:transparent;color:#d3c5a7;border:0;padding:2px}
+.seneternal-action-log-entry button:disabled{opacity:.35;cursor:not-allowed}
+@media(max-width:600px){.seneternal-action-log{width:min(240px,56vw);max-height:150px}.seneternal-action-log-entries{max-height:113px}}
 
 /* Mobile deckbuilding: one large usable workspace at a time. CSS viewport
    breakpoints adapt automatically to phones, narrow windows and rotation. */
@@ -951,44 +951,44 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 }
 
 /* Collapsible action journal: small round control mirrors playmat merge buttons. */
-.sennet-log-toggle{position:absolute;bottom:14px;left:14px;z-index:75;width:32px;height:32px;
+.seneternal-log-toggle{position:absolute;bottom:14px;left:14px;z-index:75;width:32px;height:32px;
  display:grid;place-items:center;border-radius:50%;padding:0;
  border:1.5px solid #d9c58a;background:#1d4238de;color:#f5dfac;
  box-shadow:0 2px 9px #071612bb;cursor:pointer;touch-action:manipulation}
-.sennet-log-toggle:hover,.sennet-log-toggle:focus-visible{background:#3c6251;outline:2px solid #dfca96;outline-offset:2px}
-.sennet-action-log{bottom:54px;left:12px;max-height:min(45dvh,380px)}
-.sennet-action-log-entries{max-height:min(40dvh,340px)}
-.sennet-action-log header button{margin-left:6px;padding:0 6px;border:0;border-radius:5px;background:transparent;color:#e9dfc3;cursor:pointer;font-size:18px}
-.sennet-log-share{color:#cbb98e;text-align:center;font-size:16px}
-@media(max-width:600px){.sennet-action-log{bottom:52px;left:8px;width:min(350px,calc(100vw - 16px));max-height:45dvh}.sennet-action-log-entries{max-height:40dvh}}
+.seneternal-log-toggle:hover,.seneternal-log-toggle:focus-visible{background:#3c6251;outline:2px solid #dfca96;outline-offset:2px}
+.seneternal-action-log{bottom:54px;left:12px;max-height:min(45dvh,380px)}
+.seneternal-action-log-entries{max-height:min(40dvh,340px)}
+.seneternal-action-log header button{margin-left:6px;padding:0 6px;border:0;border-radius:5px;background:transparent;color:#e9dfc3;cursor:pointer;font-size:18px}
+.seneternal-log-share{color:#cbb98e;text-align:center;font-size:16px}
+@media(max-width:600px){.seneternal-action-log{bottom:52px;left:8px;width:min(350px,calc(100vw - 16px));max-height:45dvh}.seneternal-action-log-entries{max-height:40dvh}}
 
 /* Balanced opposing corner controls: journal bottom-left, recall bottom-right. */
-.sennet-log-toggle,.sennet-rewind-button{
+.seneternal-log-toggle,.seneternal-rewind-button{
  position:absolute;bottom:max(12px,env(safe-area-inset-bottom));width:34px;height:34px;
  border-radius:50%;padding:0;display:grid;place-items:center;
  border:1px solid #cbb681;background:#1c3d34e8;color:#e9d5a9;
  box-shadow:0 2px 7px #05150f99;z-index:75;line-height:1;transform:none;
  transition:background .15s,border-color .15s;touch-action:manipulation
 }
-.sennet-log-toggle{left:max(12px,env(safe-area-inset-left));right:auto}
-.sennet-rewind-button{right:max(12px,env(safe-area-inset-right));left:auto;font-size:initial}
-.sennet-log-toggle svg,.sennet-rewind-button svg{width:18px;height:18px;display:block;flex:none}
-.sennet-log-toggle:hover,.sennet-rewind-button:hover{background:#31584a;border-color:#ead197}
-.sennet-action-log{left:max(12px,env(safe-area-inset-left));bottom:calc(max(12px,env(safe-area-inset-bottom)) + 43px)}
-@media(max-width:600px){.sennet-action-log{left:max(8px,env(safe-area-inset-left));bottom:calc(max(12px,env(safe-area-inset-bottom)) + 43px)}}
+.seneternal-log-toggle{left:max(12px,env(safe-area-inset-left));right:auto}
+.seneternal-rewind-button{right:max(12px,env(safe-area-inset-right));left:auto;font-size:initial}
+.seneternal-log-toggle svg,.seneternal-rewind-button svg{width:18px;height:18px;display:block;flex:none}
+.seneternal-log-toggle:hover,.seneternal-rewind-button:hover{background:#31584a;border-color:#ead197}
+.seneternal-action-log{left:max(12px,env(safe-area-inset-left));bottom:calc(max(12px,env(safe-area-inset-bottom)) + 43px)}
+@media(max-width:600px){.seneternal-action-log{left:max(8px,env(safe-area-inset-left));bottom:calc(max(12px,env(safe-area-inset-bottom)) + 43px)}}
 
 /* Tabletop interaction surfaces are game controls, not selectable text.
    Preserve normal editing, caret placement and selection in form fields. */
-.sennet-home,
-.sennet-home *:not(input):not(textarea):not([contenteditable]):not([contenteditable="true"]) {
+.seneternal-home,
+.seneternal-home *:not(input):not(textarea):not([contenteditable]):not([contenteditable="true"]) {
   -webkit-user-select:none;
   user-select:none;
   -webkit-touch-callout:none;
 }
-.sennet-home input,
-.sennet-home textarea,
-.sennet-home [contenteditable],
-.sennet-home [contenteditable="true"]{
+.seneternal-home input,
+.seneternal-home textarea,
+.seneternal-home [contenteditable],
+.seneternal-home [contenteditable="true"]{
   -webkit-user-select:text;
   user-select:text;
   -webkit-touch-callout:default;
@@ -998,22 +998,22 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .player-hub-utilities{display:flex;gap:8px;justify-content:center;padding:8px 10px 10px;border-top:1px solid #bda47755}
 .player-hub-utilities button{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1;min-height:32px;border:1px solid #bfa77c;border-radius:8px;background:#214439;color:#f1dfb9;cursor:pointer;font-size:12px}
 .player-hub-utilities button:hover{background:#3e6553}
-.sennet-wheel-mode-options{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px}
-.sennet-wheel-mode-options label{display:flex;flex-direction:row;align-items:center;gap:8px;padding:10px 13px;border:1px solid #8e8667;border-radius:10px;background:#1e392e;cursor:pointer}
-.sennet-wheel-mode-options input{accent-color:#d3bd85}
-.sennet-info-tip{cursor:help;font-size:16px;color:#dfcb9a;line-height:1}
-.sennet-info-tip:focus-visible{outline:2px solid #e8c58e;border-radius:50%}
+.seneternal-wheel-mode-options{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px}
+.seneternal-wheel-mode-options label{display:flex;flex-direction:row;align-items:center;gap:8px;padding:10px 13px;border:1px solid #8e8667;border-radius:10px;background:#1e392e;cursor:pointer}
+.seneternal-wheel-mode-options input{accent-color:#d3bd85}
+.seneternal-info-tip{cursor:help;font-size:16px;color:#dfcb9a;line-height:1}
+.seneternal-info-tip:focus-visible{outline:2px solid #e8c58e;border-radius:50%}
 /* The dock occupies the lower right but leaves tabletop events accessible outside it. */
-.sennet-radial-overlay{pointer-events:none}
+.seneternal-radial-overlay{pointer-events:none}
 
 /* The outer rings retract toward the fixed center on a center hold. */
-.card-radial-wheel .sennet-radial-rings{
+.card-radial-wheel .seneternal-radial-rings{
   transform-origin:200px 200px;
   transform:scale(1);
   opacity:1;
   transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .22s ease;
 }
-.card-radial-wheel.is-collapsed .sennet-radial-rings{
+.card-radial-wheel.is-collapsed .seneternal-radial-rings{
   transform:scale(.325);
   opacity:0;
   pointer-events:none;
@@ -1022,32 +1022,32 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   clip-path:circle(17% at 50% 50%);
   filter:none;
 }
-.card-radial-wheel .sennet-radial-center{cursor:pointer;touch-action:none}
+.card-radial-wheel .seneternal-radial-center{cursor:pointer;touch-action:none}
 @media(prefers-reduced-motion:reduce){
- .card-radial-wheel .sennet-radial-rings{transition:none}
+ .card-radial-wheel .seneternal-radial-rings{transition:none}
 }
 
 /* Discreet grab handle for relocating the docked wheel; never overlaps actions. */
-.sennet-radial-drag-handle{
+.seneternal-radial-drag-handle{
  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
  width:31px;height:19px;display:flex;align-items:center;justify-content:center;
  border:1px solid #ad91c9;border-radius:12px;background:#21152f;
  color:#ecd8ff;font-size:16px;line-height:1;padding:0;
  cursor:grab;touch-action:none;z-index:3;box-shadow:0 2px 6px #0008
 }
-.sennet-radial-drag-handle:active{cursor:grabbing}
+.seneternal-radial-drag-handle:active{cursor:grabbing}
 
 /* The radial center itself is the drag surface; no separate movement grip. */
-.card-radial-wheel .sennet-radial-center{cursor:grab;touch-action:none}
-.card-radial-wheel .sennet-radial-center:active{cursor:grabbing}
-.sennet-radial-drag-handle{display:none!important}
+.card-radial-wheel .seneternal-radial-center{cursor:grab;touch-action:none}
+.card-radial-wheel .seneternal-radial-center:active{cursor:grabbing}
+.seneternal-radial-drag-handle{display:none!important}
 
 /* Half-wheel's center sits at the TOP midpoint of its clipped lower semicircle.
    Keep that center exposed and interactive when the outer rings retract. */
 .card-radial-wheel.is-half.is-collapsed{
   clip-path:circle(18% at 50% 0%);
 }
-.card-radial-wheel.is-half .sennet-radial-center{
+.card-radial-wheel.is-half .seneternal-radial-center{
   pointer-events:auto;
 }
 
@@ -1145,26 +1145,26 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 
 /* Personal book drawer shares the player's table-anchored number tag.
    The closed tag stays attached to the PLAYER row; books open below it. */
-.sennet-player-tag-anchor{position:absolute;z-index:85;width:0;height:0;pointer-events:none}
-.sennet-player-tag-anchor .player-hub{
+.seneternal-player-tag-anchor{position:absolute;z-index:85;width:0;height:0;pointer-events:none}
+.seneternal-player-tag-anchor .player-hub{
  position:absolute;left:0;top:-20px;bottom:auto;
  transform:translateX(-50%);
  border:1px solid #bb9e6b;border-radius:9px;
  overflow:visible;pointer-events:auto;
  box-shadow:0 5px 20px #0008;
 }
-.sennet-player-tag-anchor .player-hub.is-open{z-index:2}
-.sennet-player-tag-anchor .player-hub-content{
+.seneternal-player-tag-anchor .player-hub.is-open{z-index:2}
+.seneternal-player-tag-anchor .player-hub-content{
  overflow:hidden;border-radius:0 0 9px 9px;
 }
-.sennet-player-tag-anchor .player-hub.is-open .player-hub-content{
+.seneternal-player-tag-anchor .player-hub.is-open .player-hub-content{
  max-height:360px;
 }
 
 /* Player tags follow transformed PLAY 01 positions, never the screen edge.
    A zero-sized anchor must not clip the clickable drawer. */
-.pixi-host .sennet-player-tag-anchor{position:absolute;z-index:95;pointer-events:none;width:0;height:0;overflow:visible;transform:none}
-.pixi-host .sennet-player-tag-anchor .player-hub{
+.pixi-host .seneternal-player-tag-anchor{position:absolute;z-index:95;pointer-events:none;width:0;height:0;overflow:visible;transform:none}
+.pixi-host .seneternal-player-tag-anchor .player-hub{
  position:absolute;left:0;top:0;bottom:auto;
  transform:translate(-50%,-50%);
  width:150px;max-width:none;min-height:23px;
@@ -1172,28 +1172,28 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
  border:1px solid #bb9e6b;border-radius:9px;
  background:linear-gradient(165deg,#25493e,#172e29);
 }
-.pixi-host .sennet-player-tag-anchor .player-hub.is-open{width:min(406px,calc(100vw - 16px));z-index:2}
-.pixi-host .sennet-player-tag-anchor .player-hub-tab{min-height:23px}
-.pixi-host .sennet-player-tag-anchor .player-hub-content{max-height:0;visibility:hidden}
-.pixi-host .sennet-player-tag-anchor .player-hub.is-open .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor .player-hub.is-open{width:min(406px,calc(100vw - 16px));z-index:2}
+.pixi-host .seneternal-player-tag-anchor .player-hub-tab{min-height:23px}
+.pixi-host .seneternal-player-tag-anchor .player-hub-content{max-height:0;visibility:hidden}
+.pixi-host .seneternal-player-tag-anchor .player-hub.is-open .player-hub-content{
  max-height:380px;visibility:visible;overflow:hidden;
 }
 
 /* The table-edge number remains the hinge. Books unfold toward the table
    rather than disappearing below the screen when the local seat is south. */
-.pixi-host .sennet-player-tag-anchor .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor .player-hub-content{
  position:absolute;left:0;bottom:100%;top:auto;width:100%;
  background:linear-gradient(165deg,#25493e,#172e29);
  border-radius:9px 9px 0 0;box-shadow:0 -9px 20px #0008;
 }
-.pixi-host .sennet-player-tag-anchor .player-hub.is-open{
+.pixi-host .seneternal-player-tag-anchor .player-hub.is-open{
  overflow:visible;
 }
 
 /* Table seat labels: one consistent gold plate, including the interactive local
    seat. Scale exactly with the Pixi camera, not the viewport or drawer width. */
-.pixi-host .sennet-player-tag-anchor .player-hub,
-.pixi-host .sennet-player-tag-anchor .player-hub.is-open{
+.pixi-host .seneternal-player-tag-anchor .player-hub,
+.pixi-host .seneternal-player-tag-anchor .player-hub.is-open{
  width:calc(156px * var(--seat-scale,1));
  height:calc(50px * var(--seat-scale,1));
  min-height:0;max-width:none;
@@ -1203,17 +1203,17 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
  background:#c9a66a;color:#263a32;box-shadow:0 2px 5px #0005;
  overflow:visible;z-index:95;
 }
-.pixi-host .sennet-player-tag-anchor .player-hub-tab{
+.pixi-host .seneternal-player-tag-anchor .player-hub-tab{
  width:100%;height:100%;min-height:0;display:grid;place-items:center;
  padding:0;border-radius:inherit;
 }
-.pixi-host .sennet-player-tag-anchor .player-hub-number{
+.pixi-host .seneternal-player-tag-anchor .player-hub-number{
  width:100%;height:100%;min-height:0;padding:0;letter-spacing:0;
  background:transparent!important;border:0!important;
  color:#263a32;font:700 calc(22px * var(--seat-scale,1))/1 'DM Sans',system-ui,sans-serif;
  text-transform:none;
 }
-.pixi-host .sennet-player-tag-anchor .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor .player-hub-content{
  position:absolute;left:50%;bottom:calc(100% + 5px);top:auto;
  transform:translateX(-50%);
  width:min(380px,calc(100vw - 20px));max-height:0;
@@ -1222,68 +1222,68 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
  background:linear-gradient(165deg,#25493e,#172e29);
  box-shadow:0 -5px 22px #000a;
 }
-.pixi-host .sennet-player-tag-anchor .player-hub.is-open .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor .player-hub.is-open .player-hub-content{
  max-height:420px;visibility:visible;opacity:1;pointer-events:auto;
  overflow:hidden;
 }
 
 /* Bookcase unfolds OUTWARD from whichever rim segment hosts the local seat.
    The gold table tag stays stationary while its contents open off the felt. */
-.pixi-host .sennet-player-tag-anchor .player-hub-content,
-.pixi-host .sennet-player-tag-anchor .player-hub.is-open .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor .player-hub-content,
+.pixi-host .seneternal-player-tag-anchor .player-hub.is-open .player-hub-content{
   position:absolute;width:min(380px,calc(100vw - 24px));height:auto;
   left:50%;top:auto;bottom:calc(100% + 7px);
   transform:translateX(-50%);
 }
-.pixi-host .sennet-player-tag-anchor[data-outward="bottom"] .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor[data-outward="bottom"] .player-hub-content{
   bottom:auto;top:calc(100% + 7px);left:50%;transform:translateX(-50%);
 }
-.pixi-host .sennet-player-tag-anchor[data-outward="left"] .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor[data-outward="left"] .player-hub-content{
   left:auto;right:calc(100% + 7px);top:50%;bottom:auto;
   transform:translateY(-50%);
 }
-.pixi-host .sennet-player-tag-anchor[data-outward="right"] .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor[data-outward="right"] .player-hub-content{
   left:calc(100% + 7px);right:auto;top:50%;bottom:auto;
   transform:translateY(-50%);
 }
 
 /* Outward only: override both the closed and expanded drawer declarations.
    The directional rule must outrank the older .player-hub.is-open rules. */
-.pixi-host .sennet-player-tag-anchor[data-outward="bottom"] .player-hub .player-hub-content,
-.pixi-host .sennet-player-tag-anchor[data-outward="bottom"] .player-hub.is-open .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor[data-outward="bottom"] .player-hub .player-hub-content,
+.pixi-host .seneternal-player-tag-anchor[data-outward="bottom"] .player-hub.is-open .player-hub-content{
  left:50%;right:auto;top:calc(100% + 7px);bottom:auto;transform:translateX(-50%);
 }
-.pixi-host .sennet-player-tag-anchor[data-outward="top"] .player-hub .player-hub-content,
-.pixi-host .sennet-player-tag-anchor[data-outward="top"] .player-hub.is-open .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor[data-outward="top"] .player-hub .player-hub-content,
+.pixi-host .seneternal-player-tag-anchor[data-outward="top"] .player-hub.is-open .player-hub-content{
  left:50%;right:auto;bottom:calc(100% + 7px);top:auto;transform:translateX(-50%);
 }
-.pixi-host .sennet-player-tag-anchor[data-outward="left"] .player-hub .player-hub-content,
-.pixi-host .sennet-player-tag-anchor[data-outward="left"] .player-hub.is-open .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor[data-outward="left"] .player-hub .player-hub-content,
+.pixi-host .seneternal-player-tag-anchor[data-outward="left"] .player-hub.is-open .player-hub-content{
  left:auto;right:calc(100% + 7px);top:50%;bottom:auto;transform:translateY(-50%);
 }
-.pixi-host .sennet-player-tag-anchor[data-outward="right"] .player-hub .player-hub-content,
-.pixi-host .sennet-player-tag-anchor[data-outward="right"] .player-hub.is-open .player-hub-content{
+.pixi-host .seneternal-player-tag-anchor[data-outward="right"] .player-hub .player-hub-content,
+.pixi-host .seneternal-player-tag-anchor[data-outward="right"] .player-hub.is-open .player-hub-content{
  left:calc(100% + 7px);right:auto;top:50%;bottom:auto;transform:translateY(-50%);
 }
 
 
 /* Gold seat tabs extend outward from the original wooden rim.
    No artificial rim, masking, or clipped lettering. */
-.pixi-host .sennet-player-tag-anchor .player-hub-tab,
-.pixi-host .sennet-player-tag-anchor[data-outward] .player-hub-tab{
+.pixi-host .seneternal-player-tag-anchor .player-hub-tab,
+.pixi-host .seneternal-player-tag-anchor[data-outward] .player-hub-tab{
  clip-path:none!important;
  overflow:visible;
 }
-.pixi-host .sennet-player-tag-anchor .player-hub-number{
+.pixi-host .seneternal-player-tag-anchor .player-hub-number{
  display:flex;align-items:center;justify-content:center;
  white-space:nowrap;overflow:visible;
 }
 
 /* Keep the local player's numbered tab underneath the radial in stacking
    order; the drawer remains clickable wherever the wheel does not overlap. */
-.pixi-host .sennet-player-tag-anchor{z-index:70}
-.pixi-host .sennet-radial-overlay{z-index:82}
-.card-radial-wheel.is-half.is-collapsed .sennet-radial-center circle{
+.pixi-host .seneternal-player-tag-anchor{z-index:70}
+.pixi-host .seneternal-radial-overlay{z-index:82}
+.card-radial-wheel.is-half.is-collapsed .seneternal-radial-center circle{
  stroke:#f2d7a3;stroke-width:5;
 }
 
@@ -1296,9 +1296,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .table-world{isolation:isolate;z-index:0}
 .pixi-host{isolation:isolate}
 .pixi-host>canvas{position:relative;z-index:0}
-.pixi-host>.sennet-player-tag-anchor{z-index:70}
-.pixi-host>.sennet-radial-overlay{z-index:82}
-.pixi-host>.sennet-player-tag-anchor:has(.player-hub.is-open){z-index:120}
+.pixi-host>.seneternal-player-tag-anchor{z-index:70}
+.pixi-host>.seneternal-radial-overlay{z-index:82}
+.pixi-host>.seneternal-player-tag-anchor:has(.player-hub.is-open){z-index:120}
 body>.reader-backdrop{
  position:fixed;inset:0;z-index:10000;
  width:100vw;height:100dvh;
@@ -1306,18 +1306,18 @@ body>.reader-backdrop{
 
 /* Table-anchored player drawer. The tab remains the table's own size and
    position; only the shelf slides out from its outer edge. */
-.pixi-host>.sennet-player-tag-anchor{
+.pixi-host>.seneternal-player-tag-anchor{
  overflow:visible;pointer-events:none;
 }
-.pixi-host>.sennet-player-tag-anchor .player-hub{
+.pixi-host>.seneternal-player-tag-anchor .player-hub{
  pointer-events:auto;touch-action:manipulation;
 }
-.pixi-host>.sennet-player-tag-anchor .player-hub-tab{
+.pixi-host>.seneternal-player-tag-anchor .player-hub-tab{
  pointer-events:auto;touch-action:manipulation;
  cursor:pointer;position:relative;z-index:1;
 }
-.pixi-host>.sennet-player-tag-anchor .player-hub .player-hub-content,
-.pixi-host>.sennet-player-tag-anchor .player-hub.is-open .player-hub-content{
+.pixi-host>.seneternal-player-tag-anchor .player-hub .player-hub-content,
+.pixi-host>.seneternal-player-tag-anchor .player-hub.is-open .player-hub-content{
  box-sizing:border-box;
  width:var(--drawer-width,320px);
  max-width:none;
@@ -1325,34 +1325,34 @@ body>.reader-backdrop{
  opacity:0;visibility:hidden;
  transition:opacity .18s ease,clip-path .22s ease;
 }
-.pixi-host>.sennet-player-tag-anchor .player-hub.is-open .player-hub-content{
+.pixi-host>.seneternal-player-tag-anchor .player-hub.is-open .player-hub-content{
  pointer-events:auto;opacity:1;visibility:visible;
 }
-.pixi-host>.sennet-player-tag-anchor[data-outward="bottom"] .player-hub .player-hub-content{
+.pixi-host>.seneternal-player-tag-anchor[data-outward="bottom"] .player-hub .player-hub-content{
  clip-path:inset(0 0 100% 0);
  transform:translateX(-50%);transform-origin:top center;
 }
-.pixi-host>.sennet-player-tag-anchor[data-outward="bottom"] .player-hub.is-open .player-hub-content{clip-path:inset(0)}
-.pixi-host>.sennet-player-tag-anchor[data-outward="top"] .player-hub .player-hub-content{
+.pixi-host>.seneternal-player-tag-anchor[data-outward="bottom"] .player-hub.is-open .player-hub-content{clip-path:inset(0)}
+.pixi-host>.seneternal-player-tag-anchor[data-outward="top"] .player-hub .player-hub-content{
  clip-path:inset(100% 0 0 0);
  transform:translateX(-50%);transform-origin:bottom center;
 }
-.pixi-host>.sennet-player-tag-anchor[data-outward="top"] .player-hub.is-open .player-hub-content{clip-path:inset(0)}
-.pixi-host>.sennet-player-tag-anchor[data-outward="left"] .player-hub .player-hub-content{
+.pixi-host>.seneternal-player-tag-anchor[data-outward="top"] .player-hub.is-open .player-hub-content{clip-path:inset(0)}
+.pixi-host>.seneternal-player-tag-anchor[data-outward="left"] .player-hub .player-hub-content{
  clip-path:inset(0 0 0 100%);
  transform:translateY(-50%);transform-origin:center right;
 }
-.pixi-host>.sennet-player-tag-anchor[data-outward="left"] .player-hub.is-open .player-hub-content{clip-path:inset(0)}
-.pixi-host>.sennet-player-tag-anchor[data-outward="right"] .player-hub .player-hub-content{
+.pixi-host>.seneternal-player-tag-anchor[data-outward="left"] .player-hub.is-open .player-hub-content{clip-path:inset(0)}
+.pixi-host>.seneternal-player-tag-anchor[data-outward="right"] .player-hub .player-hub-content{
  clip-path:inset(0 100% 0 0);
  transform:translateY(-50%);transform-origin:center left;
 }
-.pixi-host>.sennet-player-tag-anchor[data-outward="right"] .player-hub.is-open .player-hub-content{clip-path:inset(0)}
+.pixi-host>.seneternal-player-tag-anchor[data-outward="right"] .player-hub.is-open .player-hub-content{clip-path:inset(0)}
 
 /* The player-tag trigger must win hit-testing against the radial overlay.
    Neither the radial nor the tag changes its table-world coordinates. */
-.pixi-host>.sennet-player-tag-anchor{z-index:90}
-.pixi-host>.sennet-player-tag-anchor:has(.player-hub.is-open){z-index:120}
+.pixi-host>.seneternal-player-tag-anchor{z-index:90}
+.pixi-host>.seneternal-player-tag-anchor:has(.player-hub.is-open){z-index:120}
 
 /* The unified book is a single tabbed fantasy tome, not three separate covers. */
 .unified-tome{position:relative;border:7px ridge #8b693d;box-shadow:0 0 0 3px #211b19,0 28px 95px #000d,inset 0 0 32px #714b23}
@@ -1366,7 +1366,7 @@ body>.reader-backdrop{
 .unified-book-shortcut{border:1px solid #d6b47a;border-radius:7px;padding:12px 22px;color:#e9d4a2;background:#4e3528}
 
 /* Token generator's in-place Custom value editor follows its Pixi coin. */
-.sennet-coin-editor{
+.seneternal-coin-editor{
   position:absolute;z-index:84;transform:translate(-50%,-50%);
   width:76px;min-height:32px;box-sizing:border-box;
   border:2px solid #e3c88e;border-radius:20px;
@@ -1375,19 +1375,19 @@ body>.reader-backdrop{
   text-align:center;font:800 13px Inter,system-ui,sans-serif;
   outline:none;pointer-events:auto;appearance:textfield;
 }
-.sennet-coin-editor:focus{border-color:#b5fff0;box-shadow:0 0 0 3px #274d46,0 0 18px #b5fff066;}
-.sennet-coin-editor::-webkit-inner-spin-button,
-.sennet-coin-editor::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.seneternal-coin-editor:focus{border-color:#b5fff0;box-shadow:0 0 0 3px #274d46,0 0 18px #b5fff066;}
+.seneternal-coin-editor::-webkit-inner-spin-button,
+.seneternal-coin-editor::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 
 /* Physical token coins always appear above imported card imagery.
    Their Pixi counterparts still own pointer input, physics and hit tests. */
-.pixi-host>.sennet-coin-above-card{
+.pixi-host>.seneternal-coin-above-card{
   position:absolute;left:0;top:0;width:36px;height:36px;
   transform-origin:0 0;z-index:6;
   pointer-events:none;user-select:none;box-sizing:border-box;
   will-change:transform;contain:layout style;
 }
-.sennet-coin-above-card-face{
+.seneternal-coin-above-card-face{
   position:absolute;inset:1px;border-radius:50%;overflow:hidden;
   box-sizing:border-box;transform:scale(calc(var(--coin-size,1) * 1.08));
   transform-origin:center;
@@ -1398,31 +1398,31 @@ body>.reader-backdrop{
     #d2a45f 0%,#ca925d 45%,#4a3228 47%,#402b24 52%,
     #f0e3c5 54%,#e9d9b6 100%);
 }
-.sennet-coin-above-card-face::before{
+.seneternal-coin-above-card-face::before{
   content:'';position:absolute;inset:2px;border-radius:50%;
   border:1px solid #fff8;
   background:linear-gradient(140deg,#fff9 0%,transparent 33%,transparent 72%,#22181155 100%);
   opacity:calc(.2 + var(--coin-shine,.75) * .65);
 }
-.sennet-coin-above-card[data-finish="enamel"] .sennet-coin-above-card-face{
+.seneternal-coin-above-card[data-finish="enamel"] .seneternal-coin-above-card-face{
   background:linear-gradient(to bottom,#d45f5e 0%,#a84047 45%,#4b2c26 48%,#34231f 52%,#f7f1df 54%,#ddd3bd 100%);
 }
-.sennet-coin-above-card[data-finish="matte"] .sennet-coin-above-card-face{
+.seneternal-coin-above-card[data-finish="matte"] .seneternal-coin-above-card-face{
   background:linear-gradient(to bottom,#90756a 0%,#78645d 45%,#322b29 47%,#332c28 52%,#cfc4aa 54%,#ac9f8c 100%);
   box-shadow:inset 0 0 0 1.4px #514238,1px 2px 2px #0009;
 }
-.sennet-coin-above-card[data-finish="brushed"] .sennet-coin-above-card-face{
+.seneternal-coin-above-card[data-finish="brushed"] .seneternal-coin-above-card-face{
   background:repeating-linear-gradient(176deg,#ffffff13 0 1px,transparent 1px 3px),
     linear-gradient(to bottom,#baae93 0%,#a99673 45%,#44362c 48%,#322a22 52%,#e6d9bb 54%,#bfb096 100%);
 }
-.sennet-coin-above-card-top,.sennet-coin-above-card-bottom{
+.seneternal-coin-above-card-top,.seneternal-coin-above-card-bottom{
   display:flex;align-items:center;justify-content:center;position:absolute;left:0;right:0;
   height:10px;font:900 9px Inter,system-ui,sans-serif;line-height:10px;
   pointer-events:none;
 }
-.sennet-coin-above-card-top{top:1px;color:#fff1d4;text-shadow:0 1px 1px #5f2a2a;}
-.sennet-coin-above-card-bottom{bottom:0;color:#302c2c;text-shadow:0 1px #fffb;}
-.sennet-coin-above-card-number{
+.seneternal-coin-above-card-top{top:1px;color:#fff1d4;text-shadow:0 1px 1px #5f2a2a;}
+.seneternal-coin-above-card-bottom{bottom:0;color:#302c2c;text-shadow:0 1px #fffb;}
+.seneternal-coin-above-card-number{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   min-width:12px;height:12px;padding:0 1px;border-radius:50%;
   background:radial-gradient(circle at 30% 25%,#f6eacb,#d0bd99 85%);
@@ -1431,24 +1431,24 @@ body>.reader-backdrop{
   color:#27322f;font-family:Inter,system-ui,sans-serif;font-weight:900;
   white-space:nowrap;line-height:1;
 }
-.sennet-coin-above-card[data-hover="1"] .sennet-coin-above-card-top{
+.seneternal-coin-above-card[data-hover="1"] .seneternal-coin-above-card-top{
   color:#a8ffe3;text-shadow:0 0 6px #a8ffe3,0 1px 2px #05352a;
 }
-.sennet-coin-above-card[data-hover="-1"] .sennet-coin-above-card-bottom{
+.seneternal-coin-above-card[data-hover="-1"] .seneternal-coin-above-card-bottom{
   color:#ff6c9c;text-shadow:0 0 6px #ff94bc,0 1px 2px #57192a;
 }
-.sennet-coin-above-card[data-hover="1"] .sennet-coin-above-card-face{
+.seneternal-coin-above-card[data-hover="1"] .seneternal-coin-above-card-face{
   box-shadow:inset 0 6px 9px #74ffb655,inset 0 0 0 1px #c0ffe9,
     0 0 7px #a4ffddaa,1px 2px 3px #0009;
 }
-.sennet-coin-above-card[data-hover="-1"] .sennet-coin-above-card-face{
+.seneternal-coin-above-card[data-hover="-1"] .seneternal-coin-above-card-face{
   box-shadow:inset 0 -6px 9px #ff638555,inset 0 0 0 1px #ffd7e2,
     0 0 7px #ff9caeaa,1px 2px 3px #0009;
 }
 
 /* Physically thrown dice: the display-only overlay stays ABOVE CORS-loaded
    card images, while the underlying Pixi die retains pointer ownership. */
-.pixi-host>.sennet-rolled-die-above-card{
+.pixi-host>.seneternal-rolled-die-above-card{
   position:absolute;left:0;top:0;width:36px;height:36px;
   transform-origin:0 0;z-index:7;pointer-events:none;
   display:flex;align-items:center;justify-content:center;
@@ -1459,40 +1459,40 @@ body>.reader-backdrop{
   border:2px solid #ddd9c7;
   clip-path:polygon(50% 2%,95% 22%,95% 76%,50% 98%,5% 76%,5% 22%);
 }
-.sennet-rolled-die-above-card[data-sides="2"]{
+.seneternal-rolled-die-above-card[data-sides="2"]{
   border-radius:50%;clip-path:none;
   border:3px ridge #f2d9a2;
   background:radial-gradient(circle at 29% 22%,#ffefc7,#bd914b 60%,#604831);
 }
-.sennet-rolled-die-above-card[data-sides="4"]{
+.seneternal-rolled-die-above-card[data-sides="4"]{
   clip-path:polygon(50% 3%,98% 93%,2% 93%);
   background:linear-gradient(155deg,#e5d1a6,#796a52);
 }
-.sennet-rolled-die-above-card[data-sides="6"]{
+.seneternal-rolled-die-above-card[data-sides="6"]{
   clip-path:polygon(16% 3%,85% 3%,98% 15%,98% 85%,85% 98%,16% 98%,2% 85%,2% 15%);
   background:linear-gradient(142deg,#d1dfc7,#64796f);
 }
-.sennet-rolled-die-above-card[data-sides="8"]{
+.seneternal-rolled-die-above-card[data-sides="8"]{
   clip-path:polygon(50% 2%,92% 25%,92% 75%,50% 98%,8% 75%,8% 25%);
   background:linear-gradient(135deg,#ded5eb,#8278ae);
 }
-.sennet-rolled-die-above-card[data-sides="10"]{
+.seneternal-rolled-die-above-card[data-sides="10"]{
   clip-path:polygon(50% 0%,96% 37%,80% 95%,20% 95%,4% 37%);
   background:linear-gradient(135deg,#b9d3d9,#668ba8);
 }
-.sennet-rolled-die-above-card[data-sides="12"]{
+.seneternal-rolled-die-above-card[data-sides="12"]{
   clip-path:polygon(50% 1%,84% 10%,98% 40%,89% 77%,65% 98%,28% 93%,5% 65%,7% 29%);
   background:linear-gradient(145deg,#edd9d2,#a77767);
 }
-.sennet-rolled-die-above-card[data-sides="20"]{
+.seneternal-rolled-die-above-card[data-sides="20"]{
   clip-path:polygon(50% 2%,85% 14%,98% 45%,92% 78%,65% 98%,27% 94%,4% 71%,2% 32%);
   background:linear-gradient(155deg,#d2c8eb,#71629c);
 }
-.sennet-rolled-die-above-card[data-sides="100"]{
+.seneternal-rolled-die-above-card[data-sides="100"]{
   clip-path:polygon(50% 0%,77% 7%,97% 30%,100% 62%,79% 92%,51% 99%,20% 93%,0% 63%,2% 29%,24% 7%);
   background:linear-gradient(155deg,#d5ebe7,#66988d);
 }
-.sennet-rolled-die-center{
+.seneternal-rolled-die-center{
   min-width:17px;min-height:16px;padding:1px 2px;
   box-sizing:border-box;border-radius:5px;background:#15272bcc;
   border:1px solid #fbe3a2;display:flex;align-items:center;
@@ -1500,26 +1500,26 @@ body>.reader-backdrop{
   color:#f8eaca;line-height:1;font-family:Inter,system-ui,sans-serif;
   font-weight:900;text-shadow:0 1px #000a;white-space:nowrap;
 }
-.sennet-rolled-die-above-card>small{
+.seneternal-rolled-die-above-card>small{
   position:absolute;right:2px;bottom:1px;font:900 6px Inter,sans-serif;
   color:#fff9d9;background:#182522bb;padding:0 2px;border-radius:5px;
 }
-.sennet-rolled-die-above-card::before{
+.seneternal-rolled-die-above-card::before{
   content:'';position:absolute;inset:2px;pointer-events:none;
   clip-path:polygon(50% 0,97% 22%,66% 48%,43% 45%,6% 24%);
   background:linear-gradient(145deg,#fff7d9aa,#ffffff12 60%,#ffffff00);
   mix-blend-mode:screen;
 }
-.sennet-rolled-die-above-card::after{
+.seneternal-rolled-die-above-card::after{
   content:'';position:absolute;inset:4px;pointer-events:none;
   clip-path:polygon(40% 56%,66% 50%,95% 26%,84% 79%,52% 99%,5% 73%);
   background:linear-gradient(135deg,#0f202244,#0c171d92);
 }
-.sennet-rolled-die-above-card .sennet-rolled-die-center{
+.seneternal-rolled-die-above-card .seneternal-rolled-die-center{
   position:relative;z-index:2;
   box-shadow:0 1px 3px #0009,inset 0 1px 1px #fff3;
 }
-.sennet-dice-selection{
+.seneternal-dice-selection{
   position:absolute;z-index:83;left:13px;bottom:55px;
   max-width:min(440px,calc(100vw - 35px));
   display:flex;align-items:center;gap:7px;flex-wrap:wrap;
@@ -1529,19 +1529,19 @@ body>.reader-backdrop{
   color:#f1e3c3;font:700 11px Inter,system-ui,sans-serif;
   pointer-events:auto;
 }
-.sennet-dice-selection strong{font-size:11px;color:#d6fcef}
-.sennet-dice-selection button{
+.seneternal-dice-selection strong{font-size:11px;color:#d6fcef}
+.seneternal-dice-selection button{
   border:1px solid #ad9d73;border-radius:9px;
   background:#334f4a;color:#fff0c9;padding:5px 8px;
   cursor:pointer;font:700 11px Inter,system-ui,sans-serif;
 }
-.sennet-dice-selection button:hover{background:#52776c}
+.seneternal-dice-selection button:hover{background:#52776c}
 
 /* Miniature medallions keep their original two-tone precious-metal styling.
    Only the lacquer color changes; a separate transparent DOM layer keeps
    coins visible above imported card artwork. */
-.sennet-coin-above-card:not([data-finish="enamel"]):not([data-finish="matte"]):not([data-finish="brushed"])
-.sennet-coin-above-card-face{
+.seneternal-coin-above-card:not([data-finish="enamel"]):not([data-finish="matte"]):not([data-finish="brushed"])
+.seneternal-coin-above-card-face{
   background:linear-gradient(to bottom,
     color-mix(in srgb,var(--coin-accent,#d8b979) 86%,#fff) 0%,
     color-mix(in srgb,var(--coin-accent,#d8b979) 84%,#39261b) 44%,
@@ -1549,99 +1549,99 @@ body>.reader-backdrop{
     color-mix(in srgb,var(--coin-accent,#d8b979) 44%,#fff) 55%,
     color-mix(in srgb,var(--coin-accent,#d8b979) 58%,#f8dfac) 100%);
 }
-.sennet-coin-radial-layer{position:absolute;inset:0;z-index:90;pointer-events:auto}
-.sennet-coin-radial{
+.seneternal-coin-radial-layer{position:absolute;inset:0;z-index:90;pointer-events:auto}
+.seneternal-coin-radial{
   position:absolute;width:248px;height:248px;transform:translate(-50%,-50%);
   pointer-events:auto;filter:drop-shadow(0 8px 15px #000c);
-  animation:sennet-coin-grow .17s cubic-bezier(.2,1.3,.35,1) both;
+  animation:seneternal-coin-grow .17s cubic-bezier(.2,1.3,.35,1) both;
 }
-@keyframes sennet-coin-grow{from{opacity:.3;scale:.34}to{opacity:1;scale:1}}
-.sennet-coin-radial svg{width:248px;height:248px;overflow:visible}
-.sennet-coin-radial svg g{cursor:pointer;outline:none}
-.sennet-coin-sector{fill:#203936f4;stroke:#cead70;stroke-width:1.35;
+@keyframes seneternal-coin-grow{from{opacity:.3;scale:.34}to{opacity:1;scale:1}}
+.seneternal-coin-radial svg{width:248px;height:248px;overflow:visible}
+.seneternal-coin-radial svg g{cursor:pointer;outline:none}
+.seneternal-coin-sector{fill:#203936f4;stroke:#cead70;stroke-width:1.35;
   transition:fill .12s ease;pointer-events:all}
-.sennet-coin-radial svg g:nth-child(even) .sennet-coin-sector{fill:#304744f5}
-.sennet-coin-radial svg g:hover .sennet-coin-sector,
-.sennet-coin-radial svg g:focus .sennet-coin-sector{fill:#517a68}
-.sennet-coin-sector-label{fill:#ffeac0;font:800 12px Inter,system-ui,sans-serif;
+.seneternal-coin-radial svg g:nth-child(even) .seneternal-coin-sector{fill:#304744f5}
+.seneternal-coin-radial svg g:hover .seneternal-coin-sector,
+.seneternal-coin-radial svg g:focus .seneternal-coin-sector{fill:#517a68}
+.seneternal-coin-sector-label{fill:#ffeac0;font:800 12px Inter,system-ui,sans-serif;
   pointer-events:none;text-shadow:0 1px #000a}
-.sennet-coin-divider{stroke:#f2c878;stroke-width:3;pointer-events:none}
-.sennet-coin-radial-center{fill:#e3c68c;stroke:#4b3a2c;stroke-width:5;pointer-events:none}
-.sennet-coin-radial-number{font:900 17px Inter,system-ui,sans-serif;
+.seneternal-coin-divider{stroke:#f2c878;stroke-width:3;pointer-events:none}
+.seneternal-coin-radial-center{fill:#e3c68c;stroke:#4b3a2c;stroke-width:5;pointer-events:none}
+.seneternal-coin-radial-number{font:900 17px Inter,system-ui,sans-serif;
   fill:#28322f;pointer-events:none}
-.sennet-coin-close{position:absolute;top:12px;right:11px;border:1px solid #b69d73;
+.seneternal-coin-close{position:absolute;top:12px;right:11px;border:1px solid #b69d73;
   border-radius:50%;width:24px;height:24px;color:#fff0c6;background:#172f2b;
   cursor:pointer;font:900 17px Inter,system-ui,sans-serif}
-.sennet-coin-palette{position:absolute;left:50%;top:240px;transform:translateX(-50%);
+.seneternal-coin-palette{position:absolute;left:50%;top:240px;transform:translateX(-50%);
   width:222px;padding:10px;border-radius:12px;border:1px solid #d9be87;
   background:#172c2af7;color:#ffe6b8;box-shadow:0 8px 20px #0009;
   font:700 12px Inter,system-ui,sans-serif}
-.sennet-coin-palette-swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}
-.sennet-coin-palette-swatches button{width:30px;height:30px;cursor:pointer;
+.seneternal-coin-palette-swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}
+.seneternal-coin-palette-swatches button{width:30px;height:30px;cursor:pointer;
   border:2px solid #e5d3ab;border-radius:50%;
   box-shadow:inset 0 1px 4px #fff9,0 2px 4px #0008}
-.sennet-coin-palette label{display:flex;align-items:center;justify-content:space-between}
-.sennet-coin-palette input{height:25px;width:48px;cursor:pointer}
+.seneternal-coin-palette label{display:flex;align-items:center;justify-content:space-between}
+.seneternal-coin-palette input{height:25px;width:48px;cursor:pointer}
 
 /* Compact coin radial: 10 true controls, just large enough to contain
    +/-1000 labels. Unlike SVG groups, these buttons receive native clicks. */
-.sennet-coin-radial{width:160px;height:160px;
+.seneternal-coin-radial{width:160px;height:160px;
   filter:drop-shadow(0 5px 10px #0009)}
-.sennet-coin-radial .sennet-coin-ring{width:160px;height:160px;
+.seneternal-coin-radial .seneternal-coin-ring{width:160px;height:160px;
   position:absolute;inset:0;pointer-events:none}
-.sennet-coin-radial .sennet-coin-ring path{pointer-events:none}
-.sennet-coin-radial .sennet-coin-sector{
+.seneternal-coin-radial .seneternal-coin-ring path{pointer-events:none}
+.seneternal-coin-radial .seneternal-coin-sector{
   fill:#233d39ed;stroke:#d3b17e;stroke-width:1.2}
-.sennet-coin-radial .sennet-coin-ring path:nth-child(even){fill:#304a45f5}
-.sennet-coin-radial .sennet-coin-divider{stroke-width:1.5;stroke:#c9a16c}
-.sennet-coin-radial .sennet-coin-radial-center{
+.seneternal-coin-radial .seneternal-coin-ring path:nth-child(even){fill:#304a45f5}
+.seneternal-coin-radial .seneternal-coin-divider{stroke-width:1.5;stroke:#c9a16c}
+.seneternal-coin-radial .seneternal-coin-radial-center{
   fill:#d8b979;stroke:#453c33;stroke-width:2}
-.sennet-coin-action-button{position:absolute;transform:translate(-50%,-50%);
+.seneternal-coin-action-button{position:absolute;transform:translate(-50%,-50%);
   height:24px;min-width:29px;padding:0 2px;border:0;border-radius:7px;
   color:#f9e6c5;background:transparent;
   font:800 10px/1 Inter,system-ui,sans-serif;text-align:center;
   white-space:nowrap;cursor:pointer;touch-action:manipulation;z-index:2}
-.sennet-coin-action-button:hover,.sennet-coin-action-button:focus-visible{
+.seneternal-coin-action-button:hover,.seneternal-coin-action-button:focus-visible{
   outline:1px solid #ffe2a7;color:#192925;background:#d6bc84}
-.sennet-coin-radial>.sennet-coin-radial-number{
+.seneternal-coin-radial>.seneternal-coin-radial-number{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:25px;display:block;overflow:visible;white-space:nowrap;
   font:900 9px Inter,system-ui,sans-serif;color:#263331;
   pointer-events:none;text-align:center;z-index:2}
-.sennet-coin-radial>.sennet-coin-close{
+.seneternal-coin-radial>.seneternal-coin-close{
   top:-2px;right:-2px;z-index:6;width:20px;height:20px;font-size:13px}
-.sennet-coin-radial>.sennet-coin-palette{top:163px;z-index:8}
-.sennet-coin-radial-layer{isolation:isolate}
-.sennet-coin-above-card-top,.sennet-coin-above-card-bottom{display:none!important}
-.sennet-coin-above-card-number{font-size:8px}
-.sennet-rolled-die-above-card .sennet-rolled-die-center{
+.seneternal-coin-radial>.seneternal-coin-palette{top:163px;z-index:8}
+.seneternal-coin-radial-layer{isolation:isolate}
+.seneternal-coin-above-card-top,.seneternal-coin-above-card-bottom{display:none!important}
+.seneternal-coin-above-card-number{font-size:8px}
+.seneternal-rolled-die-above-card .seneternal-rolled-die-center{
   border:0;background:none;box-shadow:none;min-width:0;min-height:0;
   padding:0;text-shadow:0 1px 2px #000e,0 0 3px #000c;
   color:#fff6d9;font-weight:900}
-.sennet-rolled-die-above-card::before,
-.sennet-rolled-die-above-card::after{background:none}
-.sennet-dice-engine-error{position:absolute;z-index:85;left:50%;top:16px;
+.seneternal-rolled-die-above-card::before,
+.seneternal-rolled-die-above-card::after{background:none}
+.seneternal-dice-engine-error{position:absolute;z-index:85;left:50%;top:16px;
   transform:translateX(-50%);background:#322222f0;border:1px solid #e2a28b;
   border-radius:9px;padding:9px;color:#ffe4d4}
-.sennet-dice-engine-error button{margin-left:9px}
+.seneternal-dice-engine-error button{margin-left:9px}
 
 /* The 10 actions surround the OUTSIDE edge of the original-sized coin:
    the center is a transparent hole, not a button-covered wedge. */
-.sennet-coin-radial .sennet-coin-ring{pointer-events:none}
-.sennet-coin-radial .sennet-coin-radial-center{display:none}
-.sennet-coin-radial>.sennet-coin-radial-number{display:none}
-.sennet-coin-radial>.sennet-coin-close{display:none!important}
-.sennet-coin-radial-center-hold{position:absolute;left:50%;top:50%;
+.seneternal-coin-radial .seneternal-coin-ring{pointer-events:none}
+.seneternal-coin-radial .seneternal-coin-radial-center{display:none}
+.seneternal-coin-radial>.seneternal-coin-radial-number{display:none}
+.seneternal-coin-radial>.seneternal-coin-close{display:none!important}
+.seneternal-coin-radial-center-hold{position:absolute;left:50%;top:50%;
   transform:translate(-50%,-50%);width:43px;height:43px;
   background:transparent;border:0;box-shadow:none;border-radius:50%;
   cursor:pointer;touch-action:none;z-index:5;padding:0}
-.sennet-coin-radial-center-hold:focus-visible{outline:2px solid #ffe6ad;outline-offset:1px}
-.sennet-coin-above-card-number{min-width:18px;min-height:18px;padding:1px 2px;
+.seneternal-coin-radial-center-hold:focus-visible{outline:2px solid #ffe6ad;outline-offset:1px}
+.seneternal-coin-above-card-number{min-width:18px;min-height:18px;padding:1px 2px;
   line-height:1.1}
 
 /* Table-integrated action chronometer: bronze walnut casing, crisp digital
    glass readout, tactile undo/redo. Anchored to the real playmat geometry. */
-.sennet-action-lcd{
+.seneternal-action-lcd{
   position:absolute;transform:translate(-50%,-50%);z-index:81;
   display:grid;grid-template-columns:24px minmax(0,1fr) 24px;gap:3px;
   align-items:center;box-sizing:border-box;padding:5px 6px;
@@ -1652,7 +1652,7 @@ body>.reader-backdrop{
   background:linear-gradient(150deg,#684b30,#39291e 40%,#241e19 85%,#725536);
   pointer-events:auto;isolation:isolate;
 }
-.sennet-action-lcd-display{
+.seneternal-action-lcd-display{
   min-width:0;height:33px;display:flex;align-items:center;
   overflow-x:auto;overflow-y:hidden;border-radius:4px;
   padding:2px 7px;box-sizing:border-box;scrollbar-width:thin;
@@ -1663,26 +1663,26 @@ body>.reader-backdrop{
   text-shadow:0 0 5px #4cffa45c;white-space:nowrap;
   font-variant-numeric:tabular-nums;
 }
-.sennet-action-lcd-display span{white-space:nowrap;display:block}
-.sennet-action-lcd-button{
+.seneternal-action-lcd-display span{white-space:nowrap;display:block}
+.seneternal-action-lcd-button{
   border-radius:5px;border:1px solid #95754c;
   width:24px;height:29px;padding:0;cursor:pointer;
   background:linear-gradient(145deg,#8d6940,#483626);
   color:#f4deba;font:700 17px/1 system-ui,sans-serif;
   box-shadow:inset 0 1px #fde7b655,0 1px 2px #000a;
 }
-.sennet-action-lcd-button:not(:disabled):hover{
+.seneternal-action-lcd-button:not(:disabled):hover{
   background:#bb975f;color:#1e2a22
 }
-.sennet-action-lcd-button:disabled{
+.seneternal-action-lcd-button:disabled{
   opacity:.35;cursor:not-allowed;filter:saturate(.35)
 }
-.sennet-action-lcd-button:focus-visible{
+.seneternal-action-lcd-button:focus-visible{
   outline:2px solid #a7fbd8;outline-offset:2px
 }
 
 /* Result floats above the true 3D die but never intercepts rerolls. */
-.sennet-dice-result-bubble{
+.seneternal-dice-result-bubble{
   position:absolute;z-index:16;pointer-events:none;max-width:220px;
   transform:translate(-50%,-100%);padding:7px 13px;
   border-radius:16px;border:1px solid #f8e6b4;
@@ -1691,27 +1691,27 @@ body>.reader-backdrop{
   text-align:center;white-space:nowrap;
   box-shadow:0 5px 18px #001711ba,inset 0 1px 2px #efffcd66;
   text-shadow:0 1px 2px #031715;
-  animation:sennet-roll-bubble 2.8s cubic-bezier(.16,.8,.3,1) both;
+  animation:seneternal-roll-bubble 2.8s cubic-bezier(.16,.8,.3,1) both;
 }
-.sennet-dice-result-bubble::after{
+.seneternal-dice-result-bubble::after{
   content:'';position:absolute;left:50%;bottom:-6px;
   transform:translateX(-50%) rotate(45deg);
   width:10px;height:10px;background:#192f2bf5;
   border-right:1px solid #f8e6b4;border-bottom:1px solid #f8e6b4;
 }
-@keyframes sennet-roll-bubble{
+@keyframes seneternal-roll-bubble{
   0%{opacity:0;transform:translate(-50%,-70%) scale(.75)}
   10%{opacity:1;transform:translate(-50%,-100%) scale(1.07)}
   18%,67%{opacity:1;transform:translate(-50%,-100%) scale(1)}
   100%{opacity:0;transform:translate(-50%,-135%) scale(.96)}
 }
 /* The LCD is a TABLETOP object, not a floating screen-width overlay. */
-.sennet-action-lcd{min-width:0;max-width:none;width:240px;transform-origin:center center}
+.seneternal-action-lcd{min-width:0;max-width:none;width:240px;transform-origin:center center}
 
 /* Compact action instrument: no unused vertical padding; undo/redo are
    literal squares and remain square because the whole assembly scales
    uniformly with the playmat. The center is one scrolling display. */
-.sennet-action-lcd{
+.seneternal-action-lcd{
   box-sizing:border-box;
   height:30px;min-height:0;
   padding:2px 3px;gap:2px;
@@ -1719,14 +1719,14 @@ body>.reader-backdrop{
   grid-template-columns:22px minmax(0,1fr) auto 22px;
   align-items:center;
 }
-.sennet-action-lcd-button{
+.seneternal-action-lcd-button{
   width:22px;height:22px;min-width:22px;min-height:22px;
   padding:0;line-height:1;box-sizing:border-box;
   align-self:center;
 }
-.sennet-action-lcd-button:first-child{grid-column:1}
-.sennet-action-lcd-button:last-child{grid-column:4}
-.sennet-action-lcd-display{
+.seneternal-action-lcd-button:first-child{grid-column:1}
+.seneternal-action-lcd-button:last-child{grid-column:4}
+.seneternal-action-lcd-display{
   grid-column:2;
   box-sizing:border-box;
   height:22px;min-height:0;
@@ -1735,7 +1735,7 @@ body>.reader-backdrop{
   overflow-x:auto;overflow-y:hidden;
   scrollbar-width:thin;
 }
-.sennet-action-lcd-roll{
+.seneternal-action-lcd-roll{
   grid-column:3;height:22px;min-width:32px;
   padding:0 4px;border-radius:4px;
   border:1px solid #8bb4a0;
@@ -1743,8 +1743,8 @@ body>.reader-backdrop{
   font:800 8px/1 ui-monospace,monospace;
   cursor:pointer;
 }
-.sennet-action-lcd-roll:hover{background:#3b876d}
-.sennet-dice-source-count{
+.seneternal-action-lcd-roll:hover{background:#3b876d}
+.seneternal-dice-source-count{
   position:absolute;z-index:14;box-sizing:border-box;
   display:flex;align-items:center;justify-content:center;
   width:18px;height:18px;pointer-events:none;
@@ -1759,7 +1759,7 @@ body>.reader-backdrop{
 
 /* Precision-machined brass action keys. Icons are actual vectors, never
    font-dependent curved arrows; the two buttons remain perfect squares. */
-.sennet-action-lcd-button{
+.seneternal-action-lcd-button{
   position:relative;
   display:flex;align-items:center;justify-content:center;
   flex:0 0 22px;width:22px;height:22px;
@@ -1771,39 +1771,39 @@ body>.reader-backdrop{
     0 1px 2px #080b07b3;
   transition:background-color .12s ease,color .12s ease,box-shadow .12s ease;
 }
-.sennet-action-lcd-button svg{
+.seneternal-action-lcd-button svg{
   width:16px;height:16px;display:block;flex:none;
   filter:drop-shadow(0 1px 0 #15110da6);
 }
-.sennet-action-lcd-button:not(:disabled):hover{
+.seneternal-action-lcd-button:not(:disabled):hover{
   color:#fffbdc;
   background:linear-gradient(150deg,#c3a36d 0%,#866742 55%,#66503b 100%);
   box-shadow:inset 0 1px 1px #fff3ceaa,0 0 5px #cda85d77,0 1px 2px #090b07ae;
 }
-.sennet-action-lcd-button:not(:disabled):active{
+.seneternal-action-lcd-button:not(:disabled):active{
   color:#ebdcb5;
   background:linear-gradient(150deg,#30271e,#665035);
   box-shadow:inset 0 2px 4px #100c09b8,0 1px 0 #ffdf9b44;
 }
-.sennet-action-lcd-button:disabled{
+.seneternal-action-lcd-button:disabled{
   cursor:not-allowed;opacity:.39;
   color:#ad9d7b;filter:saturate(.55);box-shadow:inset 0 1px #dfc79a33;
 }
-.sennet-action-lcd-button:focus-visible{
+.seneternal-action-lcd-button:focus-visible{
   outline:2px solid #b9f8e1;outline-offset:2px;
 }
 
 /* Coin geometry must NEVER stretch when a long signed/comma-formatted value
    is entered. Both the metal disk and inset dial have hard square bounds;
    only glyph size changes to fit the inscription. */
-.pixi-host>.sennet-coin-above-card{
+.pixi-host>.seneternal-coin-above-card{
   width:36px;height:36px;aspect-ratio:1 / 1;
 }
-.sennet-coin-above-card-face{
+.seneternal-coin-above-card-face{
   inset:1px;width:34px;height:34px;aspect-ratio:1 / 1;
   border-radius:50%;overflow:hidden;
 }
-.sennet-coin-above-card-number{
+.seneternal-coin-above-card-number{
   box-sizing:border-box;width:20px;height:20px;min-width:20px;
   max-width:20px;min-height:20px;max-height:20px;
   aspect-ratio:1 / 1;flex:none;padding:0;
@@ -1811,17 +1811,17 @@ body>.reader-backdrop{
   white-space:nowrap;text-overflow:clip;
   letter-spacing:-.2px;
 }
-.sennet-coin-above-card[data-variant="editable"] .sennet-coin-above-card-face{
+.seneternal-coin-above-card[data-variant="editable"] .seneternal-coin-above-card-face{
   background:radial-gradient(circle at 31% 26%,#f2ffff 0%,#b7d0d0 31%,
     #6c878f 69%,#2f4b52 94%);
   border-color:#effdff;
   box-shadow:inset 0 0 0 1.3px #334e59,inset 0 1px 2px #fff9,
     inset 0 -2px 3px #0a283080,0 2px 4px #000a;
 }
-.sennet-coin-above-card[data-variant="editable"] .sennet-coin-above-card-face::before{
+.seneternal-coin-above-card[data-variant="editable"] .seneternal-coin-above-card-face::before{
   background:radial-gradient(circle at 25% 19%,#ffffffb0,transparent 52%);
 }
-.sennet-coin-above-card[data-variant="editable"] .sennet-coin-above-card-number{
+.seneternal-coin-above-card[data-variant="editable"] .seneternal-coin-above-card-number{
   color:#143440;border-color:#e2f5f2;
   background:radial-gradient(circle at 35% 22%,#effefd,#b0cbcc 78%);
   box-shadow:0 0 0 1.5px #203e4b,0 0 0 2.8px #d9eced;
@@ -1831,21 +1831,21 @@ body>.reader-backdrop{
 /* Readable coin radial: Roman labels sit directly on the annular wedges,
    not in little boxes. The whole 31×26px invisible hit target remains
    comfortably inside the 152px circle; the real coin is visible at center. */
-.sennet-coin-radial{
+.seneternal-coin-radial{
   width:152px;height:152px;
   filter:drop-shadow(0 4px 8px #000a);
   transform:translate(-50%,-50%);
 }
-.sennet-coin-radial .sennet-coin-ring{
+.seneternal-coin-radial .seneternal-coin-ring{
   width:152px;height:152px;
 }
-.sennet-coin-radial .sennet-coin-sector{
+.seneternal-coin-radial .seneternal-coin-sector{
   fill:#20342eee;stroke:#c4a06a;stroke-width:1.05;
 }
-.sennet-coin-radial .sennet-coin-ring path:nth-child(even){
+.seneternal-coin-radial .seneternal-coin-ring path:nth-child(even){
   fill:#364b3eed;
 }
-.sennet-coin-action-button{
+.seneternal-coin-action-button{
   width:31px;min-width:0;height:26px;min-height:0;padding:0;
   border:0;border-radius:0;background:none;box-shadow:none;
   display:grid;place-items:center;
@@ -1854,98 +1854,98 @@ body>.reader-backdrop{
   white-space:nowrap;box-sizing:border-box;
   cursor:pointer;touch-action:manipulation;
 }
-.sennet-coin-action-button:hover,
-.sennet-coin-action-button:focus-visible{
+.seneternal-coin-action-button:hover,
+.seneternal-coin-action-button:focus-visible{
   border:0;background:none;box-shadow:none;outline:none;
   color:#fff8d7;text-shadow:0 0 5px #ffe2aa,0 1px 2px #071812;
 }
-.sennet-coin-action-button:focus-visible{
+.seneternal-coin-action-button:focus-visible{
   text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;
 }
-.sennet-coin-radial-center-hold{width:38px;height:38px}
-.sennet-coin-radial>.sennet-coin-palette{top:160px}
+.seneternal-coin-radial-center-hold{width:38px;height:38px}
+.seneternal-coin-radial>.seneternal-coin-palette{top:160px}
 @media (prefers-reduced-motion:reduce){
-  .sennet-coin-radial{animation:none}
+  .seneternal-coin-radial{animation:none}
 }
 
 /* All twelve player captions now use the same Pixi text underneath
    tabletop accessories. The local HTML tag remains accessible and clickable,
    but no longer paints a gold plate or duplicates its text. */
-.pixi-host>.sennet-player-tag-anchor .player-hub,
-.pixi-host>.sennet-player-tag-anchor .player-hub.is-open{
+.pixi-host>.seneternal-player-tag-anchor .player-hub,
+.pixi-host>.seneternal-player-tag-anchor .player-hub.is-open{
   background:transparent!important;border:0!important;
   box-shadow:none!important;border-radius:0!important;
 }
-.pixi-host>.sennet-player-tag-anchor .player-hub-tab{
+.pixi-host>.seneternal-player-tag-anchor .player-hub-tab{
   background:transparent!important;border:0!important;
 }
-.pixi-host>.sennet-player-tag-anchor .player-hub-number{
+.pixi-host>.seneternal-player-tag-anchor .player-hub-number{
   color:transparent!important;text-shadow:none!important;
   background:transparent!important;border:0!important;
 }
-.pixi-host>.sennet-player-tag-anchor .player-hub-tab:focus-visible{
+.pixi-host>.seneternal-player-tag-anchor .player-hub-tab:focus-visible{
   outline:2px dotted #f5deb5;outline-offset:2px;
 }
-.pixi-host>.sennet-player-tag-anchor .player-hub.is-open .player-hub-content{
+.pixi-host>.seneternal-player-tag-anchor .player-hub.is-open .player-hub-content{
   background:linear-gradient(165deg,#25493e,#172e29);
 }
 
 /* Object visuals are above HTML accessories (LCD and card-action radial).
    Browser image artwork, physical coin faces and WebGL dice must agree with
    Pixi's objects > buttons > mats > accessories > seat labels hierarchy. */
-.pixi-host>.sennet-coin-above-card{z-index:86}
-.pixi-host>.sennet-rolled-die-above-card{z-index:87}
+.pixi-host>.seneternal-coin-above-card{z-index:86}
+.pixi-host>.seneternal-rolled-die-above-card{z-index:87}
 
 
 /* Synchronized Pixi/HTML camera attachment: no React layout interpolation. */
-.sennet-radial-camera-anchor{
+.seneternal-radial-camera-anchor{
   position:absolute;left:0;top:0;width:180px;height:90px;
   transform-origin:0 0;pointer-events:none;will-change:transform;
 }
-.sennet-radial-free-anchor{position:absolute;inset:0;pointer-events:none}
-.sennet-radial-camera-anchor .card-radial-wheel{
+.seneternal-radial-free-anchor{position:absolute;inset:0;pointer-events:none}
+.seneternal-radial-camera-anchor .card-radial-wheel{
   animation:none;transition:none!important;
 }
-.sennet-action-lcd{transition:none!important;will-change:transform,left,top}
-.pixi-host>.sennet-dice-source-count{z-index:90}
+.seneternal-action-lcd{transition:none!important;will-change:transform,left,top}
+.pixi-host>.seneternal-dice-source-count{z-index:90}
 
 
 /* Hold-to-collapse must leave a visible, complete gold circle (or semicircle)
    and cannot turn the center into a camera-drag handle after the hold. */
-.card-radial-wheel.is-collapsed .sennet-radial-center>circle{
+.card-radial-wheel.is-collapsed .seneternal-radial-center>circle{
   stroke:#ad94cf!important;stroke-width:5px!important;
   filter:none!important;
 }
 .card-radial-wheel.is-half.is-collapsed{
   clip-path:circle(33% at 50% 0%);
 }
-.card-radial-wheel .sennet-radial-center{cursor:pointer!important}
-.card-radial-wheel .sennet-radial-center:active{cursor:pointer!important}
+.card-radial-wheel .seneternal-radial-center{cursor:pointer!important}
+.card-radial-wheel .seneternal-radial-center:active{cursor:pointer!important}
 /* The first white coin's number field must render ABOVE its DOM coin face. */
-.pixi-host>.sennet-coin-editor{z-index:145}
+.pixi-host>.seneternal-coin-editor{z-index:145}
 
 /* A subtle violet edge belongs to the wheel, not an unrelated gold halo. */
-.card-radial-wheel .sennet-radial-center>circle{
+.card-radial-wheel .seneternal-radial-center>circle{
   stroke:#ad94cf!important;filter:none!important;
 }
 
 /* Screen box scrolls invisibly; keyboard/mouse/touch can still pan its text. */
-.sennet-action-lcd-display{
+.seneternal-action-lcd-display{
   scrollbar-width:none!important;-ms-overflow-style:none;
   cursor:pointer;user-select:none;
 }
-.sennet-action-lcd-display::-webkit-scrollbar{display:none!important;width:0;height:0}
-.sennet-action-lcd-display:focus-visible{
+.seneternal-action-lcd-display::-webkit-scrollbar{display:none!important;width:0;height:0}
+.seneternal-action-lcd-display:focus-visible{
   outline:1px solid #b8e6c9;outline-offset:-2px;
 }
-/* Sennet receipt: a full-width green CRT under one machined brass casing.
+/* Seneternal receipt: a full-width green CRT under one machined brass casing.
    Monotype/tabular clock, no gridlines or row rules whatsoever. */
-.sennet-receipt-backdrop{
+.seneternal-receipt-backdrop{
   position:fixed;inset:0;z-index:900;display:flex;align-items:center;
   justify-content:center;padding:clamp(8px,3vw,30px);background:#020c0bd9;
   backdrop-filter:blur(5px);
 }
-.sennet-receipt{
+.seneternal-receipt{
   box-sizing:border-box;width:min(1060px,100%);max-height:min(820px,94dvh);
   display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;
   border:3px solid #a17a45;border-radius:11px;
@@ -1954,65 +1954,65 @@ body>.reader-backdrop{
   color:#ddf6dd;font-family:'Cascadia Code','SFMono-Regular',Consolas,'Courier New',monospace;
   font-variant-numeric:tabular-nums;
 }
-.sennet-receipt-header{display:flex;gap:14px;align-items:center;flex:none;
+.seneternal-receipt-header{display:flex;gap:14px;align-items:center;flex:none;
   padding:16px 19px 13px;background:linear-gradient(180deg,#5e452e,#38291e);
   border-bottom:2px solid #957244}
-.sennet-receipt-insignia{display:grid;place-items:center;flex:none;
+.seneternal-receipt-insignia{display:grid;place-items:center;flex:none;
   width:45px;height:45px;border:2px solid #bd9d65;border-radius:8px;
   background:#102e27;color:#b7f5d0;font:900 26px/1 Georgia,serif;
   box-shadow:inset 0 2px 6px #000b,0 1px #edd1a344}
-.sennet-receipt-header h2{margin:3px 0;color:#e8dbb5;font-size:clamp(16px,2.6vw,24px);
+.seneternal-receipt-header h2{margin:3px 0;color:#e8dbb5;font-size:clamp(16px,2.6vw,24px);
   letter-spacing:.02em;font-weight:800}
-.sennet-receipt-header small{color:#cbb18a;font-size:10px}
-.sennet-receipt-eyebrow{font-size:10px;letter-spacing:2px;color:#a3e9bd}
-.sennet-receipt-close{margin-left:auto;align-self:flex-start;width:30px;height:30px;
+.seneternal-receipt-header small{color:#cbb18a;font-size:10px}
+.seneternal-receipt-eyebrow{font-size:10px;letter-spacing:2px;color:#a3e9bd}
+.seneternal-receipt-close{margin-left:auto;align-self:flex-start;width:30px;height:30px;
   padding:0;border:1px solid #bd985e;border-radius:6px;color:#eedcb8;
   background:#3c2a1f;font-size:24px;line-height:1}
-.sennet-receipt-scroll{
+.seneternal-receipt-scroll{
   flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;
   background:linear-gradient(165deg,#071915,#0a2823 65%,#071e1b);
   box-shadow:inset 0 10px 22px #0008,inset 0 -8px 22px #0008;
   scrollbar-width:thin;scrollbar-color:#618e72 transparent;
 }
-.sennet-receipt-table{border-collapse:separate;border-spacing:0;width:100%;
+.seneternal-receipt-table{border-collapse:separate;border-spacing:0;width:100%;
   table-layout:fixed;text-align:left;font-size:clamp(10px,1.2vw,13px);line-height:1.42}
-.sennet-receipt-time-column{width:125px}
-.sennet-receipt-type-column{width:125px}
-.sennet-receipt-location-column{width:32%}
-.sennet-receipt-table th{position:sticky;top:0;z-index:1;
+.seneternal-receipt-time-column{width:125px}
+.seneternal-receipt-type-column{width:125px}
+.seneternal-receipt-location-column{width:32%}
+.seneternal-receipt-table th{position:sticky;top:0;z-index:1;
   padding:13px 11px 11px;color:#f0daa6;
   background:#102922;font-size:10px;text-transform:uppercase;letter-spacing:1.1px;
   white-space:nowrap;border:0}
-.sennet-receipt-table td{padding:11px;vertical-align:top;border:0;
+.seneternal-receipt-table td{padding:11px;vertical-align:top;border:0;
   color:#c6e8d3;overflow-wrap:anywhere}
-.sennet-receipt-table tbody tr:nth-child(2n){background:#ffffff05}
-.sennet-receipt-table tbody tr:hover{background:#b9ffca0b}
-.sennet-receipt-table td strong{color:#a6f5c5;font-weight:800}
-.sennet-receipt-timestamp{color:#f0d7a3!important;white-space:nowrap}
-.sennet-receipt-timestamp span{display:block;letter-spacing:.15px}
-.sennet-receipt-empty{padding:35px 22px;color:#b5d4c2;text-align:center}
-.sennet-receipt-footer{display:flex;justify-content:space-between;align-items:center;
+.seneternal-receipt-table tbody tr:nth-child(2n){background:#ffffff05}
+.seneternal-receipt-table tbody tr:hover{background:#b9ffca0b}
+.seneternal-receipt-table td strong{color:#a6f5c5;font-weight:800}
+.seneternal-receipt-timestamp{color:#f0d7a3!important;white-space:nowrap}
+.seneternal-receipt-timestamp span{display:block;letter-spacing:.15px}
+.seneternal-receipt-empty{padding:35px 22px;color:#b5d4c2;text-align:center}
+.seneternal-receipt-footer{display:flex;justify-content:space-between;align-items:center;
   flex-wrap:wrap;gap:12px;flex:none;padding:12px 18px;color:#e3d0a7;
   border-top:2px solid #81603c;background:linear-gradient(#38271d,#4b3524)}
-.sennet-receipt-footer small{font:600 10px/1.5 ui-monospace,monospace;opacity:.85}
-.sennet-receipt-actions{display:flex;gap:9px;align-items:center}
-.sennet-receipt-actions button{border:1px solid #b99a61;border-radius:5px;
+.seneternal-receipt-footer small{font:600 10px/1.5 ui-monospace,monospace;opacity:.85}
+.seneternal-receipt-actions{display:flex;gap:9px;align-items:center}
+.seneternal-receipt-actions button{border:1px solid #b99a61;border-radius:5px;
   background:linear-gradient(#796045,#4b3726);color:#fff0c5;
   padding:9px 12px;font:700 11px ui-monospace,monospace}
-.sennet-receipt-actions button:hover{background:#916e47}
+.seneternal-receipt-actions button:hover{background:#916e47}
 @media(max-width:620px){
- .sennet-receipt-header{padding:12px;gap:9px}
- .sennet-receipt-time-column{width:98px}
- .sennet-receipt-type-column{width:78px}
- .sennet-receipt-location-column{width:29%}
- .sennet-receipt-table th,.sennet-receipt-table td{padding:8px 5px}
- .sennet-receipt-table{font-size:10px}
- .sennet-receipt-actions button{padding:8px}
+ .seneternal-receipt-header{padding:12px;gap:9px}
+ .seneternal-receipt-time-column{width:98px}
+ .seneternal-receipt-type-column{width:78px}
+ .seneternal-receipt-location-column{width:29%}
+ .seneternal-receipt-table th,.seneternal-receipt-table td{padding:8px 5px}
+ .seneternal-receipt-table{font-size:10px}
+ .seneternal-receipt-actions button{padding:8px}
 }
 
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   THE OPEN SENNET VOLUMES — genuinely facing folios, not a flat dialog.
+   THE OPEN SENETERNAL VOLUMES — genuinely facing folios, not a flat dialog.
    The paper, rounded fore edges, sewn gutter, page stack and cloth boards
    are separate visual layers. All existing book controls remain native.
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -2563,10 +2563,10 @@ body>.reader-backdrop{
 /* Coin color must drive the ENTIRE surface, including DOM overlays above
    externally loaded card art. High-specificity overrides remove old
    finish-specific fixed red/silver/gold fills. */
-.sennet-coin-above-card .sennet-coin-above-card-face,
-.sennet-coin-above-card[data-finish="enamel"] .sennet-coin-above-card-face,
-.sennet-coin-above-card[data-finish="matte"] .sennet-coin-above-card-face,
-.sennet-coin-above-card[data-finish="brushed"] .sennet-coin-above-card-face{
+.seneternal-coin-above-card .seneternal-coin-above-card-face,
+.seneternal-coin-above-card[data-finish="enamel"] .seneternal-coin-above-card-face,
+.seneternal-coin-above-card[data-finish="matte"] .seneternal-coin-above-card-face,
+.seneternal-coin-above-card[data-finish="brushed"] .seneternal-coin-above-card-face{
   border-color:color-mix(in srgb,var(--coin-accent,#d8b979) 45%,white);
   background:
     linear-gradient(to bottom,
@@ -2577,7 +2577,7 @@ body>.reader-backdrop{
       color-mix(in srgb,var(--coin-accent,#d8b979) 65%,white) 55%,
       color-mix(in srgb,var(--coin-accent,#d8b979) 82%,#e1e4e6) 100%);
 }
-.sennet-coin-above-card .sennet-coin-above-card-number{
+.seneternal-coin-above-card .seneternal-coin-above-card-number{
   background:radial-gradient(circle at 30% 25%,
     color-mix(in srgb,var(--coin-accent,#d8b979) 45%,white),
     color-mix(in srgb,var(--coin-accent,#d8b979) 72%,#d9d9d9) 85%);
@@ -2588,118 +2588,118 @@ body>.reader-backdrop{
 
 /* Pickup games: a small, always-accessible join/share surface that never
  * follows the camera transform or interferes with the bottom action wheel. */
-.sennet-multiplayer-dock{
+.seneternal-multiplayer-dock{
   position:fixed;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));
   z-index:46;display:flex;gap:5px;align-items:stretch;
   color:#f5e7c9;font-family:inherit;
 }
-.sennet-multiplayer-open,.sennet-multiplayer-share{
+.seneternal-multiplayer-open,.seneternal-multiplayer-share{
   background:linear-gradient(150deg,rgba(25,39,43,.97),rgba(12,22,28,.95));
   border:1px solid rgba(211,178,108,.57);color:#f5e7c9;border-radius:13px;
   min-height:37px;padding:7px 12px;display:flex;gap:9px;align-items:center;
   box-shadow:0 3px 17px #0008;cursor:pointer;
 }
-.sennet-multiplayer-open:hover,.sennet-multiplayer-share:hover{
+.seneternal-multiplayer-open:hover,.seneternal-multiplayer-share:hover{
   border-color:#efcb83;background:#2c3e40;
 }
-.sennet-multiplayer-open small{
+.seneternal-multiplayer-open small{
   color:#bcd7bf;font-size:11px;white-space:nowrap;
 }
-.sennet-multiplayer-share{padding:8px 11px;}
-.sennet-online-controls{display:flex;flex-direction:column;gap:13px;}
-.sennet-room-code{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:2px 0;}
-.sennet-room-code span{font-size:.85em;opacity:.8;}
-.sennet-online-players{display:flex;flex-wrap:wrap;gap:7px;}
-.sennet-online-players span{
+.seneternal-multiplayer-share{padding:8px 11px;}
+.seneternal-online-controls{display:flex;flex-direction:column;gap:13px;}
+.seneternal-room-code{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:2px 0;}
+.seneternal-room-code span{font-size:.85em;opacity:.8;}
+.seneternal-online-players{display:flex;flex-wrap:wrap;gap:7px;}
+.seneternal-online-players span{
   display:inline-flex;align-items:center;gap:7px;padding:5px 9px;
   background:rgba(53,71,66,.16);border:1px solid #ab987b7a;
   border-radius:99px;font-size:12px;
 }
-.sennet-online-players i{height:7px;width:7px;border-radius:50%;background:#70b891;}
-.sennet-online-players .away{opacity:.68;}
-.sennet-online-players .away i{background:#a6a1a0;}
-.sennet-saved-rooms{display:flex;flex-direction:column;gap:6px;}
-.sennet-saved-rooms h4{margin:4px 0 7px;}
-.sennet-saved-rooms button{
+.seneternal-online-players i{height:7px;width:7px;border-radius:50%;background:#70b891;}
+.seneternal-online-players .away{opacity:.68;}
+.seneternal-online-players .away i{background:#a6a1a0;}
+.seneternal-saved-rooms{display:flex;flex-direction:column;gap:6px;}
+.seneternal-saved-rooms h4{margin:4px 0 7px;}
+.seneternal-saved-rooms button{
   display:flex;align-items:center;gap:9px;min-height:37px;
   padding:7px 10px;border-radius:7px;
   border:1px solid rgba(132,113,77,.35);background:rgba(218,192,139,.1);
   text-align:left;color:inherit;cursor:pointer;
 }
-.sennet-saved-rooms button:hover{background:rgba(218,192,139,.22);}
-.sennet-saved-rooms button span{flex:1;overflow:hidden;text-overflow:ellipsis;}
-.sennet-saved-rooms button small{opacity:.76;}
+.seneternal-saved-rooms button:hover{background:rgba(218,192,139,.22);}
+.seneternal-saved-rooms button span{flex:1;overflow:hidden;text-overflow:ellipsis;}
+.seneternal-saved-rooms button small{opacity:.76;}
 @media(max-width:620px){
-  .sennet-multiplayer-dock{top:max(7px,env(safe-area-inset-top));right:9px;}
-  .sennet-multiplayer-open{padding:5px 9px;min-height:33px;font-size:12px;}
-  .sennet-multiplayer-open small{display:none;}
-  .sennet-multiplayer-share{padding:6px 8px;min-height:33px;}
+  .seneternal-multiplayer-dock{top:max(7px,env(safe-area-inset-top));right:9px;}
+  .seneternal-multiplayer-open{padding:5px 9px;min-height:33px;font-size:12px;}
+  .seneternal-multiplayer-open small{display:none;}
+  .seneternal-multiplayer-share{padding:6px 8px;min-height:33px;}
 }
 
 
 /* Multiplayer book chapter — compact, legible and usable on a narrow page */
-.sennet-play-together{display:flex;flex-direction:column;gap:14px;padding-bottom:18px;}
-.sennet-play-together .reader-heading{margin:0 0 2px;}
-.sennet-play-together .reader-heading h2{font-size:clamp(27px,3vw,36px);margin:0 0 4px;}
-.sennet-play-together .reader-heading p{margin:0;line-height:1.5;}
-.sennet-multi-status{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #b9a17b87;border-radius:10px;background:linear-gradient(100deg,#f9edd3,#f1dfbf70);}
-.sennet-multi-status-led{display:block;flex-shrink:0;height:11px;width:11px;border-radius:50%;border:2px solid #fff8;box-shadow:0 0 0 3px #947a5b35;background:#ad8b50;}
-.sennet-multi-status-led.online{background:#4d8e64;}
-.sennet-multi-status-led.waiting{background:#cfab55;}
-.sennet-multi-status-led.missing{background:#ad7360;}
-.sennet-multi-status>div{display:flex;flex-direction:column;gap:3px;min-width:0;}
-.sennet-multi-status strong{font-weight:700;font-size:14px;color:#503e2b;}
-.sennet-multi-status small{font-size:12px;color:#69563f;line-height:1.4;}
-.sennet-online-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
-.sennet-online-card{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0;
+.seneternal-play-together{display:flex;flex-direction:column;gap:14px;padding-bottom:18px;}
+.seneternal-play-together .reader-heading{margin:0 0 2px;}
+.seneternal-play-together .reader-heading h2{font-size:clamp(27px,3vw,36px);margin:0 0 4px;}
+.seneternal-play-together .reader-heading p{margin:0;line-height:1.5;}
+.seneternal-multi-status{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #b9a17b87;border-radius:10px;background:linear-gradient(100deg,#f9edd3,#f1dfbf70);}
+.seneternal-multi-status-led{display:block;flex-shrink:0;height:11px;width:11px;border-radius:50%;border:2px solid #fff8;box-shadow:0 0 0 3px #947a5b35;background:#ad8b50;}
+.seneternal-multi-status-led.online{background:#4d8e64;}
+.seneternal-multi-status-led.waiting{background:#cfab55;}
+.seneternal-multi-status-led.missing{background:#ad7360;}
+.seneternal-multi-status>div{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.seneternal-multi-status strong{font-weight:700;font-size:14px;color:#503e2b;}
+.seneternal-multi-status small{font-size:12px;color:#69563f;line-height:1.4;}
+.seneternal-online-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.seneternal-online-card{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0;
   background:#faf0d8b8;border:1px solid #cab187a6;border-radius:12px;
   box-shadow:0 3px 8px #503d2312;padding:15px 14px;}
-.sennet-online-card-mark{height:35px;width:35px;display:grid;place-items:center;color:#76562b;
+.seneternal-online-card-mark{height:35px;width:35px;display:grid;place-items:center;color:#76562b;
   border-radius:50%;background:#f0dfb7;border:1px solid #d3b882;}
-.sennet-online-card strong{font-size:16px;color:#453323;}
-.sennet-online-card p{font-size:12px;line-height:1.45;margin:0;color:#695742;min-height:44px;}
-.sennet-online-card input{width:100%;max-width:100%;min-width:0;min-height:37px;padding:8px 10px;
+.seneternal-online-card strong{font-size:16px;color:#453323;}
+.seneternal-online-card p{font-size:12px;line-height:1.45;margin:0;color:#695742;min-height:44px;}
+.seneternal-online-card input{width:100%;max-width:100%;min-width:0;min-height:37px;padding:8px 10px;
   background:#fffaec;border:1px solid #c9b18c;color:#513e29;border-radius:6px;font-size:12px;}
-.sennet-online-card button{max-width:100%;min-height:37px;border-radius:7px;
+.seneternal-online-card button{max-width:100%;min-height:37px;border-radius:7px;
   padding:7px 10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;
   font-weight:700;font-size:12px;margin-top:auto;white-space:normal;}
-.sennet-online-current,.sennet-saved-rooms{display:flex;flex-direction:column;gap:10px;
+.seneternal-online-current,.seneternal-saved-rooms{display:flex;flex-direction:column;gap:10px;
   padding:12px 14px;border:1px solid #c8b28e;border-radius:10px;background:#fff5d9a8;}
-.sennet-online-current-header{display:flex;align-items:center;justify-content:space-between;gap:10px;
+.seneternal-online-current-header{display:flex;align-items:center;justify-content:space-between;gap:10px;
   font-size:14px;color:#57432b;flex-wrap:wrap;}
-.sennet-online-current-header span{font-family:monospace;font-size:12px;word-break:break-all;}
-.sennet-online-current .tool-buttons{display:flex;flex-wrap:wrap;gap:8px;}
-.sennet-online-current .tool-buttons button{font-size:12px;padding:7px 10px;display:flex;gap:7px;align-items:center;}
-.sennet-online-current>small{font-size:11px;line-height:1.5;}
-.sennet-saved-rooms h3{font-size:17px;margin:0;color:#503924;}
-.sennet-hosting-panel{border:1px solid #c0a983;border-radius:10px;background:rgba(255,246,222,.64);overflow:hidden;}
-.sennet-hosting-panel>summary{display:flex;align-items:center;gap:8px;list-style:none;padding:12px 14px;
+.seneternal-online-current-header span{font-family:monospace;font-size:12px;word-break:break-all;}
+.seneternal-online-current .tool-buttons{display:flex;flex-wrap:wrap;gap:8px;}
+.seneternal-online-current .tool-buttons button{font-size:12px;padding:7px 10px;display:flex;gap:7px;align-items:center;}
+.seneternal-online-current>small{font-size:11px;line-height:1.5;}
+.seneternal-saved-rooms h3{font-size:17px;margin:0;color:#503924;}
+.seneternal-hosting-panel{border:1px solid #c0a983;border-radius:10px;background:rgba(255,246,222,.64);overflow:hidden;}
+.seneternal-hosting-panel>summary{display:flex;align-items:center;gap:8px;list-style:none;padding:12px 14px;
   color:#5b452b;font-size:14px;font-weight:700;cursor:pointer;}
-.sennet-hosting-panel>summary::-webkit-details-marker{display:none;}
-.sennet-hosting-panel>summary:after{content:'⌄';font-size:17px;margin-left:auto;transform:rotate(0deg);transition:transform .15s;}
-.sennet-hosting-panel[open]>summary:after{transform:rotate(180deg);}
-.sennet-hosting-panel>summary small{display:block;font-size:10px;font-weight:400;opacity:.75;margin-left:auto;text-align:right;}
-.sennet-hosting-panel[open]>summary{border-bottom:1px solid #d1b98b;}
-.sennet-hosting-body{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:14px;}
-.sennet-hosting-body p{font-size:12px;line-height:1.6;margin:0;}
-.sennet-hosting-body>small{font-size:11px;line-height:1.5;}
-.sennet-hosting-body label{width:100%;font-size:12px;font-weight:700;}
-.sennet-hosting-body label input{width:100%;min-width:0;margin-top:6px;padding:9px;font-weight:400;background:#fffaf0;
+.seneternal-hosting-panel>summary::-webkit-details-marker{display:none;}
+.seneternal-hosting-panel>summary:after{content:'⌄';font-size:17px;margin-left:auto;transform:rotate(0deg);transition:transform .15s;}
+.seneternal-hosting-panel[open]>summary:after{transform:rotate(180deg);}
+.seneternal-hosting-panel>summary small{display:block;font-size:10px;font-weight:400;opacity:.75;margin-left:auto;text-align:right;}
+.seneternal-hosting-panel[open]>summary{border-bottom:1px solid #d1b98b;}
+.seneternal-hosting-body{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:14px;}
+.seneternal-hosting-body p{font-size:12px;line-height:1.6;margin:0;}
+.seneternal-hosting-body>small{font-size:11px;line-height:1.5;}
+.seneternal-hosting-body label{width:100%;font-size:12px;font-weight:700;}
+.seneternal-hosting-body label input{width:100%;min-width:0;margin-top:6px;padding:9px;font-weight:400;background:#fffaf0;
   border:1px solid #baa37a;border-radius:5px;font-size:12px;}
-.sennet-hosting-deploy{display:flex;align-items:center;gap:8px;border:1px solid #bba06a;
+.seneternal-hosting-deploy{display:flex;align-items:center;gap:8px;border:1px solid #bba06a;
   border-radius:7px;background:#e8d5aa;padding:10px 12px;font-size:13px;color:#4d3b2b;
   text-decoration:none;font-weight:700;}
-.sennet-hosting-deploy:hover{background:#d9bc80;}
-.sennet-hosting-body>button{font-size:12px;display:flex;gap:8px;align-items:center;}
-.sennet-hosting-body>button:disabled{opacity:.5;cursor:not-allowed;}
-.sennet-hosting-ok{display:flex;gap:5px;align-items:center;color:#26633a;}
-.sennet-hosting-error{color:#9b4e39;}
+.seneternal-hosting-deploy:hover{background:#d9bc80;}
+.seneternal-hosting-body>button{font-size:12px;display:flex;gap:8px;align-items:center;}
+.seneternal-hosting-body>button:disabled{opacity:.5;cursor:not-allowed;}
+.seneternal-hosting-ok{display:flex;gap:5px;align-items:center;color:#26633a;}
+.seneternal-hosting-error{color:#9b4e39;}
 @media(max-width:600px){
-  .sennet-online-cards{grid-template-columns:1fr;}
-  .sennet-online-card{padding:12px;gap:7px;}
-  .sennet-online-card p{min-height:0;}
-  .sennet-online-card button{width:100%;}
-  .sennet-hosting-panel>summary small{display:none;}
+  .seneternal-online-cards{grid-template-columns:1fr;}
+  .seneternal-online-card{padding:12px;gap:7px;}
+  .seneternal-online-card p{min-height:0;}
+  .seneternal-online-card button{width:100%;}
+  .seneternal-hosting-panel>summary small{display:none;}
 }
 
 
@@ -2707,13 +2707,13 @@ body>.reader-backdrop{
 /* Restore the original 240px-wide, 30px-high screen box and its
    four-column layout (Undo | LCD | optional Roll | Redo). Keep the
    requested 10% LCD text legibility without enlarging its enclosure. */
-.pixi-host .sennet-action-lcd-display{
+.pixi-host .seneternal-action-lcd-display{
   font-size:12.1px;line-height:1.24;
 }
-.pixi-host .sennet-action-lcd-roll{font-size:110%;}
-.pixi-host .sennet-player-tag-anchor .player-hub-number{font-size:12.1px;}
-.pixi-host .sennet-player-tag-anchor .player-hub-name{font-size:16.5px;}
-.pixi-host .sennet-player-tag-anchor .player-hub-utilities button{font-size:110%;}
+.pixi-host .seneternal-action-lcd-roll{font-size:110%;}
+.pixi-host .seneternal-player-tag-anchor .player-hub-number{font-size:12.1px;}
+.pixi-host .seneternal-player-tag-anchor .player-hub-name{font-size:16.5px;}
+.pixi-host .seneternal-player-tag-anchor .player-hub-utilities button{font-size:110%;}
 .player-hub .book-title,.book-cover .book-title{
   color:#f8e6af;text-shadow:0 1px 4px #070d0bdc,0 0 8px #f2d28b8a;
   font-weight:700;letter-spacing:.03em;
@@ -2726,7 +2726,7 @@ body>.reader-backdrop{
 /* Drawer inscriptions ride within each source coin's *own* metal-art
    overlay. They share its transform, clipping and paint order rather than
    floating in Pixi's unrelated text layer. */
-.pixi-host>.sennet-coin-above-card .sennet-drawer-coin-caption{
+.pixi-host>.seneternal-coin-above-card .seneternal-drawer-coin-caption{
   position:absolute;
   /* Beneath the 36px face, never inside or behind its center number. */
   left:50%;top:44px;
@@ -2745,13 +2745,13 @@ body>.reader-backdrop{
 
 /* Other overlays (dice, book and coins) retain their existing
    behavior. Radial actions are magnified only in their own SVG. */
-.sennet-dice-hover-top-layer,
-.sennet-book-hover-top-layer,
-.sennet-coin-hover-top-layer{
+.seneternal-dice-hover-top-layer,
+.seneternal-book-hover-top-layer,
+.seneternal-coin-hover-top-layer{
  z-index:2147483647!important;
  pointer-events:none!important;
 }
-.sennet-coin-above-card.sennet-coin-hover-top-layer{
+.seneternal-coin-above-card.seneternal-coin-hover-top-layer{
  position:fixed!important;
  left:0;top:0;width:36px;height:36px;
  transform-origin:0 0;
@@ -2760,7 +2760,7 @@ body>.reader-backdrop{
  filter:drop-shadow(0 7px 10px #000c);
  isolation:isolate;
 }
-.sennet-book-hover-top-layer{
+.seneternal-book-hover-top-layer{
  position:fixed!important;
  left:0;top:0;
  width:0;height:0;
@@ -2768,23 +2768,23 @@ body>.reader-backdrop{
  filter:drop-shadow(0 8px 14px #000b);
  isolation:isolate;
 }
-.sennet-book-hover-top-layer .table-book{
+.seneternal-book-hover-top-layer .table-book{
  pointer-events:none!important;
  overflow:visible!important;
 }
 
 /* In the initial Eye view, the opponent's small Sword/Shield controls
    establish the exact visual diameter for this session. The mount sets
-   --sennet-control-size ONCE; every count badge inherits it and never
+   --seneternal-control-size ONCE; every count badge inherits it and never
    scales with camera zoom, card scale, or opponent grid transforms. */
-.sennet-stack-count{
+.seneternal-stack-count{
  position:absolute;z-index:125;
- width:var(--sennet-control-size,16px)!important;
- height:var(--sennet-control-size,16px)!important;
- min-width:var(--sennet-control-size,16px)!important;
- min-height:var(--sennet-control-size,16px)!important;
- max-width:var(--sennet-control-size,16px)!important;
- max-height:var(--sennet-control-size,16px)!important;
+ width:var(--seneternal-control-size,16px)!important;
+ height:var(--seneternal-control-size,16px)!important;
+ min-width:var(--seneternal-control-size,16px)!important;
+ min-height:var(--seneternal-control-size,16px)!important;
+ max-width:var(--seneternal-control-size,16px)!important;
+ max-height:var(--seneternal-control-size,16px)!important;
  display:grid;place-items:center;transform:translate(-50%,-50%)!important;
  transform-origin:center center;flex:none;border:0!important;
  border-radius:50%;padding:0!important;overflow:visible;
@@ -2792,88 +2792,88 @@ body>.reader-backdrop{
  background:transparent!important;box-shadow:none!important;
  color:#fff2cd;font:800 8px/1 'Inter',system-ui,sans-serif;
 }
-.sennet-stack-count svg{
+.seneternal-stack-count svg{
  display:block;
- width:var(--sennet-control-size,16px)!important;
- height:var(--sennet-control-size,16px)!important;
- min-width:var(--sennet-control-size,16px)!important;
- min-height:var(--sennet-control-size,16px)!important;
- max-width:var(--sennet-control-size,16px)!important;
- max-height:var(--sennet-control-size,16px)!important;
+ width:var(--seneternal-control-size,16px)!important;
+ height:var(--seneternal-control-size,16px)!important;
+ min-width:var(--seneternal-control-size,16px)!important;
+ min-height:var(--seneternal-control-size,16px)!important;
+ max-width:var(--seneternal-control-size,16px)!important;
+ max-height:var(--seneternal-control-size,16px)!important;
  pointer-events:none;overflow:visible;
  filter:drop-shadow(0 1px 1px #0008);
 }
-.sennet-stack-count:hover,.sennet-stack-count:focus-visible{
+.seneternal-stack-count:hover,.seneternal-stack-count:focus-visible{
  outline:2px solid #f4dc9e;outline-offset:2px;
  filter:brightness(1.12);
 }
-.sennet-stack-count.is-held svg{
+.seneternal-stack-count.is-held svg{
  filter:drop-shadow(0 0 3px #b98aff) drop-shadow(0 2px 2px #0008);
 }
-.sennet-full-card-peek{
+.seneternal-full-card-peek{
  position:absolute;z-index:1005;inset:0;display:flex;justify-content:center;align-items:center;
  background:#060b10d9;backdrop-filter:blur(6px);cursor:zoom-out;pointer-events:auto;
 }
-.sennet-full-card-peek img,.sennet-full-card-fallback{
+.seneternal-full-card-peek img,.seneternal-full-card-fallback{
  display:block;width:auto;height:auto;max-width:90%;max-height:90%;object-fit:contain;
  border-radius:9px;box-shadow:0 18px 55px #000d;
 }
-.sennet-full-card-fallback{aspect-ratio:62/88;width:min(50vw,57vh);padding:22px;
+.seneternal-full-card-fallback{aspect-ratio:62/88;width:min(50vw,57vh);padding:22px;
  display:grid;place-items:center;background:#203935;border:4px solid #d1b781;
  color:#fff3df;font:700 clamp(18px,3vw,42px)/1.2 'Inter',system-ui;text-align:center}
-.sennet-play00-actions{
+.seneternal-play00-actions{
  position:absolute;z-index:110;left:0;top:0;display:flex;align-items:center;gap:4px;
  transform:translate3d(var(--play00-x,0),var(--play00-y,0),0);
  pointer-events:auto;max-width:85vw;overflow:visible;
 }
-.sennet-play00-actions button{
+.seneternal-play00-actions button{
  display:grid;place-items:center;flex:none;width:30px;height:30px;
  padding:0;border:2px solid #ad88cf;border-radius:50%;cursor:pointer;
  background:radial-gradient(circle at 30% 20%,#694aa0,#2c204e 72%);
  color:#fff;box-shadow:0 2px 5px #000a;font:700 13px/1 system-ui;
 }
-.sennet-play00-actions button:hover,.sennet-play00-actions button:focus-visible{
+.seneternal-play00-actions button:hover,.seneternal-play00-actions button:focus-visible{
  background:#67409b;outline:2px solid #c8a5fa;outline-offset:1px;
 }
-.sennet-play00-actions button:disabled{opacity:.48;cursor:default}
+.seneternal-play00-actions button:disabled{opacity:.48;cursor:default}
 
 /* Real shuffle feedback: three cards riffle apart and settle back together. */
-.sennet-shuffle-fx{
+.seneternal-shuffle-fx{
  position:absolute;z-index:121;pointer-events:none;width:70px;height:96px;
- transform:translate(-50%,-50%);animation:sennet-shuffle-flash .67s ease-out both;
+ transform:translate(-50%,-50%);animation:seneternal-shuffle-flash .67s ease-out both;
 }
-.sennet-shuffle-fx::before,.sennet-shuffle-fx::after{
+.seneternal-shuffle-fx::before,.seneternal-shuffle-fx::after{
  content:'';position:absolute;inset:3px 7px;border-radius:5px;
  background:linear-gradient(130deg,#f5d6a0,#7b60ab 45%,#2b254a);
  border:2px solid #f5dfae;box-shadow:0 5px 16px #000a;
 }
-.sennet-shuffle-fx::before{animation:sennet-riffle-left .62s cubic-bezier(.3,.7,.2,1) both}
-.sennet-shuffle-fx::after{animation:sennet-riffle-right .62s cubic-bezier(.3,.7,.2,1) both}
-@keyframes sennet-riffle-left{
+.seneternal-shuffle-fx::before{animation:seneternal-riffle-left .62s cubic-bezier(.3,.7,.2,1) both}
+.seneternal-shuffle-fx::after{animation:seneternal-riffle-right .62s cubic-bezier(.3,.7,.2,1) both}
+@keyframes seneternal-riffle-left{
  0%{opacity:0;transform:translate(0,0) rotate(0)}
  25%{opacity:1;transform:translate(-21px,-5px) rotate(-16deg)}
  60%{opacity:1;transform:translate(12px,-4px) rotate(14deg)}
  100%{opacity:0;transform:translate(0,0) rotate(0)}
 }
-@keyframes sennet-riffle-right{
+@keyframes seneternal-riffle-right{
  0%{opacity:0;transform:translate(0,0) rotate(0)}
  25%{opacity:1;transform:translate(21px,3px) rotate(16deg)}
  60%{opacity:1;transform:translate(-12px,4px) rotate(-12deg)}
  100%{opacity:0;transform:translate(0,0) rotate(0)}
 }
-@keyframes sennet-shuffle-flash{0%{opacity:.35}15%{opacity:1}78%{opacity:1}100%{opacity:0}}
+@keyframes seneternal-shuffle-flash{0%{opacity:.35}15%{opacity:1}78%{opacity:1}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){
- .sennet-shuffle-fx,.sennet-shuffle-fx::before,.sennet-shuffle-fx::after{animation-duration:.15s}
+ .seneternal-shuffle-fx,.seneternal-shuffle-fx::before,.seneternal-shuffle-fx::after{animation-duration:.15s}
 }
 
 /* Arena / Tabletop Simulator inspired player-facing private hand.
    Its cards stay in UI space, independent of canvas zoom and camera pan. */
-.sennet-held-hand{
+.seneternal-held-hand{
  position:absolute;z-index:80;left:0;right:0;bottom:0;
  height:clamp(126px,23dvh,205px);pointer-events:none;
  user-select:none;contain:layout;
 }
-.sennet-held-card{
+.seneternal-held-card{
  position:absolute;bottom:-38px;
  width:clamp(82px,10.5vw,116px);height:clamp(116px,14.9vw,164px);
  border:0;border-radius:9px;padding:0;overflow:hidden;
@@ -2882,46 +2882,46 @@ body>.reader-backdrop{
  cursor:grab;pointer-events:auto;touch-action:none;
  transition:bottom .14s ease,filter .14s ease,box-shadow .14s ease;
 }
-.sennet-held-card img{
+.seneternal-held-card img{
  width:100%;height:100%;object-fit:fill;display:block;
  pointer-events:none;user-select:none;
 }
-.sennet-held-card-placeholder{
+.seneternal-held-card-placeholder{
  width:100%;height:100%;display:grid;place-items:center;
  padding:10px;background:linear-gradient(140deg,#365c52,#162f31);
  color:#efdbb1;font:700 12px/1.4 system-ui;text-align:center;
  pointer-events:none;overflow-wrap:anywhere;
 }
-.sennet-held-card:hover,.sennet-held-card:focus-visible{
+.seneternal-held-card:hover,.seneternal-held-card:focus-visible{
  bottom:-5px;z-index:200!important;filter:brightness(1.12);
  box-shadow:0 0 0 3px #f5dca4,0 6px 28px #000e;
  outline:none;
 }
-.sennet-held-card.is-selected{box-shadow:0 0 0 3px #b789fa,0 5px 14px #000c}
-.sennet-held-card.is-dragging{opacity:.45}
-.sennet-held-hand-count{
+.seneternal-held-card.is-selected{box-shadow:0 0 0 3px #b789fa,0 5px 14px #000c}
+.seneternal-held-card.is-dragging{opacity:.45}
+.seneternal-held-hand-count{
  position:absolute;left:50%;bottom:3px;transform:translateX(-50%);
  padding:2px 8px;border:1px solid #87755380;border-radius:10px;
  background:#102322bb;color:#f5e6bf;
  font:700 10px/1.1 system-ui;pointer-events:none;
 }
-.sennet-held-drag-ghost{
+.seneternal-held-drag-ghost{
  position:absolute;z-index:1003;pointer-events:none;
  width:105px;height:149px;transform:translate(-50%,-50%);
  border:2px solid #ecd5ac;border-radius:8px;overflow:hidden;
  background:#1e3935;box-shadow:0 11px 24px #000c;
 }
-.sennet-held-drag-ghost img{width:100%;height:100%;object-fit:fill}
-.sennet-held-drag-ghost span{
+.seneternal-held-drag-ghost img{width:100%;height:100%;object-fit:fill}
+.seneternal-held-drag-ghost span{
  display:grid;place-items:center;height:100%;padding:10px;
  font:700 13px/1.3 system-ui;text-align:center;
 }
 @media(max-height:570px){
- .sennet-held-hand{height:126px}
- .sennet-held-card{width:86px;height:122px;bottom:-34px}
- .sennet-held-card:hover,.sennet-held-card:focus-visible{bottom:-6px}
- .sennet-held-drag-ghost{width:82px;height:116px}
+ .seneternal-held-hand{height:126px}
+ .seneternal-held-card{width:86px;height:122px;bottom:-34px}
+ .seneternal-held-card:hover,.seneternal-held-card:focus-visible{bottom:-6px}
+ .seneternal-held-drag-ghost{width:82px;height:116px}
 }
 @media(prefers-reduced-motion:reduce){
- .sennet-held-card{transition:none}
+ .seneternal-held-card{transition:none}
 }

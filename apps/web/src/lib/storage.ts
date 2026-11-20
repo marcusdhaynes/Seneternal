@@ -1,5 +1,5 @@
-import {parseGamePack,type GamePack} from '@sennet/core';
-const KEY='sennet.packs.v1';
+import {parseGamePack,type GamePack} from '@seneternal/core';
+const KEY='seneternal.packs.v1';
 export function getPacks():GamePack[]{try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch{return [];}}
 export function rememberPack(pack:GamePack){const others=getPacks().filter(p=>p.id!==pack.id);localStorage.setItem(KEY,JSON.stringify([pack,...others].slice(0,30)));}
 export async function importPackUrl(raw:string):Promise<GamePack>{
@@ -22,7 +22,7 @@ export function downloadText(name:string,text:string,mime='application/json'){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 /** Upload directly from the player's browser to their own bucket/provider using an
- * existing short-lived presigned PUT URL; the Sennet server never handles file bytes. */
+ * existing short-lived presigned PUT URL; the Seneternal server never handles file bytes. */
 export async function directUpload(file:File,signedPutUrl:string):Promise<void>{
   const u=new URL(signedPutUrl);
   if(u.protocol!=='https:' && !['localhost','127.0.0.1'].includes(u.hostname))throw new Error('Signed destination must use HTTPS');

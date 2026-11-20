@@ -3,15 +3,15 @@ import {createServer,type IncomingMessage,type ServerResponse} from 'node:http';
 import {mkdir,readFile,rename,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {createHash,randomInt,randomUUID} from 'node:crypto';
-import {applyCommand,createGame,projectForActor,sanitizeObject,normalizePlaymatAppearance,type SharedAppearance,type Command,type EventRecord,type GameKind,type GameState,type Player} from '@sennet/core';
+import {applyCommand,createGame,projectForActor,sanitizeObject,normalizePlaymatAppearance,type SharedAppearance,type Command,type EventRecord,type GameKind,type GameState,type Player} from '@seneternal/core';
 const PORT=Number(process.env.PORT||8787);
-const DATA_DIR=process.env.SENNET_DATA_DIR||'.sennet-server';
+const DATA_DIR=process.env.SENETERNAL_DATA_DIR||'.seneternal-server';
 const MAX_MESSAGE=1024*1024;
 type RoomEntry={state:GameState;history:EventRecord[];seen:Set<string>;sockets:Set<WebSocket>;owner:string;identities:Record<string,string>};
 const rooms=new Map<string,RoomEntry>();
 const loadingRooms=new Map<string,Promise<RoomEntry>>();
 const sessions=new WeakMap<WebSocket,{room:string;actor:string}>();
-// Riot keys are NEVER sent to browsers. Sennet's optional relay fetches
+// Riot keys are NEVER sent to browsers. Seneternal's optional relay fetches
 // authorized content once per day, then serves a short-lived public cache.
 // Riftbound cannot operate before Riot approves this exact application.
 let riftboundCache:{expires:number;data:unknown}|null=null;
@@ -19,8 +19,8 @@ let riftboundPending:Promise<unknown>|null=null;
 async function authorizedRiftbound(){
   if(riftboundCache&&riftboundCache.expires>Date.now())return riftboundCache.data;
   if(riftboundPending)return riftboundPending;
-  const key=process.env.SENNET_RIOT_API_KEY;
-  if(!key)throw new Error('Riot approval / SENNET_RIOT_API_KEY required');
+  const key=process.env.SENETERNAL_RIOT_API_KEY;
+  if(!key)throw new Error('Riot approval / SENETERNAL_RIOT_API_KEY required');
   riftboundPending=(async()=>{
     const response=await fetch('https://americas.api.riotgames.com/riftbound/content/v1/contents?locale=en',{
       headers:{'X-Riot-Token':key,Accept:'application/json'},
@@ -52,7 +52,7 @@ const server=createServer((req,res)=>{
       res.end(JSON.stringify(data));
     }).catch(error=>{
       res.setHeader('Cache-Control','no-store');
-      res.writeHead(process.env.SENNET_RIOT_API_KEY?502:503);
+      res.writeHead(process.env.SENETERNAL_RIOT_API_KEY?502:503);
       res.end(JSON.stringify({error:error instanceof Error?error.message:'Riot API unavailable'}));
     });
     return;
@@ -310,4 +310,4 @@ wss.on('connection',ws=>{
     updatePresence(s.room);broadcast(s.room,{type:'presence',players:entry.state.players});persist(s.room);
   });
 });
-server.listen(PORT,()=>console.log(`Sennet relay: http://localhost:${PORT} — gameplay logs only; no uploaded files`));
+server.listen(PORT,()=>console.log(`Seneternal relay: http://localhost:${PORT} — gameplay logs only; no uploaded files`));

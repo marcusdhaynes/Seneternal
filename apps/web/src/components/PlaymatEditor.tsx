@@ -1,7 +1,7 @@
 import {useId,useState,type Dispatch,type SetStateAction} from 'react';
 import {type PlaymatAppearance,type PlaymatSectionStyle,type PlaymatTextureKind,
   defaultPlaymatAppearance,playmatSectionIndex,tcgMatCells,tcgMatLocal,tcgMatRegions,
-  tcgRegionLabel,TCG_ROW_COLORS,TCG_MAT_WIDTH,TCG_MAT_HEIGHT} from '@sennet/core';
+  tcgRegionLabel,TCG_ROW_COLORS,TCG_MAT_WIDTH,TCG_MAT_HEIGHT} from '@seneternal/core';
 
 interface Props {
   appearance:PlaymatAppearance;

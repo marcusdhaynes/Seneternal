@@ -1,12 +1,12 @@
 [package]
-name = "sennet"
+name = "seneternal"
 version = "0.1.0"
-description = "Sennet - universal 2.5D tabletop"
-authors = ["Sennet contributors"]
+description = "Seneternal - universal 2.5D tabletop"
+authors = ["Seneternal contributors"]
 edition = "2021"
 
 [lib]
-name = "sennet_lib"
+name = "seneternal_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

@@ -15,4 +15,4 @@ export async function runLua(script:string,context:Record<string,unknown>={},max
     worker.postMessage({script,context});
   });
 }
-export const SAMPLE_LUA=`-- Sennet Lua sandbox example\n-- emit(type, JSON payload). The host validates every proposed action.\nemit('ADD', '{"object":{"id":"lua-token","kind":"token","name":"Lua summoned","x":500,"y":330,"color":"#e0bc7e"}}')`;
+export const SAMPLE_LUA=`-- Seneternal Lua sandbox example\n-- emit(type, JSON payload). The host validates every proposed action.\nemit('ADD', '{"object":{"id":"lua-token","kind":"token","name":"Lua summoned","x":500,"y":330,"color":"#e0bc7e"}}')`;

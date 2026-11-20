@@ -1,5 +1,5 @@
 import {applyCommand,replay,tcgMatLocal,tcgMatRegions,tcgRegionLabel,TCG_MAT,
-  type TcgMatRegion,type EventRecord,type GameState,type TableObject} from '@sennet/core';
+  type TcgMatRegion,type EventRecord,type GameState,type TableObject} from '@seneternal/core';
 
 /** Human-readable audit rows are presentation only. The authoritative replay
  * always uses initial + ordered EventRecord commands, never these summaries. */
@@ -7,7 +7,7 @@ export interface ReceiptRow {
   id:string;at:number;type:string;location:string;description:string;
   commandId?:string;
 }
-export const RECEIPT_SCHEMA='sennet.replay/2' as const;
+export const RECEIPT_SCHEMA='seneternal.replay/2' as const;
 
 const pad=(n:number,w=2)=>String(n).padStart(w,'0');
 export function receiptTimestamp(at:number):{date:string;time:string}{
@@ -238,8 +238,8 @@ function validRecord(value:unknown):value is EventRecord{
 export function parseReplayFile(raw:unknown):ReplayFile{
   if(!raw||typeof raw!=='object')throw Error('Invalid game receipt.');
   const v=raw as Partial<ReplayFile>&{schema?:string};
-  if(v.schema!==RECEIPT_SCHEMA&&v.schema!=='sennet.replay/1')
-    throw Error('Not a Sennet game receipt or replay file.');
+  if(v.schema!==RECEIPT_SCHEMA&&v.schema!=='seneternal.replay/1')
+    throw Error('Not a Seneternal game receipt or replay file.');
   if(!validState(v.initial)||!Array.isArray(v.history)||
     !v.history.every(validRecord)||v.history.length>100000)
     throw Error('The replay has an invalid initial state or action history.');

@@ -1,4 +1,4 @@
-import {VIEW_BUTTON_CASTLE_OFFSET,VIEW_BUTTON_HIT_RADIUS} from '@sennet/core';
+import {VIEW_BUTTON_CASTLE_OFFSET,VIEW_BUTTON_HIT_RADIUS} from '@seneternal/core';
 
 /** Accessible Eye target in playmat-local units.
  * An ordinary 19-unit circle shrinks to only a few pixels at overview zoom.

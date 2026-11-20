@@ -17,7 +17,7 @@ export type DeckSection=string;
  * individual card entry does not supply a custom back image. */
 export function tcgCardBack(game:TcgId):string{
  const images:Record<TcgId,string>={
-  // Actual card-back images, rather than the generic Sennet S glyph.
+  // Actual card-back images, rather than the generic Seneternal S glyph.
   // Use each game's card-back image as published on its encyclopedia
   // page. Browser <img> renders these redirects without WebGL CORS.
   lorcana:'https://en.wikipedia.org/wiki/Special:Redirect/file/Lorcana_Card_Back.png',
@@ -165,7 +165,7 @@ function unique(cards:CatalogCard[]){const seen=new Set<string>();return cards.f
 });}
 const cacheMemory=new Map<TcgId,CatalogCard[]>();
 const CACHE_AGE=24*60*60*1000;
-const DB='sennet-tcg-catalog-v1';
+const DB='seneternal-tcg-catalog-v1';
 let dbPromise:Promise<IDBDatabase|null>|null=null;
 function database():Promise<IDBDatabase|null>{
  if(typeof indexedDB==='undefined')return Promise.resolve(null);
@@ -450,12 +450,12 @@ async function fetchCatalog(game:TcgId,onUpdate:(v:CatalogUpdate)=>void,signal:A
  }
  // Riot requires app-specific approval and server-held credentials.
  // This URL must be a trusted configured server endpoint, NOT a client key.
- let server:string=localStorage.getItem('sennet.tcg.riftbound.endpoint.v1')||import.meta.env.VITE_SENNET_RIFTBOUND_CATALOG_URL||'';
+ let server:string=localStorage.getItem('seneternal.tcg.riftbound.endpoint.v1')||import.meta.env.VITE_SENETERNAL_RIFTBOUND_CATALOG_URL||'';
  if(!server){
-  // A user who already configured their Sennet WSS relay should not
+  // A user who already configured their Seneternal WSS relay should not
   // need a second site build merely to enable the approved catalogue.
   try{
-   const relay=localStorage.getItem('sennet.ws')||import.meta.env.VITE_SENNET_WS_URL||'';
+   const relay=localStorage.getItem('seneternal.ws')||import.meta.env.VITE_SENETERNAL_WS_URL||'';
    if(relay){
     const source=new URL(relay);
     if(source.protocol==='wss:'||source.protocol==='ws:'){
@@ -466,7 +466,7 @@ async function fetchCatalog(game:TcgId,onUpdate:(v:CatalogUpdate)=>void,signal:A
    }
   }catch{/* No configured relay. */}
  }
- if(!server)throw new Error('Riot approval required. Riftbound cards can load after Riot approves Sennet and an authorized catalogue URL is connected under TCG Settings → Decks & providers.');
+ if(!server)throw new Error('Riot approval required. Riftbound cards can load after Riot approves Seneternal and an authorized catalogue URL is connected under TCG Settings → Decks & providers.');
  const address=new URL(server,window.location.origin);
  if(address.protocol!=='https:'&&address.hostname!=='localhost')throw Error('Secure HTTPS Riftbound endpoint required');
  const result=rec(await json(address.href,signal));

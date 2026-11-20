@@ -9,7 +9,7 @@ import {createDie3DModel,radiusFor} from './Dice3DGeometry';
 import {diceToCssTransform,DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET} from './diceCoordinates';
 import type {DiceThemeId} from './diceThemes';
 import {looseDieOpacity} from './diceCoordinates';
-import {TCG_MAT_WIDTH} from '@sennet/core';
+import {TCG_MAT_WIDTH} from '@seneternal/core';
 
 export interface StaticDiePlacement {
   id:string;
@@ -58,7 +58,7 @@ export function createStaticDice3D(
   renderer.setClearColor(0,0);
   // Independent 3D drawer solids respect the moving Pixi playmat edge.
   renderer.localClippingEnabled=true;
-  renderer.domElement.className='sennet-static-dice-3d';
+  renderer.domElement.className='seneternal-static-dice-3d';
   renderer.domElement.style.cssText='position:absolute;inset:0;width:100%;height:100%;'+
     'pointer-events:none;z-index:88;display:block';
   host.appendChild(renderer.domElement);
@@ -155,7 +155,7 @@ export function createStaticDice3D(
     });
     topRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
     topRenderer.setClearColor(0,0);
-    topRenderer.domElement.className='sennet-dice-hover-top-layer';
+    topRenderer.domElement.className='seneternal-dice-hover-top-layer';
     topRenderer.domElement.style.cssText=[
       'position:fixed','left:0','top:0','width:128px','height:128px',
       'z-index:2147483647','pointer-events:none','user-select:none',
@@ -347,7 +347,7 @@ export function createStaticDice3D(
           visual.result=document.createElement('span');
           host.appendChild(visual.result);
         }
-        visual.result.className='sennet-dice-source-count';
+        visual.result.className='seneternal-dice-source-count';
         visual.result.textContent='×'+String(e.quantity);
       }else{
         visual.result?.remove();

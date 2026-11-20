@@ -1,4 +1,4 @@
-# SENNET
+# SENETERNAL
 
 **Your tabletop. Your rules.** A GitHub-first, portable 2.5D tabletop simulator foundation built with TypeScript, React, Vite, PixiJS 8, Lua/Wasmoon and Tauri 2.
 
@@ -21,22 +21,22 @@ Open **http://localhost:5173**. Pick Sandbox, Board Games, TCG, RPG, Wargame, Di
 
 Once a persistent relay is hosted, multiplayer is **one click to make a table, one link to join it**:
 
-1. Choose **Play together → New table**. Sennet allocates an unguessable room code and a saved seat.
+1. Choose **Play together → New table**. Seneternal allocates an unguessable room code and a saved seat.
 2. Choose **Invite friends**. The link includes both the room and relay address, so invitees join automatically without configuring a server.
 3. Leave whenever you like. Reconnects happen automatically after network interruptions. Reopen **Play together → Pick up where you left off** to reclaim your saved seat and reload the authoritative room.
 4. Everyone can come and go independently; shared cards, tokens, turns, player assignments and their online/away status live on the relay, not in the host's tab. User-specific playmat preferences remain local to each browser identity.
 
-No user account or password is required for a trusted private playtest. Sennet generates a cryptographically random player secret and retains it in the browser, separate from the public player ID. Do not erase browser storage if you want to reclaim that identity; this is not a replacement for cross-device account login. **A room invitation grants access to the game; share it only with your intended players.**
+No user account or password is required for a trusted private playtest. Seneternal generates a cryptographically random player secret and retains it in the browser, separate from the public player ID. Do not erase browser storage if you want to reclaim that identity; this is not a replacement for cross-device account login. **A room invitation grants access to the game; share it only with your intended players.**
 
 #### Deploy the multiplayer relay on Render (persistent pickup games)
 
 This repository now includes [render.yaml](render.yaml) for a single Node web service **with a persistent disk**, suitable for small, trusted private rooms. Render may charge for the configured compute service and disk.
 
-1. In [Render's Blueprint setup](https://render.com/deploy?repo=https://github.com/marcusdhaynes/Sennet), connect this Sennet repository and review/authorize the plan and disk.
+1. In [Render's Blueprint setup](https://render.com/deploy?repo=https://github.com/marcusdhaynes/Seneternal), connect this Seneternal repository and review/authorize the plan and disk.
 2. After deployment, open your service's `https://<service>.onrender.com/health` endpoint. It should respond with `{"ok":true,...}`.
-3. In Sennet, open **Play Together → Set up online hosting once**, paste the **https://** service address, and choose **Save & test connection**. Sennet converts it to `wss://` and remembers it.
+3. In Seneternal, open **Play Together → Set up online hosting once**, paste the **https://** service address, and choose **Save & test connection**. Seneternal converts it to `wss://` and remembers it.
 4. Choose **Create online table** and copy the invitation link. The other player needs only that link—**no setup**.
-5. Optionally configure GitHub Actions repository variable `SENNET_RELAY_WSS_URL` to the matching `wss://` URL so new visitors can create rooms before receiving any invite.
+5. Optionally configure GitHub Actions repository variable `SENETERNAL_RELAY_WSS_URL` to the matching `wss://` URL so new visitors can create rooms before receiving any invite.
 
 **VPNs:** use TLS on port 443 (`wss://`), with automatic fallback to HTTPS room sync and commands if a VPN, proxy or browser blocks WebSocket upgrades. No inbound port forwarding or WebRTC peer-to-peer connection is required. Some VPNs block both protocols; those cannot be bypassed from browser code.
 
@@ -48,12 +48,12 @@ GitHub Pages cannot host persistent WebSocket connections. The WebSocket server 
 
 ```bash
 npm install
-SENNET_DATA_DIR=/persistent/sennet PORT=8787 npm run start -w @sennet/server
+SENETERNAL_DATA_DIR=/persistent/seneternal PORT=8787 npm run start -w @seneternal/server
 ```
 
-On the server, expose port 8787 through a TLS reverse proxy with a `wss://` endpoint, and provide a durable writable disk for `SENNET_DATA_DIR`. Room JSON is saved atomically after every command and seat change; it is not stored in GitHub Pages or the host browser. A server with ephemeral filesystem **will lose saved pickup games when restarted**. Keep backups, access controls and a retention policy for real deployments.
+On the server, expose port 8787 through a TLS reverse proxy with a `wss://` endpoint, and provide a durable writable disk for `SENETERNAL_DATA_DIR`. Room JSON is saved atomically after every command and seat change; it is not stored in GitHub Pages or the host browser. A server with ephemeral filesystem **will lose saved pickup games when restarted**. Keep backups, access controls and a retention policy for real deployments.
 
-For one-time default configuration across all visitors, set GitHub repository **Settings → Secrets and variables → Actions → Variables** key `SENNET_RELAY_WSS_URL` to the public `wss://` relay URL, then redeploy Pages. Alternatively, enter the relay address once in the Multiplayer settings book: subsequent invites automatically carry it to guests.
+For one-time default configuration across all visitors, set GitHub repository **Settings → Secrets and variables → Actions → Variables** key `SENETERNAL_RELAY_WSS_URL` to the public `wss://` relay URL, then redeploy Pages. Alternatively, enter the relay address once in the Multiplayer settings book: subsequent invites automatically carry it to guests.
 
 The server currently targets **trusted private games**. Public hosting will additionally require room authorization/moderation, robust authentication for cross-device profiles, database-backed scalable room storage, automated backups and operational monitoring. Until a relay is actually deployed, the site remains fully playable offline and the public multiplayer buttons cannot establish online rooms.
 
@@ -64,7 +64,7 @@ npm run dev:server
 npm run dev
 ```
 
-Point Sennet's one-time multiplayer relay setting to `ws://localhost:8787` on `http://localhost:5173`. Start a table, open the invitation link in another browser profile, move pieces, close either client, reopen, and verify the saved seats and shared state. Use `wss://` for the hosted HTTPS site.
+Point Seneternal's one-time multiplayer relay setting to `ws://localhost:8787` on `http://localhost:5173`. Start a table, open the invitation link in another browser profile, move pieces, close either client, reopen, and verify the saved seats and shared state. Use `wss://` for the hosted HTTPS site.
 
 ### Tests and build
 
@@ -77,11 +77,11 @@ npm run preview
 
 `npm run build` generates the static web app at `apps/web/dist/`. GitHub Pages can host this output, but **GitHub Pages cannot host the multiplayer WebSocket service**. The first `npm install` generates `package-lock.json`; commit the lockfile for repeatable deployment.
 
-## Open Sennet on the web
+## Open Seneternal on the web
 
-Your project is hosted at [marcusdhaynes/Sennet](https://github.com/marcusdhaynes/Sennet). The playable URL is **https://marcusdhaynes.github.io/Sennet/**.
+Your project is hosted at [marcusdhaynes/Seneternal](https://github.com/marcusdhaynes/Seneternal). The playable URL is **https://marcusdhaynes.github.io/Seneternal/**.
 
-**One-time setup:** Open [Settings → Pages](https://github.com/marcusdhaynes/Sennet/settings/pages). Under **Build and deployment**, select **GitHub Actions** as the Source. Then open [Deploy Sennet Web](https://github.com/marcusdhaynes/Sennet/actions/workflows/pages.yml), choose **Run workflow** on `main`, and check the deployment result. Future pushes to `main` automatically rebuild and publish Sennet.
+**One-time setup:** Open [Settings → Pages](https://github.com/marcusdhaynes/Seneternal/settings/pages). Under **Build and deployment**, select **GitHub Actions** as the Source. Then open [Deploy Seneternal Web](https://github.com/marcusdhaynes/Seneternal/actions/workflows/pages.yml), choose **Run workflow** on `main`, and check the deployment result. Future pushes to `main` automatically rebuild and publish Seneternal.
 
 GitHub Pages hosts the playable local/offline web interface. Real-time multiplayer requires deploying `apps/server` to a separate HTTPS/WSS service; Pages does not run servers. The starter relay is only suitable for development/testing until its security checklist has been addressed.
 
@@ -105,25 +105,25 @@ IndexedDB caches successful catalogues for 24 hours; artwork is loaded lazily. T
 
 ### Riot Riftbound approval and setup
 
-Riot's policies require an approved application to access official Riftbound card assets and impose additional constraints on digital game tools. Never put your Riot token into GitHub Pages or a public VITE variable. Sennet includes an optional secure endpoint in its Node relay.
+Riot's policies require an approved application to access official Riftbound card assets and impose additional constraints on digital game tools. Never put your Riot token into GitHub Pages or a public VITE variable. Seneternal includes an optional secure endpoint in its Node relay.
 
 1. Obtain Riot approval and an app-specific API key: https://developer.riotgames.com/docs/riftbound
-2. Configure the separate Node relay's secret environment variable **SENNET_RIOT_API_KEY**.
-3. Build the web app with **VITE_SENNET_RIFTBOUND_CATALOG_URL** pointing to https://your-relay.example/api/tcg/riftbound/catalog. This is an endpoint URL, NOT an API token.
+2. Configure the separate Node relay's secret environment variable **SENETERNAL_RIOT_API_KEY**.
+3. Build the web app with **VITE_SENETERNAL_RIFTBOUND_CATALOG_URL** pointing to https://your-relay.example/api/tcg/riftbound/catalog. This is an endpoint URL, NOT an API token.
 
 The relay calls Riot's authorized Riftbound content endpoint server-side and caches the result for 24 hours. Until approval/key configuration, the Riftbound catalogue explicitly reports access unavailable. No unofficial mirror is substituted.
 
 ## Creator-owned asset storage (BYOS)
 
-Sennet never requires creators to upload media into Sennet's own server:
+Seneternal never requires creators to upload media into Seneternal's own server:
 
-- **External game packs:** Creators export a small JSON game manifest and host it anywhere (their own domain, GitHub Pages, R2/S3-compatible object storage with public GET, etc.). Players paste that HTTPS manifest URL into Workshop. Sennet fetches it directly in their browser.
-- **External miniature images:** Creators host sprite frames and paste their HTTPS URLs into Workshop. Sennet dynamically selects the appropriate sprite angle for the player's seat. The heavy images are loaded from the creator's host.
-- **Direct file upload:** Creators provide an HTTPS **presigned PUT URL** created by their own storage provider. Sennet's browser uploads the selected game pack, sprite, ZIP, or `.glb` **directly** to that host. The Sennet relay receives none of the file bytes. Do not paste permanent keys/secrets. Configure the owner's storage for CORS and browser-accessible downloads.
+- **External game packs:** Creators export a small JSON game manifest and host it anywhere (their own domain, GitHub Pages, R2/S3-compatible object storage with public GET, etc.). Players paste that HTTPS manifest URL into Workshop. Seneternal fetches it directly in their browser.
+- **External miniature images:** Creators host sprite frames and paste their HTTPS URLs into Workshop. Seneternal dynamically selects the appropriate sprite angle for the player's seat. The heavy images are loaded from the creator's host.
+- **Direct file upload:** Creators provide an HTTPS **presigned PUT URL** created by their own storage provider. Seneternal's browser uploads the selected game pack, sprite, ZIP, or `.glb` **directly** to that host. The Seneternal relay receives none of the file bytes. Do not paste permanent keys/secrets. Configure the owner's storage for CORS and browser-accessible downloads.
 - **Offline converter:** `tools/model-to-sprites/convert.py` takes a GLB/glTF/OBJ/FBX model into 12/24/36/48 frame transparent PNGs via offline Blender. End users don't render 3D during play. After conversion, upload frames to your own hosting and point the workshop at the image URLs.
 - **Portable formats:** JSON game packs, external asset URLs, and JSON command history, designed to avoid vendor lock-in. An expanded packaging system with metadata signatures, moderated discovery, and version compatibility is planned.
 
-**Availability and cost caveat:** Creators bear hosting/storage/bandwidth responsibilities. Sennet still needs *small* infrastructure for account data, match metadata, event logs and indexes, plus ordinary web hosting and compute. Bad actors and abusive hotlinks need rate limiting/moderation. Player-supplied files cannot be trusted and must be vetted before running in a shared/public game.
+**Availability and cost caveat:** Creators bear hosting/storage/bandwidth responsibilities. Seneternal still needs *small* infrastructure for account data, match metadata, event logs and indexes, plus ordinary web hosting and compute. Bad actors and abusive hotlinks need rate limiting/moderation. Player-supplied files cannot be trusted and must be vetted before running in a shared/public game.
 
 ## Apps and packaging
 
@@ -169,4 +169,4 @@ docs/             Architecture and public-launch requirements
 - Browser-first, light on assets until the player chooses a game.
 - Community-hosted assets so creators retain control over storage and distribution.
 
-Copyright (c) 2026 Sennet. No license has been selected; all rights reserved until the project owner chooses a license.
+Copyright (c) 2026 Seneternal. No license has been selected; all rights reserved until the project owner chooses a license.

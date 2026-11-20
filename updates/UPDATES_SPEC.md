@@ -1,9 +1,9 @@
 # Updates — uniform auto-update spec (all Marcus apps)
 
-Spec version: 1.0 · 2026-11-13 · Repo: marcusdhaynes/Sennet
+Spec version: 1.0 · 2026-11-13 · Repo: marcusdhaynes/Seneternal
 
 ## Flow
-1. The app checks `https://api.github.com/repos/marcusdhaynes/Sennet/releases/latest`.
+1. The app checks `https://api.github.com/repos/marcusdhaynes/Seneternal/releases/latest`.
 2. The release `tag_name` (semver `vX.Y.Z`) is compared with the app's current
    version (see "Current version" below). A strictly newer tag is an update.
 3. When an update exists:

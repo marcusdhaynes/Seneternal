@@ -1,4 +1,4 @@
-import {type Command,type GameState,createId} from '@sennet/core';
+import {type Command,type GameState,createId} from '@seneternal/core';
 /** Explicit, reproducible heuristic bot; not a model or a claim of strategic intelligence. */
 export function choosePseudoBotAction(state:GameState):Command|null{
   const dice=state.objects.find(o=>o.kind==='die'&&!o.locked);

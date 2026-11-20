@@ -4,7 +4,7 @@ Usage:
  blender --background --python tools/model-to-sprites/convert.py -- \
    --model knight.glb --output ./sprites/knight --frames 24 --size 512
 
-No 3D model or runtime 3D dependencies are needed inside Sennet.
+No 3D model or runtime 3D dependencies are needed inside Seneternal.
 """
 import argparse
 import math
@@ -67,5 +67,5 @@ for index in range(options.frames):
   cam.rotation_euler=direction.to_track_quat('-Z','Y').to_euler()
   name=f'frame-{index:02d}.png';scene.render.filepath=str(output/name)
   bpy.ops.render.render(write_still=True);files.append(name)
-(output/'manifest.template.json').write_text(json.dumps({'name':source.stem,'frames':files,'recommended':'Host these frames on your own HTTPS storage, then paste their public URLs into Sennet Workshop.'},indent=2))
+(output/'manifest.template.json').write_text(json.dumps({'name':source.stem,'frames':files,'recommended':'Host these frames on your own HTTPS storage, then paste their public URLs into Seneternal Workshop.'},indent=2))
 print(f'Rendered {len(files)} frames to {output}')

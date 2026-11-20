@@ -1,4 +1,4 @@
-# Sennet implementation status and architecture
+# Seneternal implementation status and architecture
 
 ## Already implemented in this alpha
 
@@ -22,7 +22,7 @@
 - **No production-safe confidential hands.** The relay projects sensitive fields and syncs private deck changes through snapshots, but complete hidden-information noninterference, deck commitments, secret-hand handling and reconnect protocols require dedicated work and tests before competitive use. The no-hidden-info sandbox can be used now.
 - **Lua is experimental.** The worker uses basic standard-library removal and termination, but is *not* sufficient as a security review of hostile scripts. Need verified worker isolation, instruction/memory budget, pack signing, API allowlisting, resource quotas, versioning and server-approved scripting.
 - **Game packs are untrusted data.** Static data is sanitized but image URLs may track players or contain inappropriate material. Add hostname policies, permissions, moderation, size/version limits, CDN proxy/privacy controls as appropriate, content signatures and opt-in execution.
-- **Store policy incomplete.** BYOS only avoids storing large creator content; Sennet still pays for relay compute, event/database storage, signaling, accounts, metadata, abuse control, search and discovery.
+- **Store policy incomplete.** BYOS only avoids storing large creator content; Seneternal still pays for relay compute, event/database storage, signaling, accounts, metadata, abuse control, search and discovery.
 - **Offline-to-online queue/conflict resolution not built.** Offline session and live rooms work separately. Autosync conflicts and idempotent re-join logic are planned.
 - **Client rendering is naive for very large boards.** Scene is recreated after committed actions, with Pixi resource caching. Keyed diffing, culling, atlas/texture budgets and mobile performance profiling needed for hundreds/thousands of objects.
 - **No true arbitrary 3D object interaction.** Imported GLB/glTF must be baked offline into sprite-angle images. Physical 3D tumbling, free-elevation cameras, realistic collisions and depth-perfect overlaps are intentionally out of scope.
@@ -51,7 +51,7 @@ Initial joins/reconnects use snapshots followed by actions. Private deck operati
 ```
 Creator's model (.glb) → Blender offline render (24 views) → Creator's bucket/CDN
                                                                 │
-Player's browser ← HTTPS sprite-frame URL ← Sennet game-pack manifest reference
+Player's browser ← HTTPS sprite-frame URL ← Seneternal game-pack manifest reference
 ```
 
 `nearestFrameIndex(seat, object.rotation, frameCount)` selects the closest azimuth frame (30° for 12 images, 15° for 24, 10° for 36). The initial camera is top-down with screen-space table rotation, not a physically accurate eye-level perspective. More convincing 2.5D could use an isometric affine transform, parallax, occlusion layers and elevations baked into atlases.

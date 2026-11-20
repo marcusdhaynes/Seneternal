@@ -1,17 +1,17 @@
 {
-  "name": "sennet",
+  "name": "seneternal",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev": "npm run dev -w @sennet/web",
-    "dev:server": "npm run dev -w @sennet/server",
-    "build": "npm run build -w @sennet/web",
-    "preview": "npm run preview -w @sennet/web",
-    "check": "npm run check -w @sennet/web && npm run check -w @sennet/server",
+    "dev": "npm run dev -w @seneternal/web",
+    "dev:server": "npm run dev -w @seneternal/server",
+    "build": "npm run build -w @seneternal/web",
+    "preview": "npm run preview -w @seneternal/web",
+    "check": "npm run check -w @seneternal/web && npm run check -w @seneternal/server",
     "test": "node --experimental-strip-types --test packages/core/tests/*.test.mjs",
-    "tauri": "npm run tauri -w @sennet/web"
+    "tauri": "npm run tauri -w @seneternal/web"
   },
   "engines": { "node": ">=22.16" }
 }

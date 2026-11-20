@@ -27,7 +27,7 @@ test('private hand details are redacted for other actors',()=>{
   assert.equal(projectForActor(s,'P1').objects.find(o=>o.id===card.id)?.name,card.name);
 });
 test('pack sanitization disallows javascript assets',()=>{
-  const p=parseGamePack({schema:'sennet.pack/1',id:'foo',name:'Foo',objects:[{id:'x',kind:'miniature',name:'X',faceUrl:'javascript:alert(1)',frameUrls:['https://example.org/x.png','file:///etc/passwd']}]});
+  const p=parseGamePack({schema:'seneternal.pack/1',id:'foo',name:'Foo',objects:[{id:'x',kind:'miniature',name:'X',faceUrl:'javascript:alert(1)',frameUrls:['https://example.org/x.png','file:///etc/passwd']}]});
   assert.equal(p.objects[0].faceUrl,undefined);
   assert.deepEqual(p.objects[0].frameUrls,['https://example.org/x.png']);
 });
@@ -130,7 +130,7 @@ test('2.5D deck box is a separate movable accessory, never a deck or card',()=>{
   assert.ok(!removed.objects.some(o=>o.id===box.id));
   assert.equal(removed.objects.filter(o=>o.zone==='DECK').length,
     initial.objects.filter(o=>o.zone==='DECK').length);
-  const pack=parseGamePack({schema:'sennet.pack/1',
+  const pack=parseGamePack({schema:'seneternal.pack/1',
     id:'deckbox.test',name:'Deck box pack',author:'Test',kind:'tcg',
     objects:[box]});
   assert.equal(pack.objects[0]?.kind,'deck-box',
@@ -385,7 +385,7 @@ test('merge command rejects invalid positions, unsupported games, and changing o
 
 test('exported TCG packs retain center merges while rejecting invalid imported boundaries',()=>{
   const state=applyCommand(createGame('tcg'),c('SET_CENTER_MERGE',{seat:4,boundary:1,merged:true}));
-  const raw={schema:'sennet.pack/1',id:'merged',name:'Merged layout',author:'Tester',kind:'tcg',
+  const raw={schema:'seneternal.pack/1',id:'merged',name:'Merged layout',author:'Tester',kind:'tcg',
     objects:state.objects,centerMerges:[centerMergeKey(4,1),centerMergeKey(4,1),-4,900,1.5,'5']};
   const pack=parseGamePack(raw);
   assert.deepEqual(pack.centerMerges,[centerMergeKey(4,1)]);

@@ -1,8 +1,8 @@
 {
-  "schema":"sennet.pack/1",
+  "schema":"seneternal.pack/1",
   "id":"example.castleboard",
   "name":"Castleboard Demo",
-  "author":"Sennet",
+  "author":"Seneternal",
   "kind":"boardgame",
   "description":"Example community-made pack using universal objects.",
   "license":"CC0-1.0",

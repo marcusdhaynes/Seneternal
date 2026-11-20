@@ -1,7 +1,7 @@
 // Network-first application shell. Offline navigation can use a cached page,
 // but a missing JavaScript/CSS chunk must NEVER be replaced with HTML:
 // doing so produces a blank screen from a strict module MIME-type error.
-const CACHE='sennet-shell-v2';
+const CACHE='seneternal-shell-v2';
 const SCOPE=self.registration.scope;
 const SHELL=new URL('./',SCOPE).href;
 self.addEventListener('install',event=>{
@@ -16,7 +16,7 @@ self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const names=await caches.keys();
     await Promise.all(names.filter(name=>
-      name.startsWith('sennet-shell-')&&name!==CACHE
+      name.startsWith('seneternal-shell-')&&name!==CACHE
     ).map(name=>caches.delete(name)));
     await self.clients.claim();
   })());

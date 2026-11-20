@@ -59,9 +59,9 @@ function decoratedCover(style:typeof themes[TomeDesign]):THREE.CanvasTexture{
   }
   g.globalAlpha=1;g.fillStyle=gold;g.textAlign='center';
   // Every letter and ornamental stroke shares the same deep inset shadow,
-  // not just SENNET; retain the colored foil above the relief.
+  // not just SENETERNAL; retain the colored foil above the relief.
   g.font='bold 132px Georgia, Times New Roman, serif';
-  g.fillText('SENNET',384,304);
+  g.fillText('SENETERNAL',384,304);
   g.globalAlpha=.96;g.font='bold 40px Georgia, serif';
   g.fillText('SETTINGS',384,357);
   g.lineWidth=3;g.beginPath();g.moveTo(221,388);g.lineTo(547,388);g.stroke();

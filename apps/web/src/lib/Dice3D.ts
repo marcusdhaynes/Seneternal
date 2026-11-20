@@ -1,5 +1,5 @@
 /** Real 3D dice: WebGL geometry + a rigid-body solver. This module is loaded
- * only while dice are airborne; the rest of Sennet remains Pixi-based. */
+ * only while dice are airborne; the rest of Seneternal remains Pixi-based. */
 import * as THREE from 'three';
 import {installDiceLighting} from './Dice3DLighting.ts';
 import {createDie3DModel,dieGeometry,radiusFor,type NumberedFace} from './Dice3DGeometry.ts';
@@ -93,7 +93,7 @@ export function roll3DDice(opts:Dice3DOptions):()=>void{
   renderer.setSize(w,h,false);
   renderer.setClearColor(0x000000,0);
   const canvas=renderer.domElement;
-  canvas.className='sennet-dice-3d-layer';canvas.style.cssText=
+  canvas.className='seneternal-dice-3d-layer';canvas.style.cssText=
     'position:absolute;left:0;top:0;width:100%;height:100%;'+
     'pointer-events:none;z-index:89;display:block';
   host.appendChild(canvas);

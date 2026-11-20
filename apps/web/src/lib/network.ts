@@ -1,4 +1,4 @@
-import type {Command,EventRecord,GameKind,GameState,Player,SharedAppearance} from '@sennet/core';
+import type {Command,EventRecord,GameKind,GameState,Player,SharedAppearance} from '@seneternal/core';
 
 export interface RoomCallbacks {
   onState:(state:GameState)=>void;

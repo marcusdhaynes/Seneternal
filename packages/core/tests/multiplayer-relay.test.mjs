@@ -54,7 +54,7 @@ function eventOfType(socket,type,timeout=5000){
   });
 }
 test('multiplayer rooms preserve individual seats and game state across disconnect and restart',async t=>{
-  const directory=await mkdtemp(join(tmpdir(),'sennet-multi-'));
+  const directory=await mkdtemp(join(tmpdir(),'seneternal-multi-'));
   const port=await vacantPort();
   const url='ws://127.0.0.1:'+port;
   const room='pickup_'+process.pid;
@@ -64,7 +64,7 @@ test('multiplayer rooms preserve individual seats and game state across disconne
   t.after(async()=>{server?.kill('SIGTERM');await rm(directory,{force:true,recursive:true});});
   async function start(){
     server=spawn(process.execPath,['--import','tsx','apps/server/src/index.ts'],{
-      cwd:process.cwd(),env:{...process.env,PORT:String(port),SENNET_DATA_DIR:directory},
+      cwd:process.cwd(),env:{...process.env,PORT:String(port),SENETERNAL_DATA_DIR:directory},
       stdio:'ignore'
     });
     await waitFor(async()=>{const response=await fetch('http://127.0.0.1:'+port+'/health');return response.ok;});

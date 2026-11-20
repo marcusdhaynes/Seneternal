@@ -155,7 +155,7 @@ export default function CardRadialWheel({x,y,size,count,allLocked,pointerId,onCh
   role="dialog" aria-label={'Selected '+count+' cards · radial action wheel'}
   onContextMenu={e=>e.preventDefault()} onPointerDown={e=>e.stopPropagation()} onPointerUp={e=>e.stopPropagation()}>
   <svg viewBox={half?"0 200 400 200":"0 0 400 400"} role="img" aria-label="Position, Scale and State action wheel">
-   <g className="sennet-radial-rings" aria-hidden={collapsed} style={{pointerEvents:collapsed?'none':'auto'}}>
+   <g className="seneternal-radial-rings" aria-hidden={collapsed} style={{pointerEvents:collapsed?'none':'auto'}}>
    <circle cx={200} cy={200} r={198} fill="#0c1016" fillOpacity=".42"/>
    {RADIAL_CATEGORIES.map((name,i)=>{
     const mid=half?90+i*60+30:i*120+60,p=point(94,mid),active=category===i;
@@ -266,7 +266,7 @@ export default function CardRadialWheel({x,y,size,count,allLocked,pointerId,onCh
     </g>;
    }))}
    </g>
-   <g className="sennet-radial-center" role="button" tabIndex={0} aria-label={collapsed?'Hold to expand the action radial':'Hold to collapse the action radial'}
+   <g className="seneternal-radial-center" role="button" tabIndex={0} aria-label={collapsed?'Hold to expand the action radial':'Hold to collapse the action radial'}
      onPointerDown={e=>{e.stopPropagation();clearCenterTimer();const startX=e.clientX,startY=e.clientY;
        e.preventDefault();
        // After a stationary hold collapses the wheel, movement of the

@@ -14,7 +14,7 @@ test('merge, Eye, Castle, stack controls all use the same SMALL 16px diameter',(
   assert.equal(EYE_CONTROL_DIAMETER_PX,16);
   assert.match(table,/woodenControl\(VIEW_BUTTON_RADIUS,seatPlaymat\.sideBoxStyle\?\?'walnut',merged\)/);
   assert.match(table,/createEyeStyleCounter\(count,playmat\.sideBoxStyle/);
-  assert.match(styles,/width:var\(--sennet-control-size,16px\)!important/);
+  assert.match(styles,/width:var\(--seneternal-control-size,16px\)!important/);
   assert.ok(!styles.includes('width:34px!important;height:34px!important'));
   assert.equal(viewButtonPosition('eye').x,-22);
   assert.equal(viewButtonPosition('castle').x,22);
@@ -72,7 +72,7 @@ test('all tabletop controls use CSS pixel scale, never physical framebuffer reso
   assert.match(controls,/const sy=canvas.height\/app.screen.height/);
   assert.ok(!controls.includes('/app.renderer.width'));
   assert.ok(!controls.includes('/app.renderer.height'));
-  assert.match(styles,/\.sennet-stack-count svg\s*\{[^}]*width:var\(--sennet-control-size,16px\)!important/s);
+  assert.match(styles,/\.seneternal-stack-count svg\s*\{[^}]*width:var\(--seneternal-control-size,16px\)!important/s);
 });
 
 test('mat controls only change inverse scale; world anchor and merge positions remain immutable',()=>{
@@ -88,7 +88,7 @@ test('one session reference uses the opponent Sword/Shield size in initial Eye v
   assert.match(table,/controlReferencePixels=useRef<number\|null>\(null\)/);
   assert.match(table,/if\(controlReferencePixels\.current===null\)\{/);
   assert.match(table,/eyeOpponentReferencePixels\(/);
-  assert.match(table,/host\.style\.setProperty\('--sennet-control-size'/);
+  assert.match(table,/host\.style\.setProperty\('--seneternal-control-size'/);
   assert.match(table,/const factor=desired\/sourceDiameter/);
   assert.match(table,/const pxX=factor\/worldX,pxY=factor\/worldY/);
 });
@@ -104,7 +104,7 @@ test('radial hover modifies only the ORIGINAL wedge; no independent portal or gi
  const radial=readFileSync(new URL('../../../apps/web/src/components/CardRadialWheel.tsx',import.meta.url),'utf8');
  assert.ok(!radial.includes('createPortal('));
  assert.ok(!radial.includes('magnifierPortalRef'));
- assert.ok(!radial.includes('sennet-radial-hover-top-layer'));
+ assert.ok(!radial.includes('seneternal-radial-hover-top-layer'));
  assert.ok(!radial.includes(',document.body)'));
  assert.ok(!radial.includes('<use key={item.id}'));
  assert.match(radial,/hoveredAction===act.id&&\!collapsed/);

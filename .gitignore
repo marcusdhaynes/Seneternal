@@ -8,5 +8,5 @@ dist/
 coverage/
 target/
 gen/
-.sennet-server/
+.seneternal-server/
 *.tsbuildinfo

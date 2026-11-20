@@ -137,7 +137,7 @@ export function makePseudo3DBook(design:TomeDesign,width:number,height:number):C
   mark.anchor.set(.5);mark.position.set(center.x,center.y-.4);
   book.addChild(mark);
   const captionPoint=project(spineWidth*.28,height*.29,thickness+2);
-  const caption=new Text({text:'SENNET',resolution:2,
+  const caption=new Text({text:'SENETERNAL',resolution:2,
     style:{fontFamily:'Georgia, serif',fontSize:Math.max(8,width*.15),
       fontWeight:'bold',letterSpacing:1.4,fill:0xffe7a5}});
   caption.style.stroke={color:c.shadow,width:2.5,join:'round'};

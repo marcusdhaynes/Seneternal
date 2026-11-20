@@ -16,7 +16,7 @@ export default function TcgDeckBuilder({onClose,onLoadOnTable,initialGame=TCGS[0
  snapMerged,onSnapMerged,mergeHoverMs,onMergeHoverMs}:Props){
  const [decks,setDecks]=useState<SavedDeck[]>(readDecks);
  const [activeId,setActiveId]=useState(()=>{
-  try{return localStorage.getItem('sennet.deck-active.v1')||'';}catch{return '';}
+  try{return localStorage.getItem('seneternal.deck-active.v1')||'';}catch{return '';}
  });
  // Start on the first selectable TCG (Disney Lorcana) instead of the
  // previous Pokémon preference. A specific initialGame prop still overrides.
@@ -37,13 +37,13 @@ export default function TcgDeckBuilder({onClose,onLoadOnTable,initialGame=TCGS[0
  const [showFilters,setShowFilters]=useState(false);
  const [settingsOpen,setSettingsOpen]=useState(false);
  const [showImages,setShowImages]=useState(()=>{
-  try{return localStorage.getItem('sennet.tcg.images.v1')!=='off';}catch{return true;}
+  try{return localStorage.getItem('seneternal.tcg.images.v1')!=='off';}catch{return true;}
  });
  const [riotEndpoint,setRiotEndpoint]=useState(()=>{
-  try{return localStorage.getItem('sennet.tcg.riftbound.endpoint.v1')||'';}catch{return '';}
+  try{return localStorage.getItem('seneternal.tcg.riftbound.endpoint.v1')||'';}catch{return '';}
  });
  const [compact,setCompact]=useState(()=>{
-  try{return localStorage.getItem('sennet.tcg.compact.v1')==='on';}catch{return false;}
+  try{return localStorage.getItem('seneternal.tcg.compact.v1')==='on';}catch{return false;}
  });
  const [importText,setImportText]=useState('');
  const [cardsPerRow,setCardsPerRow]=useState(2);
@@ -64,10 +64,10 @@ export default function TcgDeckBuilder({onClose,onLoadOnTable,initialGame=TCGS[0
   const entry=newDeck(id);setDecks(old=>[entry,...old]);setActiveId(entry.id);setSection('Main');
  };
  useEffect(()=>{saveDecks(decks);},[decks]);
- useEffect(()=>{try{localStorage.setItem('sennet.tcg.riftbound.endpoint.v1',riotEndpoint);}catch{/* ephemeral */}},[riotEndpoint]);
- useEffect(()=>{try{localStorage.setItem('sennet.tcg.images.v1',showImages?'on':'off');}catch{/* ephemeral */}},[showImages]);
- useEffect(()=>{try{localStorage.setItem('sennet.tcg.compact.v1',compact?'on':'off');}catch{/* ephemeral */}},[compact]);
- useEffect(()=>{try{localStorage.setItem('sennet.deck-active.v1',activeId);}catch{/* ephemeral */}},[activeId]);
+ useEffect(()=>{try{localStorage.setItem('seneternal.tcg.riftbound.endpoint.v1',riotEndpoint);}catch{/* ephemeral */}},[riotEndpoint]);
+ useEffect(()=>{try{localStorage.setItem('seneternal.tcg.images.v1',showImages?'on':'off');}catch{/* ephemeral */}},[showImages]);
+ useEffect(()=>{try{localStorage.setItem('seneternal.tcg.compact.v1',compact?'on':'off');}catch{/* ephemeral */}},[compact]);
+ useEffect(()=>{try{localStorage.setItem('seneternal.deck-active.v1',activeId);}catch{/* ephemeral */}},[activeId]);
  useEffect(()=>{
   if(active)return;
   const existing=decks.find(d=>d.game===game);
@@ -145,7 +145,7 @@ export default function TcgDeckBuilder({onClose,onLoadOnTable,initialGame=TCGS[0
  };
  const exportDeck=(extension:'txt'|'json')=>{
   if(!active)return;
-  const basename=active.name.replace(/[^a-z0-9 _-]/gi,'_')||'Sennet deck';
+  const basename=active.name.replace(/[^a-z0-9 _-]/gi,'_')||'Seneternal deck';
   download(basename+'.'+extension,extension==='txt'?toTextDeck(active):JSON.stringify(active,null,2),
    extension==='json'?'application/json':'text/plain');
  };
@@ -161,14 +161,14 @@ export default function TcgDeckBuilder({onClose,onLoadOnTable,initialGame=TCGS[0
      const raw=JSON.parse(text) as SavedDeck;
      if(TCGS.some(t=>t.id===raw.game)&&Array.isArray(raw.entries)&&
        raw.entries.every(e=>e?.card?.game===raw.game&&e.card.id&&e.quantity>0)){
-      // Native Sennet exports contain all card metadata, so restore them
+      // Native Seneternal exports contain all card metadata, so restore them
       // with full fidelity even if the provider API is temporarily offline.
       const copy:SavedDeck={...newDeck(raw.game),name:String(raw.name||'Imported deck').slice(0,90),
        format:String(raw.format||configFor(raw.game).formats[0]),
        description:String(raw.description||'').slice(0,1000),
        entries:raw.entries.slice(0,1000).map(e=>({...e,quantity:Math.min(99,e.quantity)}))};
       setDecks(d=>[copy,...d]);pickGame(copy.game);setActiveId(copy.id);
-      setImportStatus('Native Sennet deck restored · '+copy.entries.length+' entries');
+      setImportStatus('Native Seneternal deck restored · '+copy.entries.length+' entries');
       message('Restored '+configFor(copy.game).name+' deck with all card details');
       return;
      }
@@ -419,7 +419,7 @@ export default function TcgDeckBuilder({onClose,onLoadOnTable,initialGame=TCGS[0
       <span><b>Dense results</b><small>Fit more cards onscreen with smaller rows.</small></span></label>
      <div className="tcgb-setting-actions">
       <button onClick={()=>{
-       try{localStorage.setItem('sennet.tcg.preferred.v1',game);}catch{/* ephemeral */}
+       try{localStorage.setItem('seneternal.tcg.preferred.v1',game);}catch{/* ephemeral */}
        message(config.name+' set as preferred TCG');
       }}>Save {config.name} as default</button>
       <button disabled={loading} onClick={()=>{forceReload.current=true;setSettingsOpen(false);setRefresh(v=>v+1);}}>Refresh {config.provider} catalogue</button>
@@ -437,8 +437,8 @@ export default function TcgDeckBuilder({onClose,onLoadOnTable,initialGame=TCGS[0
        if(riotEndpoint.trim()){
         const endpoint=new URL(riotEndpoint.trim());
         if(endpoint.protocol!=='https:'&&endpoint.hostname!=='localhost')throw Error('HTTPS required');
-        localStorage.setItem('sennet.tcg.riftbound.endpoint.v1',endpoint.href);
-       }else localStorage.removeItem('sennet.tcg.riftbound.endpoint.v1');
+        localStorage.setItem('seneternal.tcg.riftbound.endpoint.v1',endpoint.href);
+       }else localStorage.removeItem('seneternal.tcg.riftbound.endpoint.v1');
        message('Riot endpoint saved (no secret stored)');
        if(game==='riftbound'){setSettingsOpen(false);forceReload.current=true;setRefresh(v=>v+1);}
       }catch(e){message(e instanceof Error?e.message:'Invalid endpoint URL');}

@@ -1,4 +1,4 @@
-/** Sennet's deterministic, renderer-independent tabletop domain and command protocol. */
+/** Seneternal's deterministic, renderer-independent tabletop domain and command protocol. */
 export type GameKind = 'sandbox' | 'boardgame' | 'tcg' | 'rpg' | 'wargame' | 'dice' | 'party' | 'custom';
 export type PlayMode = 'sandbox' | 'turn-based' | 'asynchronous';
 export type ObjectKind = 'card' | 'deck' | 'deck-box' | 'token' | 'miniature' | 'die' | 'tile' | 'board' | 'marker';
@@ -26,7 +26,7 @@ export interface Command {
 }
 export interface EventRecord extends Command { seq: number; at: number }
 export type GamePack = {
-  schema: 'sennet.pack/1'; id: string; name: string; author: string; kind: GameKind;
+  schema: 'seneternal.pack/1'; id: string; name: string; author: string; kind: GameKind;
   description?: string; image?: string; objects: TableObject[];
   lua?: string; assetBaseUrl?: string; license?: string; centerMerges?: number[];
 };
@@ -2085,10 +2085,10 @@ export function projectForActor(state:GameState,viewerId:string):GameState {
 export function parseGamePack(value:unknown):GamePack {
   if(!value||typeof value!=='object')throw new Error('Pack must be a JSON object');
   const pack=value as Record<string,unknown>;
-  if(pack.schema!=='sennet.pack/1'||typeof pack.id!=='string'||typeof pack.name!=='string'||!Array.isArray(pack.objects)||pack.objects.length>1000)throw new Error('Invalid Sennet pack schema');
+  if(pack.schema!=='seneternal.pack/1'||typeof pack.id!=='string'||typeof pack.name!=='string'||!Array.isArray(pack.objects)||pack.objects.length>1000)throw new Error('Invalid Seneternal pack schema');
   const validKinds:GameKind[]=['sandbox','boardgame','tcg','rpg','wargame','dice','party','custom'];
   const kind=validKinds.includes(pack.kind as GameKind)?pack.kind as GameKind:'custom';
-  return {schema:'sennet.pack/1',id:textValue(pack.id),name:textValue(pack.name),author:textValue(pack.author||'Community'),kind,description:textValue(pack.description,250),license:textValue(pack.license,80),objects:pack.objects.map((o:unknown)=>sanitizeObject(o as Record<string,unknown>)),
+  return {schema:'seneternal.pack/1',id:textValue(pack.id),name:textValue(pack.name),author:textValue(pack.author||'Community'),kind,description:textValue(pack.description,250),license:textValue(pack.license,80),objects:pack.objects.map((o:unknown)=>sanitizeObject(o as Record<string,unknown>)),
     ...(kind==='tcg'&&Array.isArray(pack.centerMerges)?{
       centerMerges:[...new Set(pack.centerMerges.filter((n:unknown):n is number=>
         typeof n==='number'&&Number.isInteger(n)&&n>=0&&n<SEATS*3))].sort((a,b)=>a-b)
