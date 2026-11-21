@@ -107,6 +107,7 @@ import {fitMatAttachedRadial,fitSelfMatWithHud,fitBattleRadialZoom,
 import {TABLE_PAINT_ORDER,playmatPaintLayer} from '../lib/castlePaintOrder';
 import {DICE_THEMES,resolveDiceTheme,normalizeDiceAppearance,type DiceAppearance} from '../lib/diceThemes';
 import {makePseudo3DBook} from './Pseudo3DBook';
+import {stepDicePhysics,throwVelocity,type DiceBody} from '../lib/dicePhysics';
 import {wheelPosition,radialMembership,radialTapMembership,type RadialAction} from '../lib/radialWheel.ts';
 import {cardGestureOptions,isDoubleCardTap,GESTURE_HOLD_MS,GESTURE_MOVE_THRESHOLD,type CardGestureAction} from '../lib/cardGestures';
 import {cardStackMembers,nearestFrameIndex,playerSeatRotation,viewerTableRotation,tcgMatCells,tcgMatRegions,tcgMatOrigin,opponentAtTablePoint,groupedMatchupLayout,oneOnOneMatchupLayout,castleGridLayout,castleIndependentFocusLayout,castleArrowsVisible,nextCastleAllySeat,nextCastleFocusedSeat,type CastleSideFocus,opponentAcrossDivider,BATTLEFIELD_PLAYMAT_PADDING,battlefieldFitBounds,toggleOpponentRelation,type OpponentRelation,type CastleMode,neighboringOpponentSeat,centerMergeKey,tcgSnapPoint,tcgPlacementPoint,tcgDropZone,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,TCG_ROW_COLORS,isTcgRemoveDrop,tcgRegionLabel,tcgMatLocal,tcgMatWorld,THROWN_DIE_LIFETIME_MS,BOARD_CENTER,BOARD_W,TABLE_APOTHEM,TABLE_SEAT_RADIUS,TABLE_VIEW_RADIUS,MIN_TABLE_ZOOM,clampTableZoom,clampTablePan,type GameState,type Player,type TableObject,type PlaymatAppearance,type PlaymatSectionStyle,playmatSectionIndex,playmatAppearanceForSeat,opponentRelationButtonPosition,OPPONENT_RELATION_COLORS,OPPONENT_RELATION_BUTTON_RADIUS,OPPONENT_RELATION_BUTTON_HIT_RADIUS,viewButtonPosition,VIEW_BUTTON_RADIUS,VIEW_BUTTON_HIT_RADIUS,tcgSettingsButtonPosition,coinNumericValue,validCoinText} from '@seneternal/core';
@@ -1689,7 +1690,7 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
   const visuals=useRef(new Map<string,Container>());
   const tokenDrag=useRef<{pointerId:number;value:number;sign:1|-1;
     coinText?:string;startX:number;startY:number;mat:Container;ghost:Container;
-    ghostEl:HTMLDivElement;color:string;onCenterTap?:()=>void}|null>(null);
+    ghostEl:HTMLDivElement;color:string;onCenterTap?:()=>void;history:DiePointerSample[]}|null>(null);
   const commitCoinEdit=()=>{
     if(validCoinText(coinDraft)){
       if(coinEditing?.id)onCoinModify(coinEditing.id,{coinText:coinDraft});
@@ -2673,7 +2674,8 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
           const ghostEl=showCoinAboveArtwork(ghost,isEditable?faces[index]:value,sign,false,color,isEditable);
           tokenDrag.current={pointerId:e.pointerId,value,sign,
             ...(isEditable?{coinText:faces[index]}:{}),
-            startX:e.clientX,startY:e.clientY,mat,ghost,ghostEl,color,onCenterTap};
+            startX:e.clientX,startY:e.clientY,mat,ghost,ghostEl,color,onCenterTap,
+             history:[{x:e.clientX,y:e.clientY,t:performance.now()}]};
         });
       });
     }
@@ -3397,11 +3399,14 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       tokenDrag.current=null;
       const current=session.current,at=coordinates(event);
       const traveled=Math.hypot(event.clientX-d.startX,event.clientY-d.startY);
-      if(d.ghost&&!d.ghost.destroyed)d.ghost.destroy();
-      d.ghostEl.remove();
+      const dispose=()=>{
+        if(!d.ghost.destroyed)d.ghost.destroy();
+        d.ghostEl.remove();
+      };
       controlPointer.current=null;
-      if(!commit||!current||!at)return;
+      if(!commit||!current||!at){dispose();return;}
       if(traveled<9){
+        dispose();
         if(d.onCenterTap){d.onCenterTap();return;}
         // A stationary click only acts when cards have been selected.
         const ids=[...selectedSet.current].filter(id=>{
@@ -3416,7 +3421,7 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       const trayTop=-TCG_MAT_HEIGHT/2+TCG_MAT.rowHeight+TCG_MAT.gap;
       // Every return disappears back into the permanently positioned coin.
       if(local.x>=right&&local.x<=right+TCG_MAT.cardWidth&&
-         local.y>=trayTop&&local.y<=TCG_MAT_HEIGHT/2)return;
+         local.y>=trayTop&&local.y<=TCG_MAT_HEIGHT/2){dispose();return;}
       let target:TableObject|undefined;
       // Coin drop coordinates must be in the SAME board/seat-layer space
       // used to render table objects. d.mat.parent is the drawer's rotated
@@ -3432,14 +3437,74 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
           target=card;parent=piece.parent;break;
         }
       }
-      if(!parent)return;
-      const spot=parent.toLocal(at,current.app.stage);
-      callbacks.current.onTokenPlace(d.value,d.sign,
-        spot.x,spot.y,target?.id,d.color,d.coinText);
+      if(!parent){dispose();return;}
+      const placeAt=(point:Point)=>{
+        if(!session.current||session.current.app!==current.app)return;
+        const spot=parent!.toLocal(point,current.app.stage);
+        callbacks.current.onTokenPlace(d.value,d.sign,
+          spot.x,spot.y,target?.id,d.color,d.coinText);
+      };
+      const release=measureDieRelease(d.history,
+        {x:event.clientX,y:event.clientY},performance.now());
+      // A deliberate flick tosses the free coin, while ordinary dragging
+      // onto a card remains a precise counter placement.
+      if(!release.flick||target){
+        dispose();placeAt(at);return;
+      }
+      const rect=current.app.canvas.getBoundingClientRect();
+      const sx=rect.width/current.app.renderer.width;
+      const sy=rect.height/current.app.renderer.height;
+      if(!rect.width||!rect.height){dispose();return;}
+      const velocity=throwVelocity(release.dx,release.dy,release.durationMs);
+      const body:DiceBody={x:event.clientX-rect.left,y:event.clientY-rect.top,
+        vx:velocity.x*.58,vy:velocity.y*.58,z:55,vz:215,
+        angle:0,spin:(Math.random()>.5?1:-1)*(13+velocity.speed*.01),
+        radius:12,mass:.8,leftTrayExited:true};
+      // The same solver that separates dice also handles contact with
+      // grounded dice and the solid Seneternal book.
+      const books=visibleBookColliders(current.board,sx,sy);
+      const fixed:DiceBody[]=[...visuals.current.entries()].flatMap(([id,piece])=>{
+        const other=currentState.current.objects.find(o=>o.id===id);
+        if(!other?.throwDice||piece.destroyed)return [];
+        const p=piece.toGlobal(new Point(0,0));
+        return [{x:p.x*sx,y:p.y*sy,vx:0,vy:0,z:0,vz:0,
+          angle:0,spin:0,radius:14,mass:1,leftTrayExited:true,fixed:true}];
+      });
+      d.ghost.visible=true;
+      const begun=performance.now();
+      let last=begun,accumulator=0,frame=0;
+      const tick=(now:number)=>{
+        if(d.ghost.destroyed||session.current?.app!==current.app){
+          dispose();return;
+        }
+        accumulator+=Math.min(.05,(now-last)/1000);last=now;
+        while(accumulator>=1/60){
+          stepDicePhysics([body,...fixed],1/60,rect.width,rect.height,books);
+          accumulator-=1/60;
+        }
+        const painted=new Point(body.x/sx,(body.y-body.z*.25)/sy);
+        d.ghost.position.copyFrom(d.mat.toLocal(painted,current.app.stage));
+        // A flipping metal disk narrows edge-on and returns to full width
+        // as the angular momentum dissipates on the felt.
+        d.ghost.scale.y=Math.max(.11,Math.abs(Math.cos(body.angle)));
+        d.ghost.rotation=body.angle*.13;
+        const settled=body.z===0&&Math.hypot(body.vx,body.vy)<14&&
+          Math.abs(body.spin)<1.3;
+        if(settled||now-begun>2550){
+          const landed=new Point(body.x/sx,body.y/sy);
+          dispose();placeAt(landed);return;
+        }
+        frame=requestAnimationFrame(tick);
+      };
+      frame=requestAnimationFrame(tick);
+      void frame;
     };
     const move=(event:PointerEvent)=>{
       const d=tokenDrag.current,at=coordinates(event);
       if(!d||d.pointerId!==event.pointerId||!at||d.ghost.destroyed)return;
+      const now=performance.now();
+      d.history.push({x:event.clientX,y:event.clientY,t:now});
+      while(d.history.length>2&&d.history[1].t<now-180)d.history.shift();
       if(Math.hypot(event.clientX-d.startX,event.clientY-d.startY)<9)return;
       const local=d.mat.toLocal(at,session.current!.app.stage);
       d.ghost.position.copyFrom(local);d.ghost.visible=true;
