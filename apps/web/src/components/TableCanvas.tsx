@@ -1,7 +1,6 @@
 import {useCallback,useEffect,useRef,useState,type ReactNode,type PointerEvent as ReactPointerEvent} from 'react';
 import {createPortal} from 'react-dom';
 import CoinColorPicker from './CoinColorPicker';
-import {buildDrawerMagnifier} from './DrawerInstruments';
 import {Application,Assets,Circle,Container,Graphics,Point,Rectangle,RenderLayer,Sprite,Text} from 'pixi.js';
 import CardRadialWheel,{RadialActionGlyph} from './CardRadialWheel';
 import {makePlaymatRadial} from './PlaymatActionRadial';
@@ -100,7 +99,8 @@ import {formatDiceSelection} from '../lib/actionDisplay';
 import {fallbackDiceResults,type RollFallbackResult} from '../lib/diceFallback';
 import {expandDiceSources} from '../lib/diceSourceExpansion';
 import {DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET,diceRackLocations} from '../lib/diceCoordinates';
-import {bookOpenPoseX,bookSavedOffset,drawerInnerWell,isBookWithinDrawer,isBookCenterWithinDrawer,tableBookHome} from '../lib/bookDrawerPlacement';
+import {tableBookHome} from '../lib/bookDrawerPlacement';
+import {tableMaterialTexture,type TableMaterials} from '../lib/tableMaterials';
 import {fitActionScreenToWheel,actionScreenContactCenter,ACTION_LCD_HEIGHT} from '../lib/actionScreenFit';
 import {fitMatAttachedRadial,fitSelfMatWithHud,fitBattleRadialZoom,
   EYE_CONTROL_DIAMETER_PX,eyeOpponentReferencePixels} from '../lib/actionRadialFit';
@@ -111,7 +111,7 @@ import {makePseudo3DBook} from './Pseudo3DBook';
 import {wheelPosition,radialMembership,radialTapMembership,type RadialAction} from '../lib/radialWheel.ts';
 import {cardGestureOptions,isDoubleCardTap,GESTURE_HOLD_MS,GESTURE_MOVE_THRESHOLD,type CardGestureAction} from '../lib/cardGestures';
 import {cardStackMembers,nearestFrameIndex,playerSeatRotation,viewerTableRotation,tcgMatCells,tcgMatRegions,tcgMatOrigin,opponentAtTablePoint,groupedMatchupLayout,oneOnOneMatchupLayout,castleGridLayout,castleIndependentFocusLayout,castleArrowsVisible,nextCastleAllySeat,nextCastleFocusedSeat,type CastleSideFocus,opponentAcrossDivider,BATTLEFIELD_PLAYMAT_PADDING,battlefieldFitBounds,toggleOpponentRelation,type OpponentRelation,type CastleMode,neighboringOpponentSeat,centerMergeKey,tcgSnapPoint,tcgPlacementPoint,tcgDropZone,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,TCG_ROW_COLORS,isTcgRemoveDrop,tcgRegionLabel,tcgMatLocal,tcgMatWorld,THROWN_DIE_LIFETIME_MS,BOARD_CENTER,BOARD_W,TABLE_APOTHEM,TABLE_SEAT_RADIUS,TABLE_VIEW_RADIUS,MIN_TABLE_ZOOM,clampTableZoom,clampTablePan,type GameState,type Player,type TableObject,type PlaymatAppearance,type PlaymatSectionStyle,playmatSectionIndex,playmatAppearanceForSeat,opponentRelationButtonPosition,OPPONENT_RELATION_COLORS,OPPONENT_RELATION_BUTTON_RADIUS,OPPONENT_RELATION_BUTTON_HIT_RADIUS,viewButtonPosition,VIEW_BUTTON_RADIUS,VIEW_BUTTON_HIT_RADIUS,tcgSettingsButtonPosition,coinNumericValue,validCoinText} from '@seneternal/core';
-interface Props{autoDeselect:boolean;deselectMs:number;cardViewHoldMs:number;handHoldView:boolean;holdSelectStacks:boolean;handPlayMode:boolean;diceHoldMs:number;diceFadeMs:number;latestAction:string;canUndo:boolean;canRedo:boolean;onUndo:()=>void;onRedo:()=>void;onOpenReceipt:()=>void;onInterfaceAction:(type:string,location:string,description:string)=>void;bookDesign:'tiny'|'dragon'|'journal'|'arcane'|'strapped';bookDock:'left'|'right'|'free'|'hidden';bookOffset:{x:number;y:number};onBookMove:(point:{x:number;y:number})=>void;onBookOpen:()=>void;drawer?:ReactNode;wheelMode:'mobile'|'docked'|'hold';state:GameState;seat:number;playerName:string;actorId:string;selected:string|null;onSelect:(id:string|null)=>void;onMove:(id:string,x:number,y:number)=>void;onMoveStack:(id:string,x:number,y:number)=>void;onMoveSelection:(ids:string[],anchorId:string,x:number,y:number)=>void;onDrawMat:()=>void;onDrawReserve:()=>void;onOpenTcgSettings:()=>void;onCardAction:(id:string,action:"tap"|"flip")=>void;onGestureAction:(id:string,action:CardGestureAction)=>void;onRadialAction:(ids:string[],action:RadialAction,destination?:string)=>void;playmat:PlaymatAppearance;labelScale:number;diceAppearance:DiceAppearance;mergeOpacity:number;mergeHoverMs:number;onMergeCenter:(seat:number,boundary:number,merged:boolean)=>void;onViewChange?:(view:{x:number;y:number;scale:number})=>void;coinAppearance:CoinAppearance;customCoinValue:number;customCoinText:string;onCustomCoinText:(text:string)=>void;onCustomCoinValue:(value:number)=>void;onTokenPlace:(value:number,sign:1|-1,x:number,y:number,carrierId?:string,color?:string,coinText?:string)=>void;onCoinModify:(id:string,changes:{delta?:number;color?:string;coinText?:string})=>void;onCoinDuplicate:(id:string)=>void;onTokenAdjust:(ids:string[],value:number,sign:1|-1)=>void;onDicePlace:(sides:number,x:number,y:number)=>void;onDiceThrow:(throws:{sides:number;rolls:number[];x:number;y:number;rotation:number;quaternion?:[number,number,number,number];altitude?:number}[])=>void;
+interface Props{tableMaterials:TableMaterials;autoDeselect:boolean;deselectMs:number;cardViewHoldMs:number;handHoldView:boolean;holdSelectStacks:boolean;handPlayMode:boolean;diceHoldMs:number;diceFadeMs:number;latestAction:string;canUndo:boolean;canRedo:boolean;onUndo:()=>void;onRedo:()=>void;onOpenReceipt:()=>void;onInterfaceAction:(type:string,location:string,description:string)=>void;bookDesign:'tiny'|'dragon'|'journal'|'arcane'|'strapped';bookDock:'left'|'right'|'free'|'hidden';bookOffset:{x:number;y:number};onBookMove:(point:{x:number;y:number})=>void;onBookOpen:()=>void;drawer?:ReactNode;wheelMode:'mobile'|'docked'|'hold';state:GameState;seat:number;playerName:string;actorId:string;selected:string|null;onSelect:(id:string|null)=>void;onMove:(id:string,x:number,y:number)=>void;onMoveStack:(id:string,x:number,y:number)=>void;onMoveSelection:(ids:string[],anchorId:string,x:number,y:number)=>void;onDrawMat:()=>void;onDrawReserve:()=>void;onOpenTcgSettings:()=>void;onCardAction:(id:string,action:"tap"|"flip")=>void;onGestureAction:(id:string,action:CardGestureAction)=>void;onRadialAction:(ids:string[],action:RadialAction,destination?:string)=>void;playmat:PlaymatAppearance;labelScale:number;diceAppearance:DiceAppearance;mergeOpacity:number;mergeHoverMs:number;onMergeCenter:(seat:number,boundary:number,merged:boolean)=>void;onViewChange?:(view:{x:number;y:number;scale:number})=>void;coinAppearance:CoinAppearance;customCoinValue:number;customCoinText:string;onCustomCoinText:(text:string)=>void;onCustomCoinValue:(value:number)=>void;onTokenPlace:(value:number,sign:1|-1,x:number,y:number,carrierId?:string,color?:string,coinText?:string)=>void;onCoinModify:(id:string,changes:{delta?:number;color?:string;coinText?:string})=>void;onCoinDuplicate:(id:string)=>void;onTokenAdjust:(ids:string[],value:number,sign:1|-1)=>void;onDicePlace:(sides:number,x:number,y:number)=>void;onDiceThrow:(throws:{sides:number;rolls:number[];x:number;y:number;rotation:number;quaternion?:[number,number,number,number];altitude?:number}[])=>void;
 onDiceReroll:(id:string,rolls:number[],x:number,y:number,rotation:number,quaternion?:[number,number,number,number],altitude?:number)=>void;readonly?:boolean}
 /** Draw ordering is global across all seats, even when Castle mats overlap.
  * Separate opponent backings from the viewer's mat and every interactable:
@@ -302,6 +302,78 @@ function addPlaymatImage(mat:Container,base:Graphics,x:number,y:number,w:number,
 }
 /** Recessed, bevel-edged TCG playing mat. Cards use exactly the same
  * cell coordinates on every client; drag release is snapped in core. */
+/** A single unclipped tome for all game kinds and camera arrangements.
+ * Move constraints are swept against both the permanent rack and loose dice. */
+function placePersistentBook(mat:Container,layers:TablePaintLayers,
+  design:Props['bookDesign'],offset:Props['bookOffset'],state:GameState,
+  readonly:boolean,onOpen:()=>void,onMove:Props['onBookMove']):void{
+  const width=TCG_MAT.cardWidth-8,height=width/.76;
+  const home=tableBookHome(TCG_MAT_WIDTH,TCG_MAT_HEIGHT,width,height);
+  const startX=home.x+offset.x,startY=home.y+offset.y;
+  const book=makePseudo3DBook(design,width,height);
+  book.label='seneternal-physical-book';
+  book.position.set(startX,startY);
+  mat.addChild(book);layers.objects.attach(book);
+  const obstacles:{x:number;y:number;r:number}[]=[];
+  const parent=mat.parent;
+  for(const object of state.objects){
+    if(!object.throwDice||!parent)continue;
+    const local=mat.toLocal(new Point(object.x,object.y),parent);
+    obstacles.push({x:local.x,y:local.y,r:Math.max(9,(object.sides===2?12:15))});
+  }
+  if(state.kind==='tcg'){
+    const right=TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3;
+    const top=-TCG_MAT_HEIGHT/2+TCG_MAT.rowHeight+TCG_MAT.gap;
+    for(const position of diceRackLocations(right,top))
+      obstacles.push({x:position.x,y:position.y,r:10});
+  }
+  const collides=(x:number,y:number)=>obstacles.some(d=>
+    Math.hypot(Math.max(Math.abs(d.x-x)-width*.54,0),
+      Math.max(Math.abs(d.y-y)-height*.47,0))<d.r);
+  if(readonly){book.eventMode='none';return;}
+  book.on('pointerdown',event=>{
+    if(event.button!==0)return;
+    event.stopPropagation();activeBookPointer=event.pointerId;
+    const stage=document.querySelector<HTMLCanvasElement>('.pixi-host canvas');
+    if(!stage){activeBookPointer=null;return;}
+    const rect=stage.getBoundingClientRect();
+    const from=new Point(event.global.x,event.global.y);
+    const origin={x:book.x,y:book.y};
+    let moved=false;
+    const move=(e:PointerEvent)=>{
+      if(e.pointerId!==event.pointerId)return;
+      e.stopPropagation();if(e.cancelable)e.preventDefault();
+      const global=new Point(from.x+(e.clientX-event.clientX)*stage.clientWidth/rect.width,
+        from.y+(e.clientY-event.clientY)*stage.clientHeight/rect.height);
+      const start=mat.toLocal(from),target=mat.toLocal(global);
+      const destination={x:origin.x+target.x-start.x,y:origin.y+target.y-start.y};
+      if(Math.hypot(destination.x-origin.x,destination.y-origin.y)>4)moved=true;
+      // Sweep, not just final-position testing: fast cursor movement cannot
+      // teleport a hardcover through a die between animation frames.
+      const dx=destination.x-book.x,dy=destination.y-book.y;
+      const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/3));
+      for(let i=1;i<=steps;i++){
+        const x=book.x+dx/(steps-i+1),y=book.y+dy/(steps-i+1);
+        if(collides(x,y))break;
+        book.position.set(x,y);
+      }
+    };
+    const finish=(e:PointerEvent)=>{
+      if(e.pointerId!==event.pointerId)return;
+      e.stopPropagation();
+      window.removeEventListener('pointermove',move,true);
+      window.removeEventListener('pointerup',finish,true);
+      window.removeEventListener('pointercancel',finish,true);
+      activeBookPointer=null;
+      if(e.type==='pointercancel'){book.position.set(origin.x,origin.y);return;}
+      if(!moved){onOpen();return;}
+      onMove({x:offset.x+book.x-origin.x,y:offset.y+book.y-origin.y});
+    };
+    window.addEventListener('pointermove',move,true);
+    window.addEventListener('pointerup',finish,true);
+    window.addEventListener('pointercancel',finish,true);
+  });
+}
 function drawTcgMats(
   board:Container,layers:TablePaintLayers,state:GameState,viewerSeat:number,readonly:boolean,
   opacity:number,hoverMs:number,playmat:PlaymatAppearance,labelScale:number,
@@ -477,164 +549,21 @@ function drawTcgMats(
 
       }
       if(seat!==viewerSeat&&seatActor){
-        const style=remoteAppearance?.bookDesign??'dragon';
-        const dock=remoteAppearance?.bookDock??'free';
-        const side=dock==='left'?-1:1;
+        // Every player's own book remains on exposed tabletop instead of
+        // disappearing beneath a closed drawer or a legacy Hidden setting.
+        const remoteDesign=remoteAppearance?.bookDesign??'dragon';
         const bw=TCG_MAT.cardWidth-8,bh=bw/.76;
-        const home=(dock==='free'||dock==='hidden')?tableBookHome(TCG_MAT_WIDTH,TCG_MAT_HEIGHT,bw,bh):
-          {x:side*(TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3),
-            y:TCG_MAT_HEIGHT/2-bh*.44-10};
-        const shift=remoteAppearance?.bookOffset??{x:0,y:0};
-        const x=home.x+shift.x,y=home.y+shift.y;
-        const accessory=makePseudo3DBook(style,bw,bh);
-        accessory.position.set(x,y);
-        // Each opponent owns independent drawers. Never try to attach their
-        // book to the VIEWER'S drawer map (which has no remote seats).
-        const tray=([-1,1] as const).find(s=>{
-          const d=seatDrawers.get(s);
-          if(!d)return false;
-          const trayTop=-TCG_MAT_HEIGHT/2+TCG_MAT.rowHeight+TCG_MAT.gap;
-          return isBookWithinDrawer(x,y,bw*1.06,bh*1.06,
-            drawerInnerWell(s*(TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3),
-              (trayTop+TCG_MAT_HEIGHT/2)/2,TCG_MAT.cardWidth,TCG_MAT_HEIGHT/2-trayTop));
-        });
-        accessory.eventMode='none';
-        accessory.visible=dock!=='hidden';
-        if(tray!==undefined)seatDrawers.get(tray)?.addChild(accessory);
-        else{mat.addChild(accessory);layers.objects.attach(accessory);}
+        const home=tableBookHome(TCG_MAT_WIDTH,TCG_MAT_HEIGHT,bw,bh);
+        const old=remoteAppearance?.bookDock==='free'?remoteAppearance?.bookOffset:undefined;
+        const remote=makePseudo3DBook(remoteDesign,bw,bh);
+        remote.label='seneternal-physical-book';
+        remote.eventMode='none';
+        remote.position.set(home.x+(old?.x??0),home.y+(old?.y??0));
+        mat.addChild(remote);layers.objects.attach(remote);
       }
     }
     if(seat===viewerSeat){
-      const side=bookDock==='left'?-1:1;
-      // A closed hardcover's natural portrait ratio, projected onto the
-      // tabletop. Its 3D footprint uses practically all of the tray width.
-      // Book matches the full outer span of the two compact coins.
-      const bw=TCG_MAT.cardWidth-8;
-      const bh=bw/.76;
-      const trayBottom=TCG_MAT_HEIGHT/2;
-      const home=(bookDock==='free'||bookDock==='hidden')?tableBookHome(TCG_MAT_WIDTH,TCG_MAT_HEIGHT,bw,bh):
-        {x:side*(TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3),
-          y:trayBottom-bh*.44-10};
-      const bx=home.x+bookOffset.x;
-      const by=home.y+bookOffset.y;
-      const book=makePseudo3DBook(bookDesign,bw,bh);
-      book.visible=bookDock!=='hidden';
-      book.position.set(bx,by);
-      // A physical book can be loose on the felt OR stowed in EITHER
-      // drawer. Test its footprint against the actual inner wooden walls;
-      // do not infer attachment merely from the Book Design/Dock setting.
-      const trayW=TCG_MAT.cardWidth;
-      const trayTop=-TCG_MAT_HEIGHT/2+TCG_MAT.rowHeight+TCG_MAT.gap;
-      const trayH=trayBottom-trayTop;
-      const wellFor=(drawerSide:-1|1)=>drawerInnerWell(
-        drawerSide*(TCG_MAT_WIDTH/2+trayW/2+3),
-        (trayTop+trayBottom)/2,trayW,trayH);
-      const fits=(drawerSide:-1|1,x:number,y:number,shift=0)=>
-        isBookWithinDrawer(x,y,bw*1.06,bh*1.06,wellFor(drawerSide),shift);
-      let stowedIn:-1|1|null=null;
-      const stow=(drawerSide:-1|1,openX:number,y:number)=>{
-        const drawer=drawerGroups.get(drawerSide);
-        if(!drawer)return;
-        layers.objects.detach(book);
-        // Child of the wooden tray: inherits its 245ms slide, stencil and
-        // draw order beneath the felt while remaining above the tray floor.
-        drawer.addChild(book);
-        book.position.set(openX,y);
-        stowedIn=drawerSide;
-      };
-      const free=(x:number,y:number)=>{
-        mat.addChild(book);
-        book.position.set(x,y);
-        layers.objects.attach(book);
-        stowedIn=null;
-      };
-      const initialStow=([-1,1] as const).find(s=>fits(s,bx,by));
-      if(initialStow!==undefined)stow(initialStow,bx,by);
-      else free(bx,by);
-
-      let release:((event:PointerEvent)=>void)|null=null;
-      book.on('pointerdown',e=>{
-        if(e.button!==0)return;
-        e.stopPropagation();
-        activeBookPointer=e.pointerId;
-        const stage=document.querySelector<HTMLCanvasElement>('.pixi-host canvas');
-        if(!stage){activeBookPointer=null;return;}
-        const rect=stage.getBoundingClientRect();
-        const startX=e.global.x,startY=e.global.y;
-        const previouslyStowed=stowedIn;
-        const homeDrawer=previouslyStowed!==null?drawerGroups.get(previouslyStowed):null;
-        // Lift out of the clipped drawer BEFORE dragging. The book now
-        // remains selectable across the drawer wall and entire playmat.
-        const originalX=book.position.x+(homeDrawer?.position.x??0);
-        const originalY=book.position.y;
-        if(previouslyStowed!==null)free(originalX,originalY);
-        let moved=false;
-        const onMove=(event:PointerEvent)=>{
-          if(event.pointerId!==e.pointerId)return;
-          event.stopPropagation();
-          if(event.cancelable)event.preventDefault();
-          const global=new Point(
-            startX+(event.clientX-e.clientX)*stage.clientWidth/rect.width,
-            startY+(event.clientY-e.clientY)*stage.clientHeight/rect.height);
-          const start=mat.toLocal(new Point(startX,startY));
-          const current=mat.toLocal(global);
-          const dx=current.x-start.x,dy=current.y-start.y;
-          if(Math.hypot(dx,dy)>4)moved=true;
-          book.position.set(originalX+dx,originalY+dy);
-        };
-        const onUp=(event:PointerEvent)=>{
-          if(event.pointerId!==e.pointerId)return;
-          event.stopPropagation();
-          window.removeEventListener('pointermove',onMove,true);
-          window.removeEventListener('pointerup',onUp,true);
-          window.removeEventListener('pointercancel',onUp,true);
-          activeBookPointer=null;
-          release=null;
-          if(event.type==='pointercancel'||!moved){
-            free(originalX,originalY);
-            if(previouslyStowed!==null&&homeDrawer)
-              stow(previouslyStowed,bookOpenPoseX(originalX,homeDrawer.position.x),originalY);
-            if(event.type!=='pointercancel')onBookOpen();
-            return;
-          }
-          // The right drawer is the book's HOME: dropping its center
-          // inside the wooden walls snaps it to the original bottom-center
-          // seat, regardless of where it was picked up or its old offset.
-          const rightDrawer=drawerGroups.get(1);
-          const insideRight=rightDrawer&&!drawerState.right&&
-            isBookCenterWithinDrawer(book.position.x,book.position.y,
-              wellFor(1),rightDrawer.position.x);
-          if(insideRight){
-            const homeX=wellFor(1).x;
-            const homeY=trayBottom-bh*.44-10;
-            stow(1,homeX,homeY);
-            onBookMove({x:bookSavedOffset(bookOffset.x,homeX,bx),
-              y:bookSavedOffset(bookOffset.y,homeY,by)});
-            return;
-          }
-          // The left drawer retains its existing freely positioned stow.
-          // Outside both drawers the book remains a free movable object.
-          const target=([-1,1] as const).find(s=>{
-            const drawer=drawerGroups.get(s);
-            return drawer&&!(s===-1?drawerState.left:drawerState.right)&&
-              fits(s,book.position.x,book.position.y,drawer.position.x);
-          });
-          const visibleX=book.position.x,visibleY=book.position.y;
-          const openX=target===undefined?visibleX:
-            bookOpenPoseX(visibleX,drawerGroups.get(target)?.position.x??0);
-          if(target!==undefined)stow(target,openX,visibleY);
-          // bx/by already contain the prior offset. Preserve it when saving
-          // the movement delta, otherwise every drop jumps on scene rebuild.
-          onBookMove({x:bookSavedOffset(bookOffset.x,openX,bx),
-            y:bookSavedOffset(bookOffset.y,visibleY,by)});
-        };
-        release=onUp;
-        window.addEventListener('pointermove',onMove,true);
-        window.addEventListener('pointerup',onUp,true);
-        window.addEventListener('pointercancel',onUp,true);
-      });
-      book.on('destroyed',()=>{if(release)activeBookPointer=null;});
-      // A stored book shares the moving drawer; a lifted book is free.
+      placePersistentBook(mat,layers,bookDesign,bookOffset,state,readonly,onBookOpen,onBookMove);
     }
     const cos=Math.cos(topLeft.angle),sin=Math.sin(topLeft.angle);
     // Joined center rows are rendered as ONE pocket. The side columns
@@ -2599,112 +2528,6 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
           dicePointer.current=held;
         });
       });
-    }
-    // All three instruments begin INSIDE the visible left drawer.
-    // Keep dragging in the seat's own coordinate system: reparenting to
-    // the unrotated board used to turn them upside down in rotated views.
-    if(state.kind==='tcg'){
-      const left=drawerGroups.current.get(-1);
-      const local=seatGroups?.get(seat)??board;
-      if(left){
-        const trayX=-TCG_MAT_WIDTH/2-TCG_MAT.cardWidth/2-3;
-        const trayTop=-TCG_MAT_HEIGHT/2+TCG_MAT.rowHeight+TCG_MAT.gap;
-        const instruments=[
-          {key:'magnifier',node:buildDrawerMagnifier(),x:trayX-9,y:trayTop+112,scale:.52}
-        ];
-        for(const instrument of instruments){
-          const {node,key}=instrument;
-          node.position.set(instrument.x,instrument.y);
-          // Preserve the chosen magnifier orientation.
-          node.scale.set(-instrument.scale,-instrument.scale);
-          left.addChild(node);
-          // When stored, use the same drawer parent as the stowed book.
-          // Once on the table, use the book's objects paint layer.
-          const storageKey='seneternal.instrument-position.v2.'+seat+'.'+key;
-          try{
-            const saved=JSON.parse(localStorage.getItem(storageKey)||'null');
-            if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y)){
-              local.addChild(node);
-              paintLayers.objects.attach(node);
-              node.position.set(saved.x,saved.y);
-              if(Number.isFinite(saved.rotation))node.rotation=saved.rotation;
-            }
-          }catch{/* Storage is optional. */}
-          node.eventMode='static';
-          node.cursor='grab';
-          node.hitArea=new Rectangle(-49,-54,98,108);
-          node.on('pointerdown',e=>{
-            if(e.button!==0)return;
-            e.stopPropagation();
-            controlPointer.current=e.pointerId;
-            const pointer=e.pointerId;
-            const rect=app.canvas.getBoundingClientRect();
-            const toStage=(x:number,y:number)=>new Point(
-              (x-rect.left)*app.renderer.width/rect.width,
-              (y-rect.top)*app.renderer.height/rect.height);
-            const startScreen=toStage(e.clientX,e.clientY);
-            const initialParent=node.parent!;
-            const initialPos=new Point(node.x,node.y);
-            const initialRotation=node.rotation;
-            const initialGlobal=node.toGlobal(new Point(0,0));
-            let moved=false;
-            let origin=new Point();
-            let startingLocal=new Point();
-            node.cursor='grabbing';
-            const move=(event:PointerEvent)=>{
-              if(event.pointerId!==pointer||!session.current)return;
-              const point=toStage(event.clientX,event.clientY);
-              if(!moved){
-                if(Math.hypot(point.x-startScreen.x,point.y-startScreen.y)<4)return;
-                moved=true;
-                const oldParentAngle=Math.atan2(initialParent.worldTransform.b,initialParent.worldTransform.a);
-                const newParentAngle=Math.atan2(local.worldTransform.b,local.worldTransform.a);
-                const place=local.toLocal(initialGlobal);
-                if(node.parent!==local)local.addChild(node);
-                paintLayers.objects.attach(node);
-                node.position.copyFrom(place);
-                // Preserve orientation, including both existing flip axes.
-                node.rotation=initialRotation+oldParentAngle-newParentAngle;
-                startingLocal.copyFrom(place);
-                origin=local.toLocal(startScreen,app.stage);
-              }
-              const current=local.toLocal(point,app.stage);
-              node.position.set(startingLocal.x+current.x-origin.x,
-                startingLocal.y+current.y-origin.y);
-            };
-            const finish=(event:PointerEvent)=>{
-              if(event.pointerId!==pointer)return;
-              window.removeEventListener('pointermove',move);
-              window.removeEventListener('pointerup',finish);
-              window.removeEventListener('pointercancel',finish);
-              if(controlPointer.current===pointer)controlPointer.current=null;
-              node.cursor='grab';
-              if(event.type==='pointercancel'){
-                if(node.parent!==initialParent)initialParent.addChild(node);
-                if(initialParent===left)paintLayers.objects.detach(node);
-                else paintLayers.objects.attach(node);
-                node.position.copyFrom(initialPos);
-                node.rotation=initialRotation;
-                return;
-              }
-              if(!moved)return;
-              const dock=local.toLocal(left.toGlobal(new Point(instrument.x,instrument.y)));
-              if(key==='life'&&Math.hypot(node.x-dock.x,node.y-dock.y)<22){
-                paintLayers.objects.detach(node);
-                left.addChild(node);
-                node.position.set(instrument.x,instrument.y);
-                node.rotation=0;
-                try{localStorage.removeItem(storageKey);}catch{/* optional */}
-              }else{
-                try{localStorage.setItem(storageKey,JSON.stringify({x:node.x,y:node.y,rotation:node.rotation}));}catch{/* optional */}
-              }
-            };
-            window.addEventListener('pointermove',move);
-            window.addEventListener('pointerup',finish);
-            window.addEventListener('pointercancel',finish);
-          });;
-        }
-      }
     }
     // Fixed, interactive source coins live inside the *local* right tray.
     // Their Pixi transform follows the mat in all three camera modes.
