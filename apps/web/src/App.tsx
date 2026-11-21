@@ -5,6 +5,7 @@ import {ArrowLeft,BookOpen,Check,ChevronRight,Code2,Copy,Dices,Download,FlipHori
 import {applyCommand,createGame,createId,gameFromPack,parseGamePack,replay,expireThrownDice,thrownDieDeadlines,THROWN_DIE_LIFETIME_MS,type Command,type EventRecord,type GameKind,type GamePack,type GameState,type PlayMode,type TableObject,BOARD_CENTER,tcgMatCells,tcgMatLocal,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,isTcgRemoveDrop,cardStackMembers,defaultPlaymatAppearance,normalizePlaymatAppearance,type PlaymatAppearance,type SharedAppearance} from '@seneternal/core';
 import {runLua,SAMPLE_LUA} from '@seneternal/lua';
 import TableCanvas from './components/TableCanvas';
+import {DEFAULT_TABLE_MATERIALS,TABLE_MATERIAL_OPTIONS,normalizeTableMaterials,type TableMaterials} from './lib/tableMaterials';
 import {formatActionDisplay} from './lib/actionDisplay';
 import {mergeReceipt,parseReplayFile,receiptForCommand,receiptTimestamp,RECEIPT_SCHEMA,
   type ReceiptRow} from './lib/actionReceipt';
@@ -28,21 +29,14 @@ const BOOK_POSITION_KEY='seneternal.book.position.v3';
 /** Preserve deliberately moved books while migrating the old default
  * (inside a drawer) to a visible home on the table. */
 function initialBookPlacement():{dock:BookDock;offset:BookOffset}{
+  // Never restore an old Hidden/drawer dock. The physical tome now has one
+  // permanent tabletop home shared by every game, tab and viewing mode.
   try{
     const saved=JSON.parse(localStorage.getItem(BOOK_POSITION_KEY)||'null');
-    if(saved&&['left','right','free','hidden'].includes(saved.dock)&&
-      Number.isFinite(saved.offset?.x)&&Number.isFinite(saved.offset?.y))
-      return {dock:saved.dock,offset:{x:saved.offset.x,y:saved.offset.y}};
-  }catch{/* Invalid settings should never hide the book. */}
-  let offset:BookOffset={x:0,y:0};
-  try{
-    const old=JSON.parse(localStorage.getItem('seneternal.book.offset.v2')||'null');
-    if(Number.isFinite(old?.x)&&Number.isFinite(old?.y))
-      offset={x:old.x,y:old.y};
-  }catch{/* Default placement. */}
-  const raw=localStorage.getItem('seneternal.book.dock.v2');
-  const dock:BookDock=raw==='left'?'left':raw==='free'?'free':'right';
-  return {dock:dock==='right'&&offset.x===0&&offset.y===0?'free':dock,offset};
+    if(saved?.dock==='free'&&Number.isFinite(saved.offset?.x)&&
+      Number.isFinite(saved.offset?.y))return {dock:'free',offset:saved.offset};
+  }catch{/* Storage is optional. */}
+  return {dock:'free',offset:{x:0,y:0}};
 }
 type GamePage = 'all'|'recent'|'library'|'tools';
 type SettingsPage = 'general'|'playmat'|'deckbuilder'|'multiplayer'|'scripting';
@@ -188,6 +182,11 @@ export default function App(){
   // into a drawer (or Hidden setting) remains persistent across sessions.
   const [bookDock,setBookDock]=useState<BookDock>(()=>initialBookPlacement().dock);
   const [bookOffset,setBookOffset]=useState<BookOffset>(()=>initialBookPlacement().offset);
+  const [tableMaterials,setTableMaterials]=useState<TableMaterials>(()=>{
+    try{return normalizeTableMaterials(JSON.parse(localStorage.getItem('seneternal.table.materials.v1')||'null'));}
+    catch{return {...DEFAULT_TABLE_MATERIALS};}
+  });
+  useEffect(()=>{try{localStorage.setItem('seneternal.table.materials.v1',JSON.stringify(tableMaterials));}catch{}},[tableMaterials]);
   useEffect(()=>{localStorage.setItem('seneternal.book.design',bookDesign)},[bookDesign]);
   useEffect(()=>{localStorage.setItem('seneternal.book.dock.v2',bookDock)},[bookDock]);
   useEffect(()=>{localStorage.setItem('seneternal.book.offset.v2',JSON.stringify(bookOffset))},[bookOffset]);
@@ -717,7 +716,7 @@ export default function App(){
         onClick={shareRoom} title="Share invitation"><Link2 size={16}/></button>}
     </div>
     <div className="table-world">
-      <TableCanvas bookDesign={bookDesign} bookDock={bookDock} bookOffset={bookOffset} onBookMove={point=>{
+      <TableCanvas tableMaterials={tableMaterials} bookDesign={bookDesign} bookDock={bookDock} bookOffset={bookOffset} onBookMove={point=>{
           writeReceipt('Move','Book · '+Math.round(bookOffset.x)+','+Math.round(bookOffset.y)+
             ' → '+Math.round(point.x)+','+Math.round(point.y),'Reposition');
           setBookOffset(point);
@@ -982,14 +981,23 @@ export default function App(){
                 <option value="tiny">Tiny Tome · Leather & Brass</option><option value="dragon">Dragon Codex · Azure Enamel</option><option value="journal">Campaign Journal · Crimson</option><option value="arcane">Arcane Notebook · Gold Sigil</option><option value="strapped">Strapped Journal · Aged Hide</option>
               </select></label>
               <h4>Book Position</h4>
-              <label>Resting Place<select value={bookDock} onChange={e=>{setBookDock(e.target.value as BookDock);setBookOffset({x:0,y:0});}}>
-                <option value="free">On Table · Always Visible</option>
-                <option value="left">Inside Left Drawer</option>
-                <option value="right">Inside Right Drawer</option>
-                <option value="hidden">Hidden</option>
-              </select></label>
-              <p>Drag the book freely, or place it in a drawer and close the drawer to stow it. Hidden books can always be restored here.</p>
-              <button className="reader-secondary" onClick={()=>{setBookDock('free');setBookOffset({x:0,y:0});}}>Return Book to Table</button>
+              <p>The Seneternal book remains visible on the tabletop in every game and viewing mode. Drag it to reposition it; its location is preserved between sections.</p>
+              <button className="reader-secondary" onClick={()=>{setBookDock('free');setBookOffset({x:0,y:0});}}>Reset Book Position</button>
+              <div className="seneternal-table-material-settings">
+                <h3>Table Textures</h3>
+                <p>Choose separate high-detail materials for the playing surface, outer rim and surrounding floor. Procedural surfaces remain lightweight, sharp and available offline.</p>
+                {(['table','rim','floor'] as const).map(surface=>
+                  <label key={surface}>
+                    {surface==='table'?'Table':surface==='rim'?'Rim':'Floor'}
+                    <select value={tableMaterials[surface]} onChange={e=>
+                      setTableMaterials(current=>({...current,[surface]:e.target.value as TableMaterials[typeof surface]}))}>
+                      {TABLE_MATERIAL_OPTIONS.map(material=>
+                        <option key={material.id} value={material.id}>{material.label}</option>)}
+                    </select>
+                  </label>)}
+                <button className="reader-secondary" type="button"
+                  onClick={()=>setTableMaterials({...DEFAULT_TABLE_MATERIALS})}>Reset Table Textures</button>
+              </div>
               </div>}
             {settingsPage==='general'&&<><div className="reader-heading"><div><h2>Your perspective</h2><p>Your own seat is always positioned at the bottom. The table rotates around it.</p></div></div>
               <div className="reader-block"><h3>Player</h3><label>Display name<input value={playerName} maxLength={32} onChange={e=>setPlayerName(e.target.value)}/></label><label>My seat<select value={seat} onChange={e=>setSeat(Number(e.target.value))}>{Array.from({length:12},(_,i)=><option key={i} value={i}>Player {String(i+1).padStart(2,'0')}</option>)}</select></label></div>
