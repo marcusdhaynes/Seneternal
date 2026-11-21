@@ -44,6 +44,8 @@ export interface Dice3DOptions {
   /** Source was picked up and released at this exact screen coordinate. */
   heldRelease?:boolean;
   trays:Dice3DRect[];obstacles:{x:number;y:number;sides?:number;scale?:number}[];
+  /** Physical book footprint(s) in CSS pixels, supplied by the Pixi scene. */
+  books?:Dice3DRect[];
   done:(results:Dice3DResult[])=>void;
   /** A GPU/context/physics failure must never strand the roll in flight. */
   onError?:(error:unknown)=>void;
@@ -155,7 +157,16 @@ export function roll3DDice(opts:Dice3DOptions):()=>void{
   };
   let currentScreenBounds=visibleViewport();
   moveScreenWalls(currentScreenBounds);
-  // Trays, coins, playmat accessories, and cards remain visuals only.
+  // A hardcover is a solid raised obstacle, not a decorative overlay.
+  // Rigid boxes prevent dice (including D02 flipcoins) from ghosting through
+  // it, while high airborne throws may still naturally clear its top.
+  for(const book of opts.books??[]){
+    if(![book.left,book.top,book.right,book.bottom].every(Number.isFinite))continue;
+    const width=book.right-book.left,height=book.bottom-book.top;
+    if(width<2||height<2)continue;
+    boxAt(world,(book.left+book.right)/2,
+      h-(book.top+book.bottom)/2,18,width,height,36,wallMat);
+  }
   // Previously settled dice are static contact bodies: new dice cannot
   // ghost through them, while their saved outcome remains authoritative.
   for(const oldDie of opts.obstacles.slice(-60)){
