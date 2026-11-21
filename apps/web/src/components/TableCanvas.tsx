@@ -106,7 +106,6 @@ import {fitMatAttachedRadial,fitSelfMatWithHud,fitBattleRadialZoom,
   EYE_CONTROL_DIAMETER_PX,eyeOpponentReferencePixels} from '../lib/actionRadialFit';
 import {TABLE_PAINT_ORDER,playmatPaintLayer} from '../lib/castlePaintOrder';
 import {DICE_THEMES,resolveDiceTheme,normalizeDiceAppearance,type DiceAppearance} from '../lib/diceThemes';
-import {stepDicePhysics,throwVelocity,type DiceBody,type CollisionRect} from '../lib/dicePhysics';
 import {makePseudo3DBook} from './Pseudo3DBook';
 import {wheelPosition,radialMembership,radialTapMembership,type RadialAction} from '../lib/radialWheel.ts';
 import {cardGestureOptions,isDoubleCardTap,GESTURE_HOLD_MS,GESTURE_MOVE_THRESHOLD,type CardGestureAction} from '../lib/cardGestures';
@@ -304,6 +303,26 @@ function addPlaymatImage(mat:Container,base:Graphics,x:number,y:number,w:number,
  * cell coordinates on every client; drag release is snapped in core. */
 /** A single unclipped tome for all game kinds and camera arrangements.
  * Move constraints are swept against both the permanent rack and loose dice. */
+/** Project visible hardcover footprints to CSS pixels for the 3D solver. */
+function visibleBookColliders(root:Container,sx:number,sy:number):{left:number;top:number;right:number;bottom:number}[]{
+  const width=TCG_MAT.cardWidth-8,height=width/.76;
+  const colliders:{left:number;top:number;right:number;bottom:number}[]=[];
+  const visit=(node:Container)=>{
+    if(!node.visible)return;
+    if(node.label==='seneternal-physical-book'){
+      const corners=[[-width*.56,-height*.54],[width*.56,-height*.54],
+        [width*.56,height*.54],[-width*.56,height*.54]]
+        .map(([x,y])=>node.toGlobal(new Point(x,y)));
+      colliders.push({left:Math.min(...corners.map(p=>p.x))*sx,
+        right:Math.max(...corners.map(p=>p.x))*sx,
+        top:Math.min(...corners.map(p=>p.y))*sy,
+        bottom:Math.max(...corners.map(p=>p.y))*sy});
+    }
+    for(const child of node.children)if(child instanceof Container)visit(child);
+  };
+  visit(root);
+  return colliders;
+}
 function placePersistentBook(mat:Container,layers:TablePaintLayers,
   design:Props['bookDesign'],offset:Props['bookOffset'],state:GameState,
   readonly:boolean,onOpen:()=>void,onMove:Props['onBookMove']):void{
@@ -1739,9 +1758,8 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
     // The last roll may still be showing its final static/3D handoff.
     // Close that old renderer before allocating a new WebGL context.
     dice3DStop.current?.();dice3DStop.current=null;
-    // Picking one physical model releases exactly that one die, not the
-    // rest of the queued dice in the rack.
-    const selected=release?{[pressed]:1}:{...diceQuantitiesRef.current};
+    // Dragging any selected die launches every queued denomination together.
+    const selected={...diceQuantitiesRef.current};
     if(!selected[pressed])selected[pressed]=1;
     const types=DICE_TYPES.filter(sides=>(selected[sides]??0)>0);
     const mat=diceTrayMat.current;
@@ -1765,6 +1783,7 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       return {left:Math.min(...corners.map(p=>p.x)),top:Math.min(...corners.map(p=>p.y)),
         right:Math.max(...corners.map(p=>p.x)),bottom:Math.max(...corners.map(p=>p.y))};
     });
+    const books=visibleBookColliders(board,sx,sy);
     const sources=types.map(sides=>{
       const p=diceSources.current.get(sides)?.toGlobal(new Point(0,0))??
         mat.toGlobal(new Point(distance,top+85));
@@ -1798,12 +1817,11 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       return [{...convert(point),sides:obj.sides??6,
         scale:Math.hypot(edge.x-point.x,edge.y-point.y)*Math.max(sx,sy)}];
     }).slice(-60);
-    if(!release){
-      diceQuantitiesRef.current={};setDiceQuantities({});
-      for(const sides of DICE_TYPES)staticDice3D.current?.setSourceQuantity(sides,0);
-      for(const {body,count} of diceBadges.current.values()){
-        body.children[0].visible=false;count.text='';
-      }
+    diceQuantitiesRef.current={};setDiceQuantities({});
+    for(const sides of DICE_TYPES)staticDice3D.current?.setSourceQuantity(sides,0);
+    for(const {body,count} of diceBadges.current.values()){
+      if(body.children[0])body.children[0].visible=false;
+      count.text='';
     }
     let thrown=false;
     const commitResults=(results:RollFallbackResult[])=>{
@@ -1821,9 +1839,8 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
           rotation:((result.rotation%360)+360)%360,
           quaternion:result.quaternion,altitude:result.altitude};
       });
-      // A held die may coexist with a queued ROLL selection. Keep that
-      // selection intact, but always show the completed face/result in the LCD.
-      if(release)setShowDiceSelection(false);
+      // The complete selected handful was thrown in one transaction.
+      setShowDiceSelection(false);
       diceThrowCallback.current(throws);
     };
     const recoverThrow=(error:unknown)=>{
@@ -1845,7 +1862,7 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
         const beforePaint=staticDice3D.current?.getRenderedRevision()??0;
         const d=roll3DDice({host,width:rect.width,height:rect.height,
           canHandoff:()=> (staticDice3D.current?.getRenderedRevision()??0)>beforePaint,
-          sources:physicalSources,aimX,aimY,durationMs:elapsed,trays,obstacles,
+          sources:physicalSources,aimX,aimY,durationMs:elapsed,trays,obstacles,books,
           gentleDrop,heldRelease:!!release,
           done:commitResults,onError:recoverThrow});
         dice3DStop.current=d;
@@ -1887,6 +1904,7 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
         right:Math.max(...corners.map(p=>p.x)),
         top:Math.min(...corners.map(p=>p.y)),bottom:Math.max(...corners.map(p=>p.y))};
     });
+    const books=visibleBookColliders(board,sx,sy);
     const obstacles=[...visuals.current.entries()].flatMap(([otherId,piece])=>{
       const other=currentState.current.objects.find(o=>o.id===otherId);
       if(otherId===id||!other||(other.kind!=='die'&&!other.throwDice))return [];
@@ -1936,7 +1954,7 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
           sources:[{sides:die.sides??6,quantity:die.throwQuantity??1,
             themeId:resolveDiceTheme(diceAppearance,die.sides??6),scale,...start}],
           aimX:dx,aimY:dy,durationMs:elapsed,
-          reroll:true,trays,obstacles,
+          reroll:true,trays,obstacles,books,
           done:commitReroll,onError:recoverReroll});
         dice3DStop.current=stop;
       }catch(error){recoverReroll(error);}
@@ -3248,6 +3266,17 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       if(controlPointer.current===e.pointerId)controlPointer.current=null;
       if(!commit)return;
       const dx=e.clientX-d.startX,dy=e.clientY-d.startY;
+      const everMoved=d.history.some(p=>Math.hypot(p.x-d.startX,p.y-d.startY)>6);
+      if(d.held&&!everMoved){
+        // Holding the source without moving resets just this die's count.
+        const next={...diceQuantitiesRef.current};delete next[d.sides];
+        diceQuantitiesRef.current=next;setDiceQuantities(next);
+        staticDice3D.current?.setSourceQuantity(d.sides,0);
+        const badge=diceBadges.current.get(d.sides);
+        if(badge){if(badge.body.children[0])badge.body.children[0].visible=false;badge.count.text='';}
+        setShowDiceSelection(Object.values(next).some(quantity=>quantity>0));
+        return;
+      }
       if(!d.held&&Math.hypot(dx,dy)<10){addDiceCount(d.sides);return;}
       // Interpret the final meaningful pointer trajectory, cutting off
       // any earlier movement when the hand reverses. The same estimator
