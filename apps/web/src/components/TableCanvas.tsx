@@ -1687,6 +1687,10 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
   const tokenDrag=useRef<{pointerId:number;value:number;sign:1|-1;
     coinText?:string;startX:number;startY:number;mat:Container;ghost:Container;
     ghostEl:HTMLDivElement;color:string;onCenterTap?:()=>void;history:DiePointerSample[]}|null>(null);
+  // Airborne metal coins are independent of Pixi scene rebuilds. A mode
+  // change, card redraw or open drawer may not cancel their physics.
+  const coinFlights=useRef(new Set<()=>void>());
+  useEffect(()=>()=>{for(const stop of coinFlights.current)stop();coinFlights.current.clear();},[]);
   const commitCoinEdit=()=>{
     if(validCoinText(coinDraft)){
       if(coinEditing?.id)onCoinModify(coinEditing.id,{coinText:coinDraft});
@@ -3413,7 +3417,10 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       const d=tokenDrag.current;
       if(!d||d.pointerId!==event.pointerId)return;
       tokenDrag.current=null;
-      const current=session.current,at=coordinates(event);
+      const current=session.current;
+      const actual=d.ghost.visible&&!d.ghost.destroyed
+        ?d.ghost.toGlobal(new Point(0,0)):null;
+      const at=actual??coordinates(event);
       const traveled=Math.hypot(event.clientX-d.startX,event.clientY-d.startY);
       const dispose=()=>{
         if(!d.ghost.destroyed)d.ghost.destroy();
@@ -3455,8 +3462,12 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       }
       if(!parent){dispose();return;}
       const placeAt=(point:Point)=>{
-        if(!session.current||session.current.app!==current.app||!parent||parent.destroyed)return;
-        const spot=parent.toLocal(point,current.app.stage);
+        if(!session.current||session.current.app!==current.app)return;
+        // Re-resolve the live drawing parent after an animated coin lands:
+        // a concurrent state change may rebuild all the original Pixi nodes.
+        const liveParent=target&&parent&&!parent.destroyed?parent:
+          duelLayers.current?.get(seatRef.current)??current.board;
+        const spot=liveParent.toLocal(point,current.app.stage);
         callbacks.current.onTokenPlace(d.value,d.sign,
           spot.x,spot.y,target?.id,d.color,d.coinText);
       };
@@ -3471,49 +3482,58 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       const sx=rect.width/current.app.renderer.width;
       const sy=rect.height/current.app.renderer.height;
       if(!rect.width||!rect.height){dispose();return;}
-      const velocity=throwVelocity(release.dx,release.dy,release.durationMs);
-      const body:DiceBody={x:event.clientX-rect.left,y:event.clientY-rect.top,
-        vx:velocity.x*.58,vy:velocity.y*.58,z:55,vz:215,
-        angle:0,spin:(Math.random()>.5?1:-1)*(13+velocity.speed*.01),
-        radius:12,mass:.8,leftTrayExited:true};
-      // The same solver that separates dice also handles contact with
-      // grounded dice and the solid Seneternal book.
+      // True 3D rigid-body toss: the metal disk has finite thickness,
+      // separate stamped faces, inertia, torque, edge impacts and bounces.
+      // No scaleY/cosine animation or flat 2D coin approximation remains.
+      const host=mount.current;
+      if(!host){dispose();placeAt(at);return;}
+      const px=at.x*sx,py=at.y*sy;
+      const axis=d.ghost.toGlobal(new Point(1,0));
+      const radius=Math.max(7,Math.min(40,
+        Math.hypot(axis.x-at.x,axis.y-at.y)*16*Math.max(sx,sy)));
       const books=visibleBookColliders(current.board,sx,sy);
-      const fixed:DiceBody[]=[...visuals.current.entries()].flatMap(([id,piece])=>{
-        const other=currentState.current.objects.find(o=>o.id===id);
-        if(!other?.throwDice||piece.destroyed)return [];
-        const p=piece.toGlobal(new Point(0,0));
-        return [{x:p.x*sx,y:p.y*sy,vx:0,vy:0,z:0,vz:0,
-          angle:0,spin:0,radius:14,mass:1,leftTrayExited:true,fixed:true}];
+      const solids=[...visuals.current.entries()].flatMap(([id,piece])=>{
+        const object=currentState.current.objects.find(o=>o.id===id);
+        if(!object||piece.destroyed||
+          (object.kind!=='die'&&!object.throwDice&&!object.tokenCoin))return [];
+        const center=piece.toGlobal(new Point(0,0));
+        const edge=piece.toGlobal(new Point(1,0));
+        const scale=Math.hypot(edge.x-center.x,edge.y-center.y)*Math.max(sx,sy);
+        return [{x:center.x*sx,y:center.y*sy,
+          radius:(object.tokenCoin?12:15)*scale,
+          kind:object.tokenCoin?'coin' as const:'die' as const}];
       });
-      d.ghost.visible=true;
-      const begun=performance.now();
-      let last=begun,accumulator=0,frame=0;
-      const tick=(now:number)=>{
-        if(d.ghost.destroyed||session.current?.app!==current.app){
-          dispose();return;
-        }
-        accumulator+=Math.min(.05,(now-last)/1000);last=now;
-        while(accumulator>=1/60){
-          stepDicePhysics([body,...fixed],1/60,rect.width,rect.height,books);
-          accumulator-=1/60;
-        }
-        const painted=new Point(body.x/sx,(body.y-body.z*.25)/sy);
-        d.ghost.position.copyFrom(d.mat.toLocal(painted,current.app.stage));
-        // A flipping metal disk narrows edge-on and returns to full width
-        // as the angular momentum dissipates on the felt.
-        d.ghost.scale.y=Math.max(.11,Math.abs(Math.cos(body.angle)));
-        d.ghost.rotation=body.angle*.13;
-        const settled=body.z===0&&Math.hypot(body.vx,body.vy)<14&&
-          Math.abs(body.spin)<1.3;
-        if(settled||now-begun>2550){
-          const landed=new Point(body.x/sx,body.y/sy);
-          dispose();placeAt(landed);return;
-        }
-        frame=requestAnimationFrame(tick);
+      let committed=false;
+      let stopFlight:()=>void=()=>{};
+      const land=(position:{x:number;y:number;heads:boolean;rotation:number})=>{
+        if(committed)return;committed=true;
+        coinFlights.current.delete(stopFlight);
+        const final=new Point(position.x/sx,position.y/sy);
+        dispose();placeAt(final);
+        interfaceAction.current('Throw','Coin',
+          (position.heads?'Heads':'Tails')+' · '+String(d.coinText??d.value));
       };
-      frame=requestAnimationFrame(tick);
-      void frame;
+      const fallback=(error:unknown)=>{
+        console.warn('Physical coin throw unavailable:',error);
+        setDice3DError('3D coin toss unavailable on this device: '+String(error));
+        land({x:px,y:py,heads:true,rotation:0});
+      };
+      // Preserve the visible ghost until Three.js has prepared the scene.
+      // WebGL is lazily loaded and never runs while coins sit on the felt.
+      void import('../lib/Coin3D').then(({tossCoin3D})=>{
+        if(session.current?.app!==current.app||committed)return;
+        stopFlight=tossCoin3D({
+          host,width:rect.width,height:rect.height,x:px,y:py,
+          radius,value:d.coinText??d.value,color:d.color,
+          appearance:coinAppearance,
+          deltaX:release.dx,deltaY:release.dy,durationMs:release.durationMs,
+          books,solids,onLand:land,onError:fallback
+        });
+        coinFlights.current.add(stopFlight);
+        requestAnimationFrame(()=>{
+          if(!committed){d.ghost.visible=false;d.ghostEl.style.display='none';}
+        });
+      }).catch(fallback);
     };
     const move=(event:PointerEvent)=>{
       const d=tokenDrag.current,at=coordinates(event);
