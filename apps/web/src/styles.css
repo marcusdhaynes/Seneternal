@@ -3005,3 +3005,120 @@ body:has(.reader-backdrop) > :is(
   width:100%;
   min-width:0;
 }
+
+
+/* True-resolution action display: all text, buttons and SVGs are laid out
+   directly at projected screen size. Never scale a 12px raster/composite. */
+.pixi-host .seneternal-action-lcd{
+  --seneternal-lcd-scale:1;
+  transform:none!important;
+  transform-origin:top left;
+  will-change:auto;
+  height:calc(30px * var(--seneternal-lcd-scale));
+  min-height:0;
+  min-width:0;
+  max-width:none;
+  display:grid;
+  grid-template-columns:
+    calc(22px * var(--seneternal-lcd-scale))
+    minmax(0,1fr)
+    auto
+    calc(22px * var(--seneternal-lcd-scale));
+  gap:calc(2px * var(--seneternal-lcd-scale));
+  padding:calc(2px * var(--seneternal-lcd-scale))
+    calc(3px * var(--seneternal-lcd-scale));
+  border:1px solid #b89a67;
+  border-radius:calc(6px * var(--seneternal-lcd-scale));
+  background:linear-gradient(145deg,#6c5037,#352820 70%,#493827);
+  box-shadow:0 1px 2px #05090999;
+  filter:none!important;
+  isolation:auto;
+  overflow:hidden;
+}
+.pixi-host .seneternal-action-lcd-display{
+  grid-column:2;
+  height:calc(22px * var(--seneternal-lcd-scale));
+  min-height:0;
+  min-width:0;
+  box-sizing:border-box;
+  padding:0 calc(5px * var(--seneternal-lcd-scale));
+  border:1px solid #366455;
+  border-radius:calc(3px * var(--seneternal-lcd-scale));
+  background:#082521;
+  box-shadow:none;
+  color:#bdffdc;
+  font-family:'Cascadia Code',Consolas,ui-monospace,monospace;
+  font-size:calc(12.1px * var(--seneternal-lcd-scale));
+  font-weight:750;
+  line-height:1.2;
+  letter-spacing:0;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:geometricPrecision;
+  text-shadow:none!important;
+  white-space:nowrap;
+}
+.pixi-host .seneternal-action-lcd-display span{
+  display:block;
+  text-shadow:none!important;
+}
+.pixi-host .seneternal-action-lcd-button{
+  box-sizing:border-box;
+  width:calc(22px * var(--seneternal-lcd-scale));
+  height:calc(22px * var(--seneternal-lcd-scale));
+  min-width:0;
+  min-height:0;
+  flex:none;
+  border:1px solid #c1a477;
+  border-radius:calc(4px * var(--seneternal-lcd-scale));
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#f9edcf;
+  background:#634d36;
+  box-shadow:none;
+  text-shadow:none!important;
+  filter:none!important;
+  transition:background-color .1s linear,color .1s linear;
+}
+.pixi-host .seneternal-action-lcd-button svg{
+  display:block;
+  width:calc(16px * var(--seneternal-lcd-scale));
+  height:calc(16px * var(--seneternal-lcd-scale));
+  overflow:visible;
+  fill:none;
+  filter:none!important;
+  shape-rendering:geometricPrecision;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.pixi-host .seneternal-action-lcd-button:hover:not(:disabled){
+  color:#fff9e4;
+  background:#80613c;
+  box-shadow:none;
+}
+.pixi-host .seneternal-action-lcd-button:active:not(:disabled){
+  background:#483727;
+  box-shadow:none;
+}
+.pixi-host .seneternal-action-lcd-button:disabled{
+  opacity:.43;
+  color:#d0c0a0;
+  box-shadow:none;
+  filter:none!important;
+}
+.pixi-host .seneternal-action-lcd-roll{
+  grid-column:3;
+  height:calc(22px * var(--seneternal-lcd-scale));
+  min-width:calc(32px * var(--seneternal-lcd-scale));
+  padding:0 calc(4px * var(--seneternal-lcd-scale));
+  border-radius:calc(3px * var(--seneternal-lcd-scale));
+  border:1px solid #79a993;
+  background:#235747;
+  color:#dfffea;
+  box-shadow:none;
+  font:800 calc(9px * var(--seneternal-lcd-scale))/1
+    'Cascadia Code',Consolas,ui-monospace,monospace;
+  text-shadow:none!important;
+  filter:none!important;
+}
