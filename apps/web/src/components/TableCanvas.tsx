@@ -3542,7 +3542,28 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       d.history.push({x:event.clientX,y:event.clientY,t:now});
       while(d.history.length>2&&d.history[1].t<now-180)d.history.shift();
       if(Math.hypot(event.clientX-d.startX,event.clientY-d.startY)<9)return;
-      const local=d.mat.toLocal(at,session.current!.app.stage);
+      const current=session.current;if(!current)return;
+      const rect=current.app.canvas.getBoundingClientRect();
+      if(rect.width<=0||rect.height<=0)return;
+      const sx=rect.width/current.app.renderer.width,
+        sy=rect.height/current.app.renderer.height;
+      const center=d.ghost.toGlobal(new Point(0,0));
+      const edge=d.ghost.toGlobal(new Point(1,0));
+      const radius=Math.max(7,Math.min(38,
+        16*Math.hypot(edge.x-center.x,edge.y-center.y)*Math.max(sx,sy)));
+      const colliders:DragObstacle[]=visibleBookColliders(current.board,sx,sy)
+        .map(book=>dieAgainstBook(book,radius));
+      for(const [id,piece] of visuals.current){
+        const other=currentState.current.objects.find(o=>o.id===id);
+        if(!other||piece.destroyed||
+          (other.kind!=='die'&&!other.throwDice&&!other.tokenCoin))continue;
+        const spot=piece.toGlobal(new Point(0,0));
+        colliders.push(dieAgainstDie({x:spot.x*sx,y:spot.y*sy},
+          radius+(other.tokenCoin?10:14)*(other.scale??1)));
+      }
+      const placed=slideDrag({x:center.x*sx,y:center.y*sy},
+        {x:at.x*sx,y:at.y*sy},colliders);
+      const local=d.mat.toLocal(new Point(placed.x/sx,placed.y/sy),current.app.stage);
       d.ghost.position.copyFrom(local);d.ghost.visible=true;
     };
     const up=(event:PointerEvent)=>finish(event,true);
