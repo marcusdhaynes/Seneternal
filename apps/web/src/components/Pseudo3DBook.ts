@@ -137,13 +137,15 @@ export function makePseudo3DBook(design:TomeDesign,width:number,height:number):C
   mark.anchor.set(.5);mark.position.set(center.x,center.y-.4);
   book.addChild(mark);
   const captionPoint=project(spineWidth*.28,height*.29,thickness+2);
-  const caption=new Text({text:'SENETERNAL',resolution:2,
-    style:{fontFamily:'Georgia, serif',fontSize:Math.max(8,width*.15),
-      fontWeight:'bold',letterSpacing:1.4,fill:0xffe7a5}});
-  caption.style.stroke={color:c.shadow,width:2.5,join:'round'};
-  caption.style.dropShadow={color:0x030506,alpha:1,blur:3,distance:1.7,angle:Math.PI/2};
+  const caption=new Text({text:'SENETERNAL',resolution:4,
+    style:{fontFamily:'Georgia, serif',fontSize:Math.max(6,Math.min(11,width*.107)),
+      fontWeight:'bold',letterSpacing:.12,fill:0xffe7a5,align:'center'}});
+  // The fallback title must fit the closed book's actual width, even while
+  // the higher-resolution 3D cover texture is loading.
+  caption.style.stroke={color:c.shadow,width:.75,join:'round'};
+  caption.style.dropShadow={color:0x030506,alpha:.7,blur:.5,distance:.6,angle:Math.PI/2};
   caption.anchor.set(.5);caption.position.set(captionPoint.x,captionPoint.y);
-  caption.rotation=.025;
+  caption.rotation=0;
   book.addChild(caption);
   // Reuse the exact SAME GPU-ready texture in every table rebuild.
   // This prevents placeholder-to-3D swaps when cards, dice or drawers change.
