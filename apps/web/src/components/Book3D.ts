@@ -33,9 +33,12 @@ function roundedCover(width:number,height:number,radius:number):THREE.Shape{
 }
 function decoratedCover(style:typeof themes[TomeDesign]):THREE.CanvasTexture{
   const canvas=document.createElement('canvas');
-  canvas.width=768;canvas.height=1024;
+  // Paint at 2x and downsample on the actual 3D model, rather than
+  // stretching tiny raster letters across the full miniature cover.
+  canvas.width=1536;canvas.height=2048;
   const g=canvas.getContext('2d');
   if(!g)throw Error('Canvas drawing is unavailable');
+  g.scale(2,2);
   const gold=style.foil;
   g.clearRect(0,0,768,1024);
   // Real embossed relief: the dark offset silhouette persists when the
@@ -60,10 +63,20 @@ function decoratedCover(style:typeof themes[TomeDesign]):THREE.CanvasTexture{
   g.globalAlpha=1;g.fillStyle=gold;g.textAlign='center';
   // Every letter and ornamental stroke shares the same deep inset shadow,
   // not just SENETERNAL; retain the colored foil above the relief.
-  g.font='bold 132px Georgia, Times New Roman, serif';
-  g.fillText('SENETERNAL',384,304);
-  g.globalAlpha=.96;g.font='bold 40px Georgia, serif';
-  g.fillText('SETTINGS',384,357);
+  // The former 132px unbounded word was clipped on both sides.
+  // Measure every design's real Georgia glyph widths, including fallback
+  // fonts, and reserve the entire inner inlaid rectangle for the title.
+  let titleSize=112;
+  do{
+    g.font='bold '+titleSize+'px Georgia, Times New Roman, serif';
+    if(g.measureText('SENETERNAL').width<=570)break;
+    titleSize-=2;
+  }while(titleSize>50);
+  g.shadowBlur=3;g.shadowOffsetX=1;g.shadowOffsetY=2;
+  g.fillText('SENETERNAL',384,300,570);
+  g.globalAlpha=.96;g.font='bold 37px Georgia, serif';
+  g.fillText('THE TABLETOP',384,357,530);
+  g.shadowBlur=0;g.shadowOffsetX=0;g.shadowOffsetY=0;
   g.lineWidth=3;g.beginPath();g.moveTo(221,388);g.lineTo(547,388);g.stroke();
   g.globalAlpha=1;
   g.beginPath();g.arc(384,572,147,0,Math.PI*2);g.stroke();
@@ -84,7 +97,7 @@ function decoratedCover(style:typeof themes[TomeDesign]):THREE.CanvasTexture{
 function renderBook(design:TomeDesign):HTMLCanvasElement{
   const style=themes[design];
   const scene=new THREE.Scene();
-  const width=900,height=1188;
+  const width=1200,height=1584;
   const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true,powerPreference:'low-power'});
   renderer.setSize(width,height,false);
   renderer.setPixelRatio(1);
