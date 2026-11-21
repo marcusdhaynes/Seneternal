@@ -331,7 +331,7 @@ function placePersistentBook(mat:Container,layers:TablePaintLayers,
   const obstacles:{x:number;y:number;r:number}[]=[];
   const parent=mat.parent;
   for(const object of state.objects){
-    if((!object.throwDice&&object.kind!=='die'&&!object.tokenCoin)||!parent)continue;
+    if((!object.throwDice&&!['die','miniature','marker','token'].includes(object.kind)&&!object.tokenCoin)||!parent)continue;
     const local=mat.toLocal(new Point(object.x,object.y),parent);
     obstacles.push({x:local.x,y:local.y,
       r:Math.max(8,(object.tokenCoin?11:object.sides===2?12:15)*(object.scale??1))});
@@ -3708,18 +3708,18 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       const candidateX=Math.max(0,Math.min(BOARD_W,d.startX+(point.x-origin.x)*factor));
       const candidateY=Math.max(0,Math.min(BOARD_W,d.startY+(point.y-origin.y)*factor));
       const movedObject=currentState.current.objects.find(o=>o.id===d.id);
-      if(movedObject?.kind==='die'||movedObject?.tokenCoin){
+      if(movedObject?.tokenCoin||movedObject&&['die','miniature','marker','token'].includes(movedObject.kind)){
         const sx=rect.width/current.app.renderer.width,
           sy=rect.height/current.app.renderer.height;
         const moving=d.visual.toGlobal(new Point(0,0));
         const goal=parent.toGlobal(new Point(candidateX,candidateY));
-        const ownRadius=movedObject.tokenCoin?11:13;
+        const ownRadius=movedObject.tokenCoin?11:Math.max(9,13*(movedObject.scale??1));
         const colliders:DragObstacle[]=visibleBookColliders(current.board,sx,sy)
           .map(book=>dieAgainstBook(book,ownRadius));
         for(const [id,piece] of visuals.current){
           if(id===d.id||piece.destroyed)continue;
           const other=currentState.current.objects.find(o=>o.id===id);
-          if(!other||(other.kind!=='die'&&!other.throwDice&&!other.tokenCoin))continue;
+          if(!other||(!['die','miniature','marker','token'].includes(other.kind)&&!other.throwDice&&!other.tokenCoin))continue;
           const p=piece.toGlobal(new Point(0,0));
           colliders.push(dieAgainstDie({x:p.x*sx,y:p.y*sy},
             ownRadius+(other.tokenCoin?11:14)*(other.scale??1)));
