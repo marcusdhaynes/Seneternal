@@ -3336,11 +3336,35 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       if(!current||piece.destroyed||!piece.parent)return;
       const rect=current.app.canvas.getBoundingClientRect();
       if(rect.width<=0||rect.height<=0)return;
-      const stagePoint=new Point(
-        (e.clientX-rect.left)*current.app.renderer.width/rect.width,
-        (e.clientY-rect.top)*current.app.renderer.height/rect.height);
+      const sx=rect.width/current.app.renderer.width,sy=rect.height/current.app.renderer.height;
+      const from=piece.toGlobal(new Point(0,0));
+      const start={x:from.x*sx,y:from.y*sy};
+      const destination={x:e.clientX-rect.left,y:e.clientY-rect.top};
+      const books=visibleBookColliders(current.board,sx,sy);
+      const otherDice=[...visuals.current.entries()].flatMap(([id,other])=>{
+        if(id===active.id||other.destroyed||
+          !currentState.current.objects.find(obj=>obj.id===id)?.throwDice)return [];
+        const point=other.toGlobal(new Point(0,0));
+        return [{x:point.x*sx,y:point.y*sy}];
+      });
+      const blocked=(x:number,y:number)=>
+        books.some(b=>{
+          const cx=Math.max(b.left,Math.min(x,b.right));
+          const cy=Math.max(b.top,Math.min(y,b.bottom));
+          return Math.hypot(x-cx,y-cy)<13;
+        })||otherDice.some(d=>Math.hypot(x-d.x,y-d.y)<25);
+      const dx=destination.x-start.x,dy=destination.y-start.y;
+      const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/3));
+      let ending=start;
+      for(let i=1;i<=steps;i++){
+        const x=start.x+dx*i/steps,y=start.y+dy*i/steps;
+        if(blocked(x,y))break;
+        ending={x,y};
+      }
+      const stagePoint=new Point(ending.x/sx,ending.y/sy);
       const local=piece.parent.toLocal(stagePoint,current.app.stage);
-      // The model center itself remains exactly at the pointer.
+      // Held dice stop at the book edge or another die; neither may pass
+      // through the physical cover while the pointer is still dragging.
       piece.position.set(local.x,local.y);
       staticDice3D.current?.sync();
     };
@@ -3365,7 +3389,11 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       }
       const gesture=measureDieRelease(active.history,
         {x:e.clientX,y:e.clientY},performance.now());
-      rerollDieNow.current(active.id,e.clientX,e.clientY,
+      const app=session.current?.app,rect=app?.canvas.getBoundingClientRect();
+      const actual=active.piece.toGlobal(new Point(0,0));
+      const releaseX=app&&rect?rect.left+actual.x*rect.width/app.renderer.width:e.clientX;
+      const releaseY=app&&rect?rect.top+actual.y*rect.height/app.renderer.height:e.clientY;
+      rerollDieNow.current(active.id,releaseX,releaseY,
         gesture.flick?gesture.dx:0,gesture.flick?gesture.dy:0,
         gesture.flick?gesture.durationMs:120);
     };
