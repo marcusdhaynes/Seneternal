@@ -2933,3 +2933,75 @@ body:has(.reader-backdrop) > :is(
   .seneternal-coin-hover-top-layer,
   .seneternal-book-hover-top-layer
 ){display:none!important}
+
+
+/* Precision pass: sharply rasterized tabletop displays and controls.
+   Thin duplicate rings, blur filters and glowing text strokes previously
+   became visible as stray horizontal/diagonal lines at small zoom. */
+.seneternal-action-lcd-button svg,
+.seneternal-stack-count svg,
+.seneternal-log-toggle svg,
+.seneternal-rewind-button svg,
+.seneternal-coin-radial svg{
+  shape-rendering:geometricPrecision;
+  text-rendering:geometricPrecision;
+  filter:none;
+}
+.seneternal-action-lcd-button svg,
+.seneternal-log-toggle svg,
+.seneternal-rewind-button svg{
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  overflow:visible;
+}
+.seneternal-action-lcd-display,
+.seneternal-action-lcd-roll,
+.seneternal-action-lcd-button,
+.seneternal-dice-source-count,
+.seneternal-coin-action-button{
+  -webkit-font-smoothing:antialiased;
+  font-smooth:always;
+  text-rendering:optimizeLegibility;
+  text-shadow:none;
+}
+.seneternal-action-lcd-button{
+  box-shadow:inset 0 1px 0 #ffe9b77d,0 1px 2px #070b0899;
+}
+.seneternal-action-lcd-roll{
+  letter-spacing:.015em;
+  font-weight:800;
+  text-shadow:none;
+}
+.seneternal-coin-radial .seneternal-coin-sector{
+  stroke-width:1;
+  shape-rendering:geometricPrecision;
+}
+.seneternal-coin-action-button,
+.seneternal-coin-action-button:hover{
+  text-shadow:none;
+}
+.seneternal-dice-source-count{
+  box-shadow:0 1px 2px #0018129c;
+}
+.seneternal-stack-count svg{
+  filter:none;
+  overflow:hidden;
+}
+.seneternal-stack-count.is-held svg{
+  filter:none;
+}
+.seneternal-table-material-settings{
+  display:grid;
+  gap:11px;
+  margin-top:17px;
+  padding-top:14px;
+  border-top:1px solid #b9a37b66;
+}
+.seneternal-table-material-settings label{
+  display:grid;
+  gap:5px;
+}
+.seneternal-table-material-settings select{
+  width:100%;
+  min-width:0;
+}
