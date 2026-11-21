@@ -178,8 +178,8 @@ export default function App(){
   const [recent,setRecent]=useState<SavedSession[]>(recentGames);
   const [book,setBook]=useState<Book|null>(null);
   const [bookDesign,setBookDesign]=useState<'tiny'|'dragon'|'journal'|'arcane'|'strapped'>(()=>(localStorage.getItem('seneternal.book.design') as 'tiny'|'dragon'|'journal'|'arcane'|'strapped')||'dragon');
-  // New games expose the physical tome on the felt; an intentional move
-  // into a drawer (or Hidden setting) remains persistent across sessions.
+  // The physical tome always rests on exposed tabletop space and retains
+  // its user-adjusted location across games, modes and app sections.
   const [bookDock,setBookDock]=useState<BookDock>(()=>initialBookPlacement().dock);
   const [bookOffset,setBookOffset]=useState<BookOffset>(()=>initialBookPlacement().offset);
   const [tableMaterials,setTableMaterials]=useState<TableMaterials>(()=>{
@@ -1046,11 +1046,11 @@ export default function App(){
                 </select>
               </div>
               <div className="reader-block"><h3>Right tray · Dice, flip coin &amp; coin generators</h3>
-                <p>Flip Coin, D04, D06, D08, D10, D12, D20 and D100 are permanent in the right box, between the two coin generators and the book. Tap a die to select one, tap repeatedly to increase its count (maximum 20). Select different dice to combine them. Drag any selected die to throw the entire selection with natural motion, screen and tray wall rebounds, and collisions between the dice. Reaching 20 automatically throws the selection. Only one physical die of each type appears after a throw, but every selected roll is calculated and logged. The centered face displays the combined result; inspect a thrown die for its individual results.</p>
+                <p>Flip Coin, D04, D06, D08, D10, D12, D20 and D100 are permanent in the right drawer alongside the two coin generators. The book stays visible on the table, independent of the drawers. Tap a die to select one, tap repeatedly to increase its count (maximum 20). Select different dice to combine them. Drag any selected die to throw the entire selection with natural motion, screen and tray wall rebounds, and collisions between the dice. Reaching 20 automatically throws the selection. All selected dice participate in one throw, and their individual rolls are calculated and logged. The centered face displays the combined result; inspect a thrown die for its individual results.</p>
               </div>
               <div className="reader-block">
                 <h3>Die interactions</h3>
-                <p>Hold a die, move it naturally with the cursor, then release to reroll. A quick click repeats the result bubble. Loose dice slowly fade out after the selected time; source dice stay in the box.</p>
+                <p>Hold a loose die, move it naturally with the cursor, then release to reroll; it stops against the physical book or another die. A quick click repeats the result bubble. Holding a source die without moving resets that die's selected count to zero. Loose dice slowly fade out after the selected time; source dice stay in the box.</p>
                 <label>Hold to pick up — {(diceHoldMs/1000).toFixed(2)} seconds
                   <input type="range" min={100} max={1000} step={50} value={diceHoldMs}
                     onChange={e=>setDiceHoldMs(Number(e.target.value))}/>
