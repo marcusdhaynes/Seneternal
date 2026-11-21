@@ -215,14 +215,25 @@ export function tossCoin3D(opt:CoinTossOptions):()=>void{
         y:clamp(height-body.position.y,radius,height-radius),
         heads:normal.z>=0,rotation};
       opt.onLand(result);
-      frame=requestAnimationFrame(()=>{frame=requestAnimationFrame(cleanup);});
+      // The 3D coin must stay visible through the authoritative game-state
+      // commit and the next DOM/Pixi paint, even on slower devices.
+      const handoffStarted=performance.now();
+      const handoff=(time:number)=>{
+        if(ended)return;
+        if(time-handoffStarted>=190){cleanup();return;}
+        frame=requestAnimationFrame(handoff);
+      };
+      frame=requestAnimationFrame(handoff);
     };
     const tick=(now:number)=>{
       if(ended||finished)return;
       try{
         const dt=Math.min(.05,(now-previous)/1000);previous=now;
         world.step(1/120,dt,8);
-        mesh.position.set(body.position.x,body.position.y,body.position.z);
+        // With an overhead orthographic camera, pure Z motion is hidden.
+        // Apply the camera's shallow-pitch projection so the real altitude
+        // is visibly separated from its ground contact shadow.
+        mesh.position.set(body.position.x,body.position.y+body.position.z*.26,body.position.z);
         mesh.quaternion.set(body.quaternion.x,body.quaternion.y,body.quaternion.z,body.quaternion.w);
         shadow.position.set(body.position.x,body.position.y,.18);
         const altitude=Math.max(0,body.position.z-radius*.14);
