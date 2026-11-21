@@ -70,22 +70,6 @@ export function buildLifeCounter(seat=0):Container{
  root.eventMode='passive';
  return root;
 }
-export function buildDrawerMagnifier(onUse?:()=>void):Container{
- const root=new Container();root.label='magnifying-glass';
- root.addChild(new Graphics().ellipse(3,16,23,7).fill({color:0x020b0b,alpha:.23}));
- const handle=new Graphics().moveTo(8,9).lineTo(23,28)
-  .stroke({color:0x1b191b,width:9,cap:'round'})
-  .moveTo(8,9).lineTo(22,27).stroke({color:0x65513b,width:5,cap:'round'})
-  .moveTo(9,10).lineTo(21,25).stroke({color:0xc8a777,width:1.3,cap:'round'});
- const lens=new Graphics().circle(-6,-7,17).fill(0x172127).stroke({color:0xbdc7c9,width:4})
-  .circle(-6,-7,13).fill({color:0x8dd5ed,alpha:.23})
-  .moveTo(-16,-16).quadraticCurveTo(-9,-22,0,-17)
-  .stroke({color:0xffffff,width:2.5,alpha:.7,cap:'round'});
- root.addChild(handle,lens);
- const hit=new Graphics().circle(-6,-7,19).fill({color:0xffffff,alpha:.001});
- hit.eventMode='static';hit.cursor='zoom-in';hit.on('pointertap',e=>{e.stopPropagation();onUse?.();});root.addChild(hit);
- return root;
-}
 export function buildDrawerCalculator():Container{
  const root=new Container();root.label='basic-calculator';
  const body=new Graphics().roundRect(-23,-35,46,70,6).fill(0x252c34)
