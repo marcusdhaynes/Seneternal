@@ -350,10 +350,10 @@ function placePersistentBook(mat:Container,layers:TablePaintLayers,
       if(Math.hypot(destination.x-origin.x,destination.y-origin.y)>4)moved=true;
       // Sweep, not just final-position testing: fast cursor movement cannot
       // teleport a hardcover through a die between animation frames.
-      const dx=destination.x-book.x,dy=destination.y-book.y;
+      const fromX=book.x,fromY=book.y,dx=destination.x-fromX,dy=destination.y-fromY;
       const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/3));
       for(let i=1;i<=steps;i++){
-        const x=book.x+dx/(steps-i+1),y=book.y+dy/(steps-i+1);
+        const x=fromX+dx*i/steps,y=fromY+dy*i/steps;
         if(collides(x,y))break;
         book.position.set(x,y);
       }
@@ -986,9 +986,21 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
   relations:Readonly<Record<number,OpponentRelation>>,eyeHoldMs:number,
   selectedEnemy:number|null,
   drawerState:{left:boolean;right:boolean},drawerGroups:Map<number,Container>,drawerTabs:Map<number,Container>,onToggleDrawer:(side:-1|1)=>void,onEyeReady:(button:Container)=>void,
-  onCastleReady:(button:Container)=>void,onMergeReady:(button:Container)=>void,handPlayMode:boolean):Map<number,Container>|null{
+  onCastleReady:(button:Container)=>void,onMergeReady:(button:Container)=>void,handPlayMode:boolean,
+  tableMaterials:TableMaterials):Map<number,Container>|null{
   const backdrop=new Graphics().rect(0,0,BOARD_W,BOARD_W).fill(0x142723);
   board.addChild(backdrop);
+  const overlay=(surface:keyof TableMaterials,polygon?:number[])=>{
+    const sprite=new Sprite(tableMaterialTexture(tableMaterials[surface]));
+    sprite.width=BOARD_W;sprite.height=BOARD_W;sprite.eventMode='none';
+    sprite.alpha=surface==='floor'?.86:surface==='rim'?.88:.79;
+    board.addChild(sprite);
+    if(polygon){
+      const mask=new Graphics().poly(polygon).fill(0xffffff);
+      mask.eventMode='none';board.addChild(mask);sprite.mask=mask;
+    }
+  };
+  overlay('floor');
   if(duelOpponent!==null||castleActive){
     // The classified-only Castle and Eye opponent modes share one divider.
     // Wide felt planes fill spare screen width without deforming cards.
@@ -1012,16 +1024,23 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
       return {x:BOARD_CENTER+radius*Math.cos(a),y:BOARD_CENTER+radius*Math.sin(a)};
     });
     const pts=points.flatMap(p=>[p.x,p.y]);
-    board.addChild(new Graphics().poly(pts).fill(COLORS.woodDark)
-      .stroke({color:0x110f0c,width:18}));
-    board.addChild(new Graphics().poly(points.map(p=>[
+    const rimPts=points.map(p=>[
       BOARD_CENTER+(p.x-BOARD_CENTER)*.991,
-      BOARD_CENTER+(p.y-BOARD_CENTER)*.991]).flat()).fill(COLORS.wood)
-      .stroke({color:COLORS.gold,width:3,alpha:.75}));
-    board.addChild(new Graphics().poly(points.map(p=>[
+      BOARD_CENTER+(p.y-BOARD_CENTER)*.991]).flat();
+    const feltPts=points.map(p=>[
       BOARD_CENTER+(p.x-BOARD_CENTER)*.972,
-      BOARD_CENTER+(p.y-BOARD_CENTER)*.972]).flat()).fill(COLORS.felt)
-      .stroke({color:0x112d2b,width:4}));
+      BOARD_CENTER+(p.y-BOARD_CENTER)*.972]).flat();
+    board.addChild(new Graphics().poly(pts).fill(COLORS.woodDark)
+      .stroke({color:0x110f0c,width:15}));
+    board.addChild(new Graphics().poly(rimPts).fill(COLORS.wood));
+    overlay('rim',rimPts);
+    // One narrow polished inlay, not multiple aliased superimposed rings.
+    board.addChild(new Graphics().poly(rimPts)
+      .stroke({color:COLORS.gold,width:2,alpha:.78}));
+    board.addChild(new Graphics().poly(feltPts).fill(COLORS.felt));
+    overlay('table',feltPts);
+    board.addChild(new Graphics().poly(feltPts)
+      .stroke({color:0x17352b,width:2,alpha:.75}));
   }
   const seatLayers=duelOpponent===null&&!castleActive
     ?null:makeDuelSeatLayers(board,seat,duelOpponent,relations,castleActive,
@@ -1029,9 +1048,17 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
   if(state.kind==='tcg')drawTcgMats(board,layers,state,seat,readonly,opacity,hoverMs,playmat,labelScale,
     bookDesign,bookDock,bookOffset,onBookOpen,onBookMove,
     onToggleRelation,onFocusCastleSeat,duelOpponent,relations,onMerge,
-    onEyeTap,onEyeHold,onCastleTap,onCastleHold,onOpenTcgSettings,castleActive,castleMode,
+    onEyeTap,onEyeHold,onCastleTap,onOpenTcgSettings,castleActive,castleMode,
     castleBaseMode,focused,onCycleOpponent,onControlDown,hoverTimers,seatLayers,
     eyeHoldMs,selectedEnemy,drawerState,drawerGroups,drawerTabs,onToggleDrawer,onEyeReady,onCastleReady,onMergeReady,handPlayMode);
+  else{
+    // Sandbox, dice, boardgame, RPG, wargame, party and custom all share
+    // exactly the same player-seat origin and saved book offset as TCG.
+    const at=tcgMatOrigin(seat),holder=new Container();
+    holder.position.set(at.x,at.y);holder.rotation=at.angle;
+    board.addChild(holder);
+    placePersistentBook(holder,layers,bookDesign,bookOffset,state,readonly,onBookOpen,onBookMove);
+  }
   for(let i=0;i<12;i++){
     // Retractable HTML edge labels replace physical chair/name blocks
     // in the versus mode, preserving the full play area for cards.
@@ -1331,7 +1358,7 @@ type EyeView={
   castleSelectedEnemy?:number|null;
 };
 const isBattleView=(kind:EyeView['kind'])=>kind==='versus'||kind==='castle';
-export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,handHoldView,holdSelectStacks,handPlayMode,diceHoldMs,diceFadeMs,latestAction,canUndo,canRedo,onUndo,onRedo,onOpenReceipt,onInterfaceAction,bookDesign,bookDock,bookOffset,onBookMove,onBookOpen,drawer,wheelMode,state,seat,playerName,actorId,selected,onSelect,onMove,onMoveStack,onMoveSelection,onDrawMat,onDrawReserve,onOpenTcgSettings,onCardAction,onGestureAction,onRadialAction,mergeOpacity,mergeHoverMs,playmat,labelScale,diceAppearance,onMergeCenter,onViewChange,coinAppearance,customCoinValue,customCoinText,onCustomCoinText,onCustomCoinValue,onTokenPlace,onTokenAdjust,onDicePlace,onDiceThrow,onDiceReroll,onCoinModify,onCoinDuplicate,readonly=false}:Props){
+export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,cardViewHoldMs,handHoldView,holdSelectStacks,handPlayMode,diceHoldMs,diceFadeMs,latestAction,canUndo,canRedo,onUndo,onRedo,onOpenReceipt,onInterfaceAction,bookDesign,bookDock,bookOffset,onBookMove,onBookOpen,drawer,wheelMode,state,seat,playerName,actorId,selected,onSelect,onMove,onMoveStack,onMoveSelection,onDrawMat,onDrawReserve,onOpenTcgSettings,onCardAction,onGestureAction,onRadialAction,mergeOpacity,mergeHoverMs,playmat,labelScale,diceAppearance,onMergeCenter,onViewChange,coinAppearance,customCoinValue,customCoinText,onCustomCoinText,onCustomCoinValue,onTokenPlace,onTokenAdjust,onDicePlace,onDiceThrow,onDiceReroll,onCoinModify,onCoinDuplicate,readonly=false}:Props){
   const [ready,setReady]=useState(false);
   const [diceQuantities,setDiceQuantities]=useState<Record<number,number>>({});
   // A completed die roll takes LCD priority over a previously queued
@@ -2247,7 +2274,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
       boxClosed,drawerGroups.current,drawerTabs.current,toggleBox,
       button=>{eyeHitTarget.current=button;},
       button=>{castleHitTarget.current=button;},
-      button=>{mergeHitTargets.current.push(button);},handPlayMode);
+      button=>{mergeHitTargets.current.push(button);},handPlayMode,tableMaterials);
     duelLayers.current=seatGroups;
     // Permanent native radial, parented to the player's seat/playmat.
     // Its transform is inherited directly from Pixi, without DOM camera
@@ -3180,7 +3207,7 @@ export default function TableCanvas({autoDeselect,deselectMs,cardViewHoldMs,hand
       for(const {button} of stackBadges)button.remove();
       for(const {el} of shuffleFx)el.remove();
     };
-  },[state,seat,playerName,actorId,selected,selectedIds,readonly,ready,mergeOpacity,mergeHoverMs,playmat,labelScale,bookDesign,bookDock,bookOffset,eyeView,relations,viewport,coinAppearance,diceAppearance,customCoinValue,customCoinText,coinSources,boxClosed,diceFadeMs,diceHoldMs,handPlayMode,handHoldView]);
+  },[state,seat,playerName,actorId,selected,selectedIds,readonly,ready,mergeOpacity,mergeHoverMs,playmat,labelScale,tableMaterials,bookDesign,bookDock,bookOffset,eyeView,relations,viewport,coinAppearance,diceAppearance,customCoinValue,customCoinText,coinSources,boxClosed,diceFadeMs,diceHoldMs,handPlayMode,handHoldView]);
 
   useEffect(()=>{
     if(!ready||!session.current||!mount.current)return;
