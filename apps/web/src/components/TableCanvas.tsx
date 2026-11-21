@@ -157,17 +157,10 @@ function createEyeStyleCounter(value:number,finish:string,selectable=true,held=f
     if(stroke){node.setAttribute('stroke',stroke);node.setAttribute('stroke-width',String(width??1));}
     svg.appendChild(node);
   };
-  circle(17,18,17,p.deep);
-  circle(17,17,16,held?p.highlight:p.base);
-  circle(17,17,15.1,'none',p.hardware,1.55);
-  circle(17,17,13,'none',p.deep,2);
-  circle(17,17,11,'none',p.highlight,.8);
-  const glint=document.createElementNS(ns,'path');
-  glint.setAttribute('d','M 8.7 8.5 A 11 11 0 0 1 20.7 6.7');
-  glint.setAttribute('fill','none');glint.setAttribute('stroke',p.hardware);
-  glint.setAttribute('stroke-width','1.2');glint.setAttribute('opacity','.85');
-  svg.appendChild(glint);
-  const text=document.createElementNS(ns,'text');
+  circle(17,18,16.7,p.deep);
+  circle(17,17,15.5,held?p.highlight:p.base);
+  circle(17,17,15.15,'none',p.hardware,1.25);
+   const text=document.createElementNS(ns,'text');
   const num=String(value);
   text.textContent=num;text.setAttribute('x','17');text.setAttribute('y','18');
   text.setAttribute('text-anchor','middle');text.setAttribute('dominant-baseline','middle');
@@ -181,13 +174,14 @@ function createEyeStyleCounter(value:number,finish:string,selectable=true,held=f
 }
 function woodenControl(radius:number,finish:string,active=false):Graphics{
   const p=drawerPalette(finish);
+  // A single clean rim and a subtle bevel. The previous concentric
+  // 5-ring stack + unfinished arc caused overdraw/stray scan lines as
+  // tiny controls were rescaled by the camera.
   return new Graphics()
-    .circle(0,1,radius+1).fill({color:p.deep,alpha:.98})
-    .circle(0,0,radius).fill({color:active?p.highlight:p.base,alpha:.99})
-    .circle(0,0,radius-.9).stroke({color:p.hardware,width:1.55,alpha:.98})
-    .circle(0,0,radius-3).stroke({color:p.deep,width:2,alpha:.82})
-    .circle(0,0,radius-5).stroke({color:p.highlight,width:.8,alpha:.62})
-    .arc(-2,-1,radius-5,3.85,5.35).stroke({color:p.hardware,width:1.2,alpha:.85});
+    .circle(0,1.1,radius+1).fill({color:p.deep,alpha:.88})
+    .circle(0,0,radius).fill({color:active?p.highlight:p.base,alpha:1})
+    .circle(0,0,radius-.9).stroke({color:p.hardware,width:1.4,alpha:.98})
+    .circle(0,0,radius-3).stroke({color:p.deep,width:.8,alpha:.45});
 }
 function label(text:string,size:number,color:number,weight:'normal'|'bold'='normal'){
   const t=new Text({text,resolution:Math.min(4,Math.max(2,window.devicePixelRatio||1)),style:{fontFamily:FONT,fontSize:size,fill:color,fontWeight:weight,align:'center'}});t.anchor.set(.5);return t;
@@ -659,8 +653,12 @@ function drawTcgMats(
       marker.addChild(woodenControl(VIEW_BUTTON_RADIUS,seatPlaymat.sideBoxStyle??'walnut',merged));
       // Merge artwork follows its owning mat, including Castle seat scaling.
       onMergeReady(marker);
-      const sign=label(merged?'−':'+',29,0xf4e1b9,'bold');
-      sign.eventMode='none';sign.position.set(0,-1);marker.addChild(sign);
+      // Draw a geometric glyph with two rounded solid bars, never a
+      // font raster scaled under Eye/Castle camera transforms.
+      const sign=new Graphics()
+        .roundRect(-5.7,-1.5,11.4,3,1.5).fill(0xf4e1b9);
+      if(!merged)sign.roundRect(-1.5,-5.7,3,11.4,1.5).fill(0xf4e1b9);
+      sign.eventMode='none';marker.addChild(sign);
       if(seat===viewerSeat&&!readonly){
         let armed=false;
         let timer:number|null=null;
