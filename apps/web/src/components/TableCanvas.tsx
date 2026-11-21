@@ -331,7 +331,7 @@ function placePersistentBook(mat:Container,layers:TablePaintLayers,
   const obstacles:{x:number;y:number;r:number}[]=[];
   const parent=mat.parent;
   for(const object of state.objects){
-    if(!object.throwDice||!parent)continue;
+    if((!object.throwDice&&object.kind!=='die')||!parent)continue;
     const local=mat.toLocal(new Point(object.x,object.y),parent);
     obstacles.push({x:local.x,y:local.y,r:Math.max(9,(object.sides===2?12:15))});
   }
@@ -3465,8 +3465,8 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       }
       if(!parent){dispose();return;}
       const placeAt=(point:Point)=>{
-        if(!session.current||session.current.app!==current.app)return;
-        const spot=parent!.toLocal(point,current.app.stage);
+        if(!session.current||session.current.app!==current.app||!parent||parent.destroyed)return;
+        const spot=parent.toLocal(point,current.app.stage);
         callbacks.current.onTokenPlace(d.value,d.sign,
           spot.x,spot.y,target?.id,d.color,d.coinText);
       };
@@ -3604,8 +3604,32 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       const origin=parent.toLocal(coord(d.startClientX,d.startClientY),current.app.stage);
       const point=parent.toLocal(coord(event.clientX,event.clientY),current.app.stage);
       const factor=1;
-      d.x=Math.max(0,Math.min(BOARD_W,d.startX+(point.x-origin.x)*factor));
-      d.y=Math.max(0,Math.min(BOARD_W,d.startY+(point.y-origin.y)*factor));
+      const candidateX=Math.max(0,Math.min(BOARD_W,d.startX+(point.x-origin.x)*factor));
+      const candidateY=Math.max(0,Math.min(BOARD_W,d.startY+(point.y-origin.y)*factor));
+      const movedObject=currentState.current.objects.find(o=>o.id===d.id);
+      if(movedObject?.kind==='die'){
+        const sx=rect.width/current.app.renderer.width,
+          sy=rect.height/current.app.renderer.height;
+        const books=visibleBookColliders(current.board,sx,sy);
+        const moving={x:d.visual.x,y:d.visual.y};
+        const dx=candidateX-moving.x,dy=candidateY-moving.y;
+        const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/3));
+        let safe=moving;
+        for(let i=1;i<=steps;i++){
+          const x=moving.x+dx*i/steps,y=moving.y+dy*i/steps;
+          const global=parent.toGlobal(new Point(x,y));
+          const px=global.x*sx,py=global.y*sy;
+          if(books.some(book=>{
+            const cx=Math.max(book.left,Math.min(px,book.right));
+            const cy=Math.max(book.top,Math.min(py,book.bottom));
+            return Math.hypot(px-cx,py-cy)<13;
+          }))break;
+          safe={x,y};
+        }
+        d.x=safe.x;d.y=safe.y;
+      }else{
+        d.x=candidateX;d.y=candidateY;
+      }
       const dx=d.x-d.startX,dy=d.y-d.startY;
       if(d.selection||d.whole){
         for(const m of d.members){
