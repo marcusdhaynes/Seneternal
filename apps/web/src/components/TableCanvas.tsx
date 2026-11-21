@@ -1680,7 +1680,7 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
     whole:boolean;held:boolean;wheel:boolean;locked:boolean;selection:boolean;
     stackIds:string[];members:{id:string;x:number;y:number}[];
     coinCenter:boolean;coinAnchor:{x:number;y:number}|null;
-    timer:number|null;
+    timer:number|null;history:DiePointerSample[];
   };
   const drag=useRef<ActiveDrag|null>(null);
   const visuals=useRef(new Map<string,Container>());
@@ -1706,6 +1706,72 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
   const snapHighlight=useRef<Graphics|null>(null);
   const currentKind=useRef(state.kind);currentKind.current=state.kind;
   const currentState=useRef(state);currentState.current=state;
+  // Placed, free-standing coins use the SAME physical toss engine as the
+  // source generator. Ordinary drags remain exact moves and counter clicks.
+  const throwExistingCoin=useRef<(id:string,gesture:{
+    dx:number;dy:number;durationMs:number;flick:boolean})=>boolean>(()=>false);
+  throwExistingCoin.current=(id,gesture)=>{
+    const current=session.current,host=mount.current;
+    const piece=visuals.current.get(id);
+    const object=currentState.current.objects.find(o=>o.id===id);
+    if(!current||!host||!piece||piece.destroyed||!piece.parent||
+      !object?.tokenCoin||object.locked||object.carrierId||!gesture.flick)return false;
+    const app=current.app,rect=app.canvas.getBoundingClientRect();
+    if(rect.width<=0||rect.height<=0)return false;
+    const sx=rect.width/app.renderer.width,sy=rect.height/app.renderer.height;
+    const center=piece.toGlobal(new Point(0,0));
+    const edge=piece.toGlobal(new Point(1,0));
+    const radius=Math.max(7,Math.min(40,16*
+      Math.hypot(edge.x-center.x,edge.y-center.y)*Math.max(sx,sy)));
+    const books=visibleBookColliders(current.board,sx,sy);
+    const solids=[...visuals.current.entries()].flatMap(([otherId,visual])=>{
+      if(otherId===id||visual.destroyed)return [];
+      const obj=currentState.current.objects.find(o=>o.id===otherId);
+      if(!obj||(obj.kind!=='die'&&!obj.throwDice&&!obj.tokenCoin))return [];
+      const p=visual.toGlobal(new Point(0,0));
+      const v=visual.toGlobal(new Point(1,0));
+      return [{x:p.x*sx,y:p.y*sy,
+        radius:(obj.tokenCoin?12:15)*Math.hypot(v.x-p.x,v.y-p.y)*Math.max(sx,sy),
+        kind:obj.tokenCoin?'coin' as const:'die' as const}];
+    });
+    const firstParent=piece.parent;
+    let completed=false,stopFlight:()=>void=()=>{};
+    const land=(result:{x:number;y:number;heads:boolean;rotation:number})=>{
+      if(completed)return;completed=true;
+      coinFlights.current.delete(stopFlight);
+      const live=visuals.current.get(id);
+      if(!piece.destroyed)piece.visible=true;
+      if(session.current?.app!==app)return;
+      const parent=live&&!live.destroyed&&live.parent?live.parent:
+        firstParent&&!firstParent.destroyed?firstParent:current.board;
+      const at=parent.toLocal(new Point(result.x/sx,result.y/sy),app.stage);
+      callbacks.current.onMove(id,at.x,at.y);
+      interfaceAction.current('Throw','Coin',
+        (result.heads?'Heads':'Tails')+' · '+String(object.coinText??object.value??1));
+    };
+    const fallback=(error:unknown)=>{
+      console.warn('Placed coin toss unavailable:',error);
+      setDice3DError('3D coin toss unavailable on this device: '+String(error));
+      land({x:center.x*sx,y:center.y*sy,heads:true,rotation:0});
+    };
+    void import('../lib/Coin3D').then(({tossCoin3D})=>{
+      if(session.current?.app!==app||completed)return;
+      stopFlight=tossCoin3D({
+        host,width:rect.width,height:rect.height,
+        x:center.x*sx,y:center.y*sy,radius,
+        deltaX:gesture.dx,deltaY:gesture.dy,durationMs:gesture.durationMs,
+        value:object.coinText??object.value??1,
+        color:object.color??'#d8b979',appearance:coinAppearance,
+        books,solids,onLand:land,onError:fallback
+      });
+      coinFlights.current.add(stopFlight);
+      requestAnimationFrame(()=>{
+        if(!completed&&!piece.destroyed)piece.visible=false;
+      });
+    }).catch(fallback);
+    return true;
+  };
+
   const playmatRef=useRef(playmat);playmatRef.current=playmat;
   showRollBubble.current=(id,explicit)=>{
     const host=mount.current;
@@ -3085,7 +3151,8 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
             whole:false,held:false,wheel:false,
             locked:group.some(card=>!!card.locked),selection:multi,
             stackIds,coinCenter,coinAnchor,
-            members:group.map(card=>({id:card.id,x:card.x,y:card.y})),timer:null
+            members:group.map(card=>({id:card.id,x:card.x,y:card.y})),timer:null,
+            history:[{x:e.clientX,y:e.clientY,t:performance.now()}]
           };
           drag.current=active;
           setGestureMenu(null);
@@ -3603,6 +3670,9 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
     const move=(event:PointerEvent)=>{
       const d=drag.current,current=session.current;
       if(!d||d.pointerId!==event.pointerId||!current||!mount.current||d.wheel)return;
+      const sample=performance.now();
+      d.history.push({x:event.clientX,y:event.clientY,t:sample});
+      while(d.history.length>2&&d.history[1].t<sample-180)d.history.shift();
       const distance=Math.hypot(event.clientX-d.startClientX,
         event.clientY-d.startClientY);
       if(!d.moved){
@@ -3787,6 +3857,12 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
         return;
       }
       lastTap.current=null;
+      const tossed=currentState.current.objects.find(o=>o.id===d.id);
+      if(tossed?.tokenCoin&&!tossed.carrierId&&!d.selection&&!d.whole){
+        const gesture=measureDieRelease(d.history,
+          {x:event.clientX,y:event.clientY},performance.now());
+        if(gesture.flick&&throwExistingCoin.current(d.id,gesture))return;
+      }
       for(const member of d.members.length?d.members:[{id:d.id}])recentLocalDrops.current.add(member.id);
       const dx=d.x-d.startX,dy=d.y-d.startY;
       if(d.selection&&d.members.length>0){
