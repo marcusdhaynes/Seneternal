@@ -107,7 +107,7 @@ import {fitMatAttachedRadial,fitSelfMatWithHud,fitBattleRadialZoom,
 import {TABLE_PAINT_ORDER,playmatPaintLayer} from '../lib/castlePaintOrder';
 import {DICE_THEMES,resolveDiceTheme,normalizeDiceAppearance,type DiceAppearance} from '../lib/diceThemes';
 import {makePseudo3DBook} from './Pseudo3DBook';
-import {stepDicePhysics,throwVelocity,type DiceBody} from '../lib/dicePhysics';
+import {slideDrag,bookAgainstDie,dieAgainstBook,dieAgainstDie,type DragObstacle} from '../lib/dragCollision';
 import {wheelPosition,radialMembership,radialTapMembership,type RadialAction} from '../lib/radialWheel.ts';
 import {cardGestureOptions,isDoubleCardTap,GESTURE_HOLD_MS,GESTURE_MOVE_THRESHOLD,type CardGestureAction} from '../lib/cardGestures';
 import {cardStackMembers,nearestFrameIndex,playerSeatRotation,viewerTableRotation,tcgMatCells,tcgMatRegions,tcgMatOrigin,opponentAtTablePoint,groupedMatchupLayout,oneOnOneMatchupLayout,castleGridLayout,castleIndependentFocusLayout,castleArrowsVisible,nextCastleAllySeat,nextCastleFocusedSeat,type CastleSideFocus,opponentAcrossDivider,BATTLEFIELD_PLAYMAT_PADDING,battlefieldFitBounds,toggleOpponentRelation,type OpponentRelation,type CastleMode,neighboringOpponentSeat,centerMergeKey,tcgSnapPoint,tcgPlacementPoint,tcgDropZone,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,TCG_ROW_COLORS,isTcgRemoveDrop,tcgRegionLabel,tcgMatLocal,tcgMatWorld,THROWN_DIE_LIFETIME_MS,BOARD_CENTER,BOARD_W,TABLE_APOTHEM,TABLE_SEAT_RADIUS,TABLE_VIEW_RADIUS,MIN_TABLE_ZOOM,clampTableZoom,clampTablePan,type GameState,type Player,type TableObject,type PlaymatAppearance,type PlaymatSectionStyle,playmatSectionIndex,playmatAppearanceForSeat,opponentRelationButtonPosition,OPPONENT_RELATION_COLORS,OPPONENT_RELATION_BUTTON_RADIUS,OPPONENT_RELATION_BUTTON_HIT_RADIUS,viewButtonPosition,VIEW_BUTTON_RADIUS,VIEW_BUTTON_HIT_RADIUS,tcgSettingsButtonPosition,coinNumericValue,validCoinText} from '@seneternal/core';
@@ -331,9 +331,10 @@ function placePersistentBook(mat:Container,layers:TablePaintLayers,
   const obstacles:{x:number;y:number;r:number}[]=[];
   const parent=mat.parent;
   for(const object of state.objects){
-    if((!object.throwDice&&object.kind!=='die')||!parent)continue;
+    if((!object.throwDice&&object.kind!=='die'&&!object.tokenCoin)||!parent)continue;
     const local=mat.toLocal(new Point(object.x,object.y),parent);
-    obstacles.push({x:local.x,y:local.y,r:Math.max(9,(object.sides===2?12:15))});
+    obstacles.push({x:local.x,y:local.y,
+      r:Math.max(8,(object.tokenCoin?11:object.sides===2?12:15)*(object.scale??1))});
   }
   if(state.kind==='tcg'){
     const right=TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3;
@@ -341,9 +342,8 @@ function placePersistentBook(mat:Container,layers:TablePaintLayers,
     for(const position of diceRackLocations(right,top))
       obstacles.push({x:position.x,y:position.y,r:10});
   }
-  const collides=(x:number,y:number)=>obstacles.some(d=>
-    Math.hypot(Math.max(Math.abs(d.x-x)-width*.54,0),
-      Math.max(Math.abs(d.y-y)-height*.47,0))<d.r);
+  const colliders=obstacles.map(d=>
+    bookAgainstDie(d,d.r,width*.54,height*.47));
   if(readonly){book.eventMode='none';return;}
   book.on('pointerdown',event=>{
     if(event.button!==0)return;
@@ -362,15 +362,13 @@ function placePersistentBook(mat:Container,layers:TablePaintLayers,
       const start=mat.toLocal(from),target=mat.toLocal(global);
       const destination={x:origin.x+target.x-start.x,y:origin.y+target.y-start.y};
       if(Math.hypot(destination.x-origin.x,destination.y-origin.y)>4)moved=true;
-      // Sweep, not just final-position testing: fast cursor movement cannot
-      // teleport a hardcover through a die between animation frames.
-      const fromX=book.x,fromY=book.y,dx=destination.x-fromX,dy=destination.y-fromY;
-      const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/3));
-      for(let i=1;i<=steps;i++){
-        const x=fromX+dx*i/steps,y=fromY+dy*i/steps;
-        if(collides(x,y))break;
-        book.position.set(x,y);
-      }
+      // Sweep the hardcover around dice and coins. Contact only redirects
+      // movement to a tangential route; it never latches or freezes the book.
+      const current={x:book.x,y:book.y};
+      const travel=Math.hypot(destination.x-current.x,destination.y-current.y);
+      const next=slideDrag(current,destination,colliders,
+        Math.max(42,Math.min(2000,travel*2.2+80)));
+      book.position.set(next.x,next.y);
     };
     const finish=(e:PointerEvent)=>{
       if(e.pointerId!==event.pointerId)return;
@@ -3347,24 +3345,16 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
         const point=other.toGlobal(new Point(0,0));
         return [{x:point.x*sx,y:point.y*sy}];
       });
-      const blocked=(x:number,y:number)=>
-        books.some(b=>{
-          const cx=Math.max(b.left,Math.min(x,b.right));
-          const cy=Math.max(b.top,Math.min(y,b.bottom));
-          return Math.hypot(x-cx,y-cy)<13;
-        })||otherDice.some(d=>Math.hypot(x-d.x,y-d.y)<25);
-      const dx=destination.x-start.x,dy=destination.y-start.y;
-      const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/3));
-      let ending=start;
-      for(let i=1;i<=steps;i++){
-        const x=start.x+dx*i/steps,y=start.y+dy*i/steps;
-        if(blocked(x,y))break;
-        ending={x,y};
-      }
+      const colliders:DragObstacle[]=[
+        ...books.map(book=>dieAgainstBook(book,13)),
+        ...otherDice.map(d=>dieAgainstDie(d,25))
+      ];
+      // A held die glides around the book and other dice, preserving
+      // tangential pointer motion rather than stopping at first contact.
+      const ending=slideDrag(start,destination,colliders);
       const stagePoint=new Point(ending.x/sx,ending.y/sy);
       const local=piece.parent.toLocal(stagePoint,current.app.stage);
-      // Held dice stop at the book edge or another die; neither may pass
-      // through the physical cover while the pointer is still dragging.
+      // The die stays outside the collider, but remains freely draggable.
       piece.position.set(local.x,local.y);
       staticDice3D.current?.sync();
     };
@@ -3607,26 +3597,26 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       const candidateX=Math.max(0,Math.min(BOARD_W,d.startX+(point.x-origin.x)*factor));
       const candidateY=Math.max(0,Math.min(BOARD_W,d.startY+(point.y-origin.y)*factor));
       const movedObject=currentState.current.objects.find(o=>o.id===d.id);
-      if(movedObject?.kind==='die'){
+      if(movedObject?.kind==='die'||movedObject?.tokenCoin){
         const sx=rect.width/current.app.renderer.width,
           sy=rect.height/current.app.renderer.height;
-        const books=visibleBookColliders(current.board,sx,sy);
-        const moving={x:d.visual.x,y:d.visual.y};
-        const dx=candidateX-moving.x,dy=candidateY-moving.y;
-        const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/3));
-        let safe=moving;
-        for(let i=1;i<=steps;i++){
-          const x=moving.x+dx*i/steps,y=moving.y+dy*i/steps;
-          const global=parent.toGlobal(new Point(x,y));
-          const px=global.x*sx,py=global.y*sy;
-          if(books.some(book=>{
-            const cx=Math.max(book.left,Math.min(px,book.right));
-            const cy=Math.max(book.top,Math.min(py,book.bottom));
-            return Math.hypot(px-cx,py-cy)<13;
-          }))break;
-          safe={x,y};
+        const moving=d.visual.toGlobal(new Point(0,0));
+        const goal=parent.toGlobal(new Point(candidateX,candidateY));
+        const ownRadius=movedObject.tokenCoin?11:13;
+        const colliders:DragObstacle[]=visibleBookColliders(current.board,sx,sy)
+          .map(book=>dieAgainstBook(book,ownRadius));
+        for(const [id,piece] of visuals.current){
+          if(id===d.id||piece.destroyed)continue;
+          const other=currentState.current.objects.find(o=>o.id===id);
+          if(!other||(other.kind!=='die'&&!other.throwDice&&!other.tokenCoin))continue;
+          const p=piece.toGlobal(new Point(0,0));
+          colliders.push(dieAgainstDie({x:p.x*sx,y:p.y*sy},
+            ownRadius+(other.tokenCoin?11:14)*(other.scale??1)));
         }
-        d.x=safe.x;d.y=safe.y;
+        const next=slideDrag({x:moving.x*sx,y:moving.y*sy},
+          {x:goal.x*sx,y:goal.y*sy},colliders);
+        const local=parent.toLocal(new Point(next.x/sx,next.y/sy),current.app.stage);
+        d.x=local.x;d.y=local.y;
       }else{
         d.x=candidateX;d.y=candidateY;
       }
