@@ -1066,7 +1066,7 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
   if(state.kind==='tcg')drawTcgMats(board,layers,state,seat,readonly,opacity,hoverMs,playmat,labelScale,
     bookDesign,bookDock,bookOffset,onBookOpen,onBookMove,
     onToggleRelation,onFocusCastleSeat,duelOpponent,relations,onMerge,
-    onEyeTap,onEyeHold,onCastleTap,onOpenTcgSettings,castleActive,castleMode,
+    onEyeTap,onEyeHold,onCastleTap,onCastleHold,onOpenTcgSettings,castleActive,castleMode,
     castleBaseMode,focused,onCycleOpponent,onControlDown,hoverTimers,seatLayers,
     eyeHoldMs,selectedEnemy,drawerState,drawerGroups,drawerTabs,onToggleDrawer,onEyeReady,onCastleReady,onMergeReady,handPlayMode);
   else{
