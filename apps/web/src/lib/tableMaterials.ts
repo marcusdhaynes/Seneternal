@@ -1,20 +1,22 @@
 import {Texture} from 'pixi.js';
+import {EMERALD_FELT_REFERENCE_URL} from './emeraldFeltReference';
 
 /** Independent, GPU-cached materials for the tabletop, its wooden rim and
  * the surrounding floor. Nothing is fetched and no per-frame renderer runs. */
 export type TableMaterialId =
   'emerald-felt'|'burgundy-felt'|'midnight-felt'|'walnut'|'oak'|
-  'mahogany'|'slate'|'marble'|'leather'|'obsidian-glass'|'custom-pattern';
+  'mahogany'|'slate'|'marble'|'leather'|'obsidian-glass'|'custom-pattern'|'emerald-felt-tile';
 export interface TableMaterials {
   table:TableMaterialId;
   rim:TableMaterialId;
   floor:TableMaterialId;
 }
 export const DEFAULT_TABLE_MATERIALS:TableMaterials={
-  table:'emerald-felt',rim:'walnut',floor:'slate'
+  table:'emerald-felt',rim:'walnut',floor:'emerald-felt-tile'
 };
 export const TABLE_MATERIAL_OPTIONS:{id:TableMaterialId;label:string}[]=[
   {id:'emerald-felt',label:'Emerald billiard felt'},
+  {id:'emerald-felt-tile',label:'Emerald Felt · Supplied Repeating Pattern'},
   {id:'burgundy-felt',label:'Burgundy tournament felt'},
   {id:'midnight-felt',label:'Midnight blue felt'},
   {id:'walnut',label:'Oiled black walnut'},
@@ -31,7 +33,7 @@ const colors:Record<TableMaterialId,[number,number,number]>={
   'midnight-felt':[31,47,75], walnut:[88,56,35],
   oak:[158,112,62], mahogany:[98,39,33], slate:[53,61,65],
   marble:[206,201,182], leather:[120,64,40],
-  'obsidian-glass':[20,29,36], 'custom-pattern':[53,61,65]
+  'obsidian-glass':[20,29,36], 'custom-pattern':[53,61,65], 'emerald-felt-tile':[18,109,73]
 };
 export function normalizeTableMaterials(value:unknown):TableMaterials{
   const v=value&&typeof value==='object'?value as Record<string,unknown>:{};
@@ -51,6 +53,11 @@ function random(seed:number):()=>number{
 const clamp=(n:number)=>Math.min(255,Math.max(0,Math.round(n)));
 export function tableMaterialTexture(id:TableMaterialId):Texture{
   const cached=cache.get(id);if(cached)return cached;
+  if(id==='emerald-felt-tile'){
+    const texture=Texture.from(EMERALD_FELT_REFERENCE_URL);
+    cache.set(id,texture);
+    return texture;
+  }
   const size=1024,canvas=document.createElement('canvas');
   canvas.width=canvas.height=size;
   const ctx=canvas.getContext('2d',{alpha:false});
