@@ -1,11 +1,12 @@
 import {Texture} from 'pixi.js';
 import {EMERALD_FELT_REFERENCE_URL} from './emeraldFeltReference';
+import {GRAY_FELT_REFERENCE_URL} from './grayFeltReference';
 
 /** Independent, GPU-cached materials for the tabletop, its wooden rim and
  * the surrounding floor. Nothing is fetched and no per-frame renderer runs. */
 export type TableMaterialId =
   'emerald-felt'|'burgundy-felt'|'midnight-felt'|'walnut'|'oak'|
-  'mahogany'|'slate'|'marble'|'leather'|'obsidian-glass'|'custom-pattern'|'emerald-felt-tile';
+  'mahogany'|'slate'|'marble'|'leather'|'obsidian-glass'|'custom-pattern'|'emerald-felt-tile'|'gray-felt-tile';
 export interface TableMaterials {
   table:TableMaterialId;
   rim:TableMaterialId;
@@ -17,6 +18,7 @@ export const DEFAULT_TABLE_MATERIALS:TableMaterials={
 export const TABLE_MATERIAL_OPTIONS:{id:TableMaterialId;label:string}[]=[
   {id:'emerald-felt',label:'Emerald billiard felt'},
   {id:'emerald-felt-tile',label:'Emerald Felt · Supplied Repeating Pattern'},
+  {id:'gray-felt-tile',label:'Gray Felt · Supplied Repeating Pattern'},
   {id:'burgundy-felt',label:'Burgundy tournament felt'},
   {id:'midnight-felt',label:'Midnight blue felt'},
   {id:'walnut',label:'Oiled black walnut'},
@@ -33,7 +35,7 @@ const colors:Record<TableMaterialId,[number,number,number]>={
   'midnight-felt':[31,47,75], walnut:[88,56,35],
   oak:[158,112,62], mahogany:[98,39,33], slate:[53,61,65],
   marble:[206,201,182], leather:[120,64,40],
-  'obsidian-glass':[20,29,36], 'custom-pattern':[53,61,65], 'emerald-felt-tile':[18,109,73]
+  'obsidian-glass':[20,29,36], 'custom-pattern':[53,61,65], 'emerald-felt-tile':[18,109,73], 'gray-felt-tile':[91,91,91]
 };
 export function normalizeTableMaterials(value:unknown):TableMaterials{
   const v=value&&typeof value==='object'?value as Record<string,unknown>:{};
@@ -47,6 +49,7 @@ export function normalizeTableMaterials(value:unknown):TableMaterials{
 }
 const cache=new Map<TableMaterialId,Texture>();
 let emeraldTexturePromise:Promise<Texture>|null=null;
+let grayTexturePromise:Promise<Texture>|null=null;
 /** Decode the bundled WebP before creating a Pixi texture. Pixi v8's
  * Texture.from(URL) only retrieves previously loaded assets, so an unprimed
  * data URI can silently render empty. Preloading avoids blank table tiles. */
@@ -71,6 +74,30 @@ export function preloadEmeraldFeltTexture():Promise<Texture>{
   });
   return emeraldTexturePromise;
 }
+/** Loads the user's bundled gray reference texture once. Unlike using
+ * Texture.from(dataURI), the decoded image source is always ready before
+ * the Pixi TilingSprite is composed, avoiding an empty first frame. */
+export function preloadGrayFeltTexture():Promise<Texture>{
+  const loaded=cache.get('gray-felt-tile');
+  if(loaded)return Promise.resolve(loaded);
+  if(grayTexturePromise)return grayTexturePromise;
+  grayTexturePromise=(async()=>{
+    const img=new Image();
+    img.src=GRAY_FELT_REFERENCE_URL;
+    if(typeof img.decode==='function')await img.decode();
+    else await new Promise<void>((resolve,reject)=>{
+      img.onload=()=>resolve();
+      img.onerror=()=>reject(Error('Gray felt texture could not be decoded'));
+    });
+    const texture=Texture.from(img);
+    cache.set('gray-felt-tile',texture);
+    return texture;
+  })().catch(error=>{
+    grayTexturePromise=null;
+    throw error;
+  });
+  return grayTexturePromise;
+}
 function random(seed:number):()=>number{
   let value=seed>>>0;
   return ()=>{value=(Math.imul(value,1664525)+1013904223)>>>0;return value/4294967296;};
@@ -78,11 +105,11 @@ function random(seed:number):()=>number{
 const clamp=(n:number)=>Math.min(255,Math.max(0,Math.round(n)));
 export function tableMaterialTexture(id:TableMaterialId):Texture{
   const cached=cache.get(id);if(cached)return cached;
-  if(id==='emerald-felt-tile'){
+  if(id==='emerald-felt-tile'||id==='gray-felt-tile'){
     // Startup awaits preloadEmeraldFeltTexture so this is the decoded source,
     // not an unresolved URL. The fallback is intentionally visible if WebP
     // fails on a legacy device, rather than rendering a transparent table.
-    return cache.get('emerald-felt-tile')??Texture.WHITE;
+    return cache.get(id)??Texture.WHITE;
   }
   const size=1024,canvas=document.createElement('canvas');
   canvas.width=canvas.height=size;
