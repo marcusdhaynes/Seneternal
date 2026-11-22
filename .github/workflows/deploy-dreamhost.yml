@@ -42,7 +42,11 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          rsync -avz --delete --exclude='.dh-diag' \
+          # Preserve older fingerprinted JS/CSS assets for tabs that were
+          # already open before this deployment. Their dynamic imports (and
+          # lazy game modules) must remain fetchable across releases.
+          # Receiver-side 'P' prevents deletion but still uploads new assets.
+          rsync -avz --delete --filter='P /assets/***' --exclude='.dh-diag' \
             -e "ssh -i ~/.ssh/deploy_key -p 22 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             apps/web/dist/ \
             "${{ secrets.DREAMHOST_SFTP_USER }}@${{ secrets.DREAMHOST_SFTP_HOST }}:/home/marcusdhaynes/seneternal.com/"
