@@ -100,7 +100,7 @@ import {fallbackDiceResults,type RollFallbackResult} from '../lib/diceFallback';
 import {expandDiceSources} from '../lib/diceSourceExpansion';
 import {DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET,diceRackLocations} from '../lib/diceCoordinates';
 import {tableBookHome} from '../lib/bookDrawerPlacement';
-import {customFloorTexture,preloadEmeraldFeltTexture,preloadGrayFeltTexture,tableMaterialTexture,type TableMaterials} from '../lib/tableMaterials';
+import {customFloorTexture,preloadEmeraldFeltTexture,preloadGrayFeltTexture,tableMaterialTexture,type TableMaterials,type TextureQuality} from '../lib/tableMaterials';
 // The coin simulator is in the initial bundle. Deploying a new build must
 // never invalidate an already-open table's asynchronously fetched Coin3D hash.
 import {tossCoin3D} from '../lib/Coin3D';
@@ -131,7 +131,7 @@ function layoutActionLcd(node:HTMLDivElement,geometry:{
   node.style.setProperty('--seneternal-lcd-scale',String(scale));
   node.style.transform='none';
 }
-interface Props{tableMaterials:TableMaterials;customFloorPattern:string|null;autoDeselect:boolean;deselectMs:number;cardViewHoldMs:number;handHoldView:boolean;holdSelectStacks:boolean;handPlayMode:boolean;diceHoldMs:number;diceFadeMs:number;latestAction:string;canUndo:boolean;canRedo:boolean;onUndo:()=>void;onRedo:()=>void;onOpenReceipt:()=>void;onInterfaceAction:(type:string,location:string,description:string)=>void;bookDesign:'tiny'|'dragon'|'journal'|'arcane'|'strapped';bookDock:'left'|'right'|'free'|'hidden';bookOffset:{x:number;y:number};onBookMove:(point:{x:number;y:number})=>void;onBookOpen:()=>void;drawer?:ReactNode;wheelMode:'mobile'|'docked'|'hold';state:GameState;seat:number;playerName:string;actorId:string;selected:string|null;onSelect:(id:string|null)=>void;onMove:(id:string,x:number,y:number)=>void;onMoveStack:(id:string,x:number,y:number)=>void;onMoveSelection:(ids:string[],anchorId:string,x:number,y:number)=>void;onDrawMat:()=>void;onDrawReserve:()=>void;onOpenTcgSettings:()=>void;onCardAction:(id:string,action:"tap"|"flip")=>void;onGestureAction:(id:string,action:CardGestureAction)=>void;onRadialAction:(ids:string[],action:RadialAction,destination?:string)=>void;playmat:PlaymatAppearance;labelScale:number;diceAppearance:DiceAppearance;mergeOpacity:number;mergeHoverMs:number;onMergeCenter:(seat:number,boundary:number,merged:boolean)=>void;onViewChange?:(view:{x:number;y:number;scale:number})=>void;coinAppearance:CoinAppearance;customCoinValue:number;customCoinText:string;onCustomCoinText:(text:string)=>void;onCustomCoinValue:(value:number)=>void;onTokenPlace:(value:number,sign:1|-1,x:number,y:number,carrierId?:string,color?:string,coinText?:string)=>void;onCoinModify:(id:string,changes:{delta?:number;color?:string;coinText?:string})=>void;onCoinDuplicate:(id:string)=>void;onTokenAdjust:(ids:string[],value:number,sign:1|-1)=>void;onDicePlace:(sides:number,x:number,y:number)=>void;onDiceThrow:(throws:{sides:number;rolls:number[];x:number;y:number;rotation:number;quaternion?:[number,number,number,number];altitude?:number}[])=>void;
+interface Props{tableMaterials:TableMaterials;textureQuality:TextureQuality;customFloorPattern:string|null;autoDeselect:boolean;deselectMs:number;cardViewHoldMs:number;handHoldView:boolean;holdSelectStacks:boolean;handPlayMode:boolean;diceHoldMs:number;diceFadeMs:number;latestAction:string;canUndo:boolean;canRedo:boolean;onUndo:()=>void;onRedo:()=>void;onOpenReceipt:()=>void;onInterfaceAction:(type:string,location:string,description:string)=>void;bookDesign:'tiny'|'dragon'|'journal'|'arcane'|'strapped';bookDock:'left'|'right'|'free'|'hidden';bookOffset:{x:number;y:number};onBookMove:(point:{x:number;y:number})=>void;onBookOpen:()=>void;drawer?:ReactNode;wheelMode:'mobile'|'docked'|'hold';state:GameState;seat:number;playerName:string;actorId:string;selected:string|null;onSelect:(id:string|null)=>void;onMove:(id:string,x:number,y:number)=>void;onMoveStack:(id:string,x:number,y:number)=>void;onMoveSelection:(ids:string[],anchorId:string,x:number,y:number)=>void;onDrawMat:()=>void;onDrawReserve:()=>void;onOpenTcgSettings:()=>void;onCardAction:(id:string,action:"tap"|"flip")=>void;onGestureAction:(id:string,action:CardGestureAction)=>void;onRadialAction:(ids:string[],action:RadialAction,destination?:string)=>void;playmat:PlaymatAppearance;labelScale:number;diceAppearance:DiceAppearance;mergeOpacity:number;mergeHoverMs:number;onMergeCenter:(seat:number,boundary:number,merged:boolean)=>void;onViewChange?:(view:{x:number;y:number;scale:number})=>void;coinAppearance:CoinAppearance;customCoinValue:number;customCoinText:string;onCustomCoinText:(text:string)=>void;onCustomCoinValue:(value:number)=>void;onTokenPlace:(value:number,sign:1|-1,x:number,y:number,carrierId?:string,color?:string,coinText?:string)=>void;onCoinModify:(id:string,changes:{delta?:number;color?:string;coinText?:string})=>void;onCoinDuplicate:(id:string)=>void;onTokenAdjust:(ids:string[],value:number,sign:1|-1)=>void;onDicePlace:(sides:number,x:number,y:number)=>void;onDiceThrow:(throws:{sides:number;rolls:number[];x:number;y:number;rotation:number;quaternion?:[number,number,number,number];altitude?:number}[])=>void;
 onDiceReroll:(id:string,rolls:number[],x:number,y:number,rotation:number,quaternion?:[number,number,number,number],altitude?:number)=>void;readonly?:boolean}
 /** Draw ordering is global across all seats, even when Castle mats overlap.
  * Separate opponent backings from the viewer's mat and every interactable:
@@ -1019,29 +1019,29 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
   selectedEnemy:number|null,
   drawerState:{left:boolean;right:boolean},drawerGroups:Map<number,Container>,drawerTabs:Map<number,Container>,onToggleDrawer:(side:-1|1)=>void,onEyeReady:(button:Container)=>void,
   onCastleReady:(button:Container)=>void,onMergeReady:(button:Container)=>void,handPlayMode:boolean,
-  tableMaterials:TableMaterials,customFloorPattern:string|null,getSolidContacts:BookSolidContacts):Map<number,Container>|null{
+  tableMaterials:TableMaterials,textureQuality:TextureQuality,customFloorPattern:string|null,getSolidContacts:BookSolidContacts):Map<number,Container>|null{
   const backdrop=new Graphics().rect(0,0,BOARD_W,BOARD_W).fill(0x142723);
   board.addChild(backdrop);
   const overlay=(surface:keyof TableMaterials,polygon?:number[])=>{
-    const id=tableMaterials[surface];
-    const custom=surface==='floor'&&id==='custom-pattern'&&!!customFloorPattern;
-    const builtin=id==='emerald-felt-tile'||id==='gray-felt-tile';
-    const resolved=id==='custom-pattern'&&!custom?'slate':id;
-    const texture=custom?customFloorTexture(customFloorPattern!):tableMaterialTexture(resolved);
-    // The uploaded felt is a REAL repeating image (not procedural noise or
-    // a single texture stretched over the whole octagonal tabletop).
-    const sprite=custom||builtin
-      ?new TilingSprite({texture,width:BOARD_W,height:BOARD_W})
-      :new Sprite(texture);
-    sprite.width=BOARD_W;sprite.height=BOARD_W;
+    const selected=tableMaterials[surface];
+    const custom=surface==='floor'&&selected==='custom-pattern'&&!!customFloorPattern;
+    const id=custom?selected:selected==='custom-pattern'?'slate':selected;
+    const texture=custom?customFloorTexture(customFloorPattern!):
+      tableMaterialTexture(id,textureQuality);
+    // Every finish is a real world-space repeating material, never a
+    // single enlarged raster stretched over the entire octagonal table.
+    const sprite=new TilingSprite({texture,width:BOARD_W,height:BOARD_W});
     sprite.eventMode='none';
-    if(sprite instanceof TilingSprite){
-      // The bundled reference patterns repeat in world space rather than
-      // stretching one image across the play surface. The gray WebP is
-      // 256px, while the existing emerald reference is 512px.
-      sprite.tileScale.set(id==='gray-felt-tile'?.96:builtin?.72:.36);
-    }
-    sprite.alpha=custom||builtin?1:surface==='floor'?.86:surface==='rim'?.88:.79;
+    const targetTileWidth=custom?Math.min(800,texture.width*.36):
+      id==='gray-felt-tile'?320:
+      id==='emerald-felt-tile'?440:
+      id==='walnut'||id==='oak'||id==='mahogany'?910:
+      id==='slate'||id==='marble'?860:720;
+    // Keep the exact same apparent grain scale in Balanced, High and Ultra:
+    // quality controls texels per inch, NOT how big the material pattern is.
+    const pixelScale=targetTileWidth/Math.max(1,texture.width);
+    sprite.tileScale.set(pixelScale);
+    sprite.alpha=1;
     board.addChild(sprite);
     if(polygon){
       const mask=new Graphics().poly(polygon).fill(0xffffff);
@@ -1406,7 +1406,7 @@ type EyeView={
   castleSelectedEnemy?:number|null;
 };
 const isBattleView=(kind:EyeView['kind'])=>kind==='versus'||kind==='castle';
-export default function TableCanvas({tableMaterials,customFloorPattern,autoDeselect,deselectMs,cardViewHoldMs,handHoldView,holdSelectStacks,handPlayMode,diceHoldMs,diceFadeMs,latestAction,canUndo,canRedo,onUndo,onRedo,onOpenReceipt,onInterfaceAction,bookDesign,bookDock,bookOffset,onBookMove,onBookOpen,drawer,wheelMode,state,seat,playerName,actorId,selected,onSelect,onMove,onMoveStack,onMoveSelection,onDrawMat,onDrawReserve,onOpenTcgSettings,onCardAction,onGestureAction,onRadialAction,mergeOpacity,mergeHoverMs,playmat,labelScale,diceAppearance,onMergeCenter,onViewChange,coinAppearance,customCoinValue,customCoinText,onCustomCoinText,onCustomCoinValue,onTokenPlace,onTokenAdjust,onDicePlace,onDiceThrow,onDiceReroll,onCoinModify,onCoinDuplicate,readonly=false}:Props){
+export default function TableCanvas({tableMaterials,textureQuality,customFloorPattern,autoDeselect,deselectMs,cardViewHoldMs,handHoldView,holdSelectStacks,handPlayMode,diceHoldMs,diceFadeMs,latestAction,canUndo,canRedo,onUndo,onRedo,onOpenReceipt,onInterfaceAction,bookDesign,bookDock,bookOffset,onBookMove,onBookOpen,drawer,wheelMode,state,seat,playerName,actorId,selected,onSelect,onMove,onMoveStack,onMoveSelection,onDrawMat,onDrawReserve,onOpenTcgSettings,onCardAction,onGestureAction,onRadialAction,mergeOpacity,mergeHoverMs,playmat,labelScale,diceAppearance,onMergeCenter,onViewChange,coinAppearance,customCoinValue,customCoinText,onCustomCoinText,onCustomCoinValue,onTokenPlace,onTokenAdjust,onDicePlace,onDiceThrow,onDiceReroll,onCoinModify,onCoinDuplicate,readonly=false}:Props){
   const [ready,setReady]=useState(false);
   const [diceQuantities,setDiceQuantities]=useState<Record<number,number>>({});
   // A completed die roll takes LCD priority over a previously queued
@@ -2392,7 +2392,7 @@ export default function TableCanvas({tableMaterials,customFloorPattern,autoDesel
       boxClosed,drawerGroups.current,drawerTabs.current,toggleBox,
       button=>{eyeHitTarget.current=button;},
       button=>{castleHitTarget.current=button;},
-      button=>{mergeHitTargets.current.push(button);},handPlayMode,tableMaterials,customFloorPattern,
+      button=>{mergeHitTargets.current.push(button);},handPlayMode,tableMaterials,textureQuality,customFloorPattern,
       mat=>{
         const bookWidth=TCG_MAT.cardWidth-8,bookHeight=bookWidth/.76;
         const result:DragObstacle[]=[];
@@ -3344,7 +3344,7 @@ export default function TableCanvas({tableMaterials,customFloorPattern,autoDesel
       for(const {button} of stackBadges)button.remove();
       for(const {el} of shuffleFx)el.remove();
     };
-  },[state,seat,playerName,actorId,selected,selectedIds,readonly,ready,mergeOpacity,mergeHoverMs,playmat,labelScale,tableMaterials,customFloorPattern,bookDesign,bookDock,bookOffset,eyeView,relations,viewport,coinAppearance,diceAppearance,customCoinValue,customCoinText,coinSources,boxClosed,diceFadeMs,diceHoldMs,handPlayMode,handHoldView]);
+  },[state,seat,playerName,actorId,selected,selectedIds,readonly,ready,mergeOpacity,mergeHoverMs,playmat,labelScale,tableMaterials,textureQuality,customFloorPattern,bookDesign,bookDock,bookOffset,eyeView,relations,viewport,coinAppearance,diceAppearance,customCoinValue,customCoinText,coinSources,boxClosed,diceFadeMs,diceHoldMs,handPlayMode,handHoldView]);
 
   useEffect(()=>{
     if(!ready||!session.current||!mount.current)return;
