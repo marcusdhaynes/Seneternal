@@ -1,6 +1,8 @@
 import {Texture} from 'pixi.js';
 import {EMERALD_FELT_REFERENCE_URL} from './emeraldFeltReference';
 import {GRAY_FELT_REFERENCE_URL} from './grayFeltReference';
+import {GENERATED_MATERIAL_ATLAS_URI,GENERATED_MATERIAL_SLOTS,isGeneratedMaterial} from './generatedMaterialAtlas';
+export {GENERATED_MATERIAL_SLOTS,isGeneratedMaterial,generatedPreviewStyle,type GeneratedMaterialId} from './generatedMaterialAtlas';
 import {detailFabric,detailProcedural,normalizeTextureQuality,texturePixelSize,type TextureQuality} from './materialDetail';
 export {normalizeTextureQuality,texturePixelSize,type TextureQuality} from './materialDetail';
 
@@ -8,7 +10,9 @@ export {normalizeTextureQuality,texturePixelSize,type TextureQuality} from './ma
  * the surrounding floor. Nothing is fetched and no per-frame renderer runs. */
 export type TableMaterialId =
   'emerald-felt'|'burgundy-felt'|'midnight-felt'|'walnut'|'oak'|
-  'mahogany'|'slate'|'marble'|'leather'|'obsidian-glass'|'custom-pattern'|'emerald-felt-tile'|'gray-felt-tile';
+  'mahogany'|'slate'|'marble'|'leather'|'obsidian-glass'|'custom-pattern'|'emerald-felt-tile'|'gray-felt-tile'|
+  'premium-emerald-felt'|'premium-gray-felt'|'premium-burgundy-felt'|'premium-navy-felt'|
+  'premium-walnut'|'premium-oak'|'premium-mahogany'|'brushed-brass'|'premium-slate-tiles'|'premium-ivory-marble';
 export interface TableMaterials {
   table:TableMaterialId;
   rim:TableMaterialId;
@@ -30,6 +34,16 @@ export const TABLE_MATERIAL_OPTIONS:{id:TableMaterialId;label:string}[]=[
   {id:'marble',label:'Ivory veined marble'},
   {id:'leather',label:'Cognac full-grain leather'},
   {id:'obsidian-glass',label:'Smoked obsidian glass'},
+  {id:'premium-emerald-felt',label:'Premium Emerald Felt · Generated'},
+  {id:'premium-gray-felt',label:'Premium Charcoal Felt · Generated'},
+  {id:'premium-burgundy-felt',label:'Premium Burgundy Felt · Generated'},
+  {id:'premium-navy-felt',label:'Premium Midnight Felt · Generated'},
+  {id:'premium-walnut',label:'Dark Walnut Wood · Generated'},
+  {id:'premium-oak',label:'Honey Oak Wood · Generated'},
+  {id:'premium-mahogany',label:'Polished Mahogany · Generated'},
+  {id:'brushed-brass',label:'Antique Brushed Brass · Generated'},
+  {id:'premium-slate-tiles',label:'Dark Slate Tiles · Generated'},
+  {id:'premium-ivory-marble',label:'Ivory Marble · Generated'},
   {id:'custom-pattern',label:'My repeating floor pattern'}
 ];
 const colors:Record<TableMaterialId,[number,number,number]>={
@@ -37,7 +51,12 @@ const colors:Record<TableMaterialId,[number,number,number]>={
   'midnight-felt':[31,47,75], walnut:[88,56,35],
   oak:[158,112,62], mahogany:[98,39,33], slate:[53,61,65],
   marble:[206,201,182], leather:[120,64,40],
-  'obsidian-glass':[20,29,36], 'custom-pattern':[53,61,65], 'emerald-felt-tile':[18,109,73], 'gray-felt-tile':[91,91,91]
+  'obsidian-glass':[20,29,36], 'custom-pattern':[53,61,65], 'emerald-felt-tile':[18,109,73], 'gray-felt-tile':[91,91,91],
+  'premium-emerald-felt':[12,110,67],'premium-gray-felt':[79,79,79],
+  'premium-burgundy-felt':[89,15,29],'premium-navy-felt':[11,30,61],
+  'premium-walnut':[85,47,29],'premium-oak':[188,120,46],
+  'premium-mahogany':[112,33,19],'brushed-brass':[172,123,43],
+  'premium-slate-tiles':[62,63,65],'premium-ivory-marble':[224,215,196]
 };
 export function normalizeTableMaterials(value:unknown):TableMaterials{
   const v=value&&typeof value==='object'?value as Record<string,unknown>:{};
@@ -52,6 +71,38 @@ export function normalizeTableMaterials(value:unknown):TableMaterials{
 const cache=new Map<TableMaterialId,Texture>();
 const detailedCache=new Map<string,Texture>();
 const referenceImages=new Map<TableMaterialId,HTMLImageElement>();
+const generatedBaseTiles=new Map<string,HTMLCanvasElement>();
+let generatedAtlasImage:HTMLImageElement|null=null;
+let generatedAtlasPending:Promise<void>|null=null;
+/** Decode one offline 5×2 atlas before the Pixi scene builds. */
+export function preloadGeneratedMaterialAtlas():Promise<void>{
+  if(generatedAtlasImage)return Promise.resolve();
+  if(generatedAtlasPending)return generatedAtlasPending;
+  generatedAtlasPending=(async()=>{
+    const image=new Image();
+    image.src=GENERATED_MATERIAL_ATLAS_URI;
+    if(typeof image.decode==='function')await image.decode();
+    else await new Promise<void>((resolve,reject)=>{
+      image.onload=()=>resolve();image.onerror=()=>reject(Error('Generated material atlas failed to load'));
+    });
+    if(image.naturalWidth!==640||image.naturalHeight!==256)
+      throw Error('Unexpected generated material atlas dimensions');
+    generatedAtlasImage=image;
+  })().catch(error=>{generatedAtlasPending=null;throw error;});
+  return generatedAtlasPending;
+}
+function generatedBaseTile(id:keyof typeof GENERATED_MATERIAL_SLOTS):HTMLCanvasElement|null{
+  if(!generatedAtlasImage)return null;
+  const existing=generatedBaseTiles.get(id);
+  if(existing)return existing;
+  const {column,row}=GENERATED_MATERIAL_SLOTS[id];
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=128;
+  const context=canvas.getContext('2d',{alpha:false});
+  if(!context)return null;
+  context.drawImage(generatedAtlasImage,column*128,row*128,128,128,0,0,128,128);
+  generatedBaseTiles.set(id,canvas);
+  return canvas;
+}
 /** GPU-friendly trilinear/mipmap sampling also eliminates sparkle at zoomed
  * out angles, while anisotropic sampling retains grain clarity at a tilt. */
 function configureSampling(texture:Texture):Texture{
@@ -128,6 +179,19 @@ export function tableMaterialTexture(
   const key=id+':'+quality;
   const existing=detailedCache.get(key);
   if(existing&&!existing.destroyed)return existing;
+  if(isGeneratedMaterial(id)){
+    const base=generatedBaseTile(id);
+    if(base){
+      const size=texturePixelSize(quality);
+      const detailed=id.includes('felt')?detailFabric(base,size,id):
+        detailProcedural(base,id,size);
+      const texture=configureSampling(Texture.from(detailed));
+      detailedCache.set(key,texture);
+      return texture;
+    }
+    // If image decoding is temporarily unavailable, fall through to the
+    // existing deterministic material generator rather than displaying white.
+  }
   if(id==='emerald-felt-tile'||id==='gray-felt-tile'){
     const image=referenceImages.get(id);
     if(!image)return cache.get(id)??Texture.WHITE;
@@ -143,9 +207,9 @@ export function tableMaterialTexture(
   canvas.width=canvas.height=size;
   const ctx=canvas.getContext('2d',{alpha:false});
   if(!ctx)throw Error('Table material canvas unavailable');
-  const c=colors[id],isFelt=id.endsWith('felt'),
-    wood=['walnut','oak','mahogany'].includes(id),
-    stone=id==='slate'||id==='marble',glass=id==='obsidian-glass';
+  const c=colors[id],isFelt=id.includes('felt'),
+    wood=['walnut','oak','mahogany'].some(type=>id.includes(type)),
+    stone=id.includes('slate')||id.includes('marble'),glass=id==='obsidian-glass';
   const seed=Array.from(id).reduce((n,ch)=>Math.imul(n,31)+ch.charCodeAt(0),121);
   const rand=random(seed);
   const pixels=ctx.createImageData(size,size),data=pixels.data;
