@@ -100,7 +100,7 @@ import {fallbackDiceResults,type RollFallbackResult} from '../lib/diceFallback';
 import {expandDiceSources} from '../lib/diceSourceExpansion';
 import {DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET,diceRackLocations} from '../lib/diceCoordinates';
 import {tableBookHome} from '../lib/bookDrawerPlacement';
-import {customFloorTexture,preloadEmeraldFeltTexture,preloadGrayFeltTexture,tableMaterialTexture,type TableMaterials,type TextureQuality} from '../lib/tableMaterials';
+import {customFloorTexture,preloadCustomFloorTexture,preloadEmeraldFeltTexture,preloadGrayFeltTexture,releaseUnusedMaterialTextures,tableMaterialTexture,type TableMaterials,type TextureQuality} from '../lib/tableMaterials';
 // The coin simulator is in the initial bundle. Deploying a new build must
 // never invalidate an already-open table's asynchronously fetched Coin3D hash.
 import {tossCoin3D} from '../lib/Coin3D';
@@ -1447,6 +1447,15 @@ export default function TableCanvas({tableMaterials,textureQuality,customFloorPa
   const dice3DActive=useRef(false);
   const dice3DStop=useRef<(()=>void)|null>(null);
   const [dice3DError,setDice3DError]=useState<string|null>(null);
+  // Remove superseded quality tiers after Pixi has finished rebuilding the
+  // board; otherwise repeated 4K/2K switching would retain huge old atlases.
+  useEffect(()=>{
+    const timer=window.setTimeout(()=>{
+      releaseUnusedMaterialTextures(Object.values(tableMaterials),textureQuality);
+    },8000);
+    return()=>window.clearTimeout(timer);
+  },[tableMaterials,textureQuality]);
+
   const diceFlying=useRef<Container[]>([]);
   const throwDiceNow=useRef<(sides:number,dx:number,dy:number,elapsed:number,release?:{x:number;y:number},gentleDrop?:boolean)=>void>(()=>{});
   const diceThrowCallback=useRef(onDiceThrow);diceThrowCallback.current=onDiceThrow;
@@ -2102,7 +2111,8 @@ export default function TableCanvas({tableMaterials,textureQuality,customFloorPa
       // Both user's bundled felt patterns are decoded before first paint.
       // A decode failure for one preset must not hide the other.
       const textureLoads=await Promise.allSettled([
-        preloadEmeraldFeltTexture(),preloadGrayFeltTexture()
+        preloadEmeraldFeltTexture(),preloadGrayFeltTexture(),
+        ...(customFloorPattern?[preloadCustomFloorTexture(customFloorPattern)]:[])
       ]);
       for(const result of textureLoads)if(result.status==='rejected')
         console.warn('Bundled felt texture unavailable:',result.reason);
