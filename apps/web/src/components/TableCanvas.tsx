@@ -100,7 +100,7 @@ import {fallbackDiceResults,type RollFallbackResult} from '../lib/diceFallback';
 import {expandDiceSources} from '../lib/diceSourceExpansion';
 import {DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET,diceRackLocations} from '../lib/diceCoordinates';
 import {tableBookHome} from '../lib/bookDrawerPlacement';
-import {customFloorTexture,tableMaterialTexture,type TableMaterials} from '../lib/tableMaterials';
+import {customFloorTexture,preloadEmeraldFeltTexture,tableMaterialTexture,type TableMaterials} from '../lib/tableMaterials';
 import {fitActionScreenToWheel,actionScreenContactCenter,ACTION_LCD_HEIGHT} from '../lib/actionScreenFit';
 import {fitMatAttachedRadial,fitSelfMatWithHud,fitBattleRadialZoom,
   EYE_CONTROL_DIAMETER_PX,eyeOpponentReferencePixels} from '../lib/actionRadialFit';
@@ -2095,6 +2095,10 @@ export default function TableCanvas({tableMaterials,customFloorPattern,autoDesel
     const app=new Application();
     (async()=>{
       await app.init({width:BOARD_W,height:BOARD_W,backgroundColor:0x101e1d,antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),preference:'webgl',autoDensity:true});
+      // Load the bundled exact-image material once, before any tabletop
+      // background is composed. Nothing is fetched from the network.
+      try{await preloadEmeraldFeltTexture();}
+      catch(error){console.warn('Bundled felt texture unavailable:',error);}
       if(disposed){app.destroy(true);return;}
       const scene=new Container(),board=new Container();board.position.set(BOARD_CENTER,BOARD_CENTER);board.pivot.set(BOARD_CENTER,BOARD_CENTER);
       scene.addChild(board);app.stage.addChild(scene);mount.current?.appendChild(app.canvas);
