@@ -1,7 +1,7 @@
 import {useCallback,useEffect,useRef,useState,type ReactNode,type PointerEvent as ReactPointerEvent} from 'react';
 import {createPortal} from 'react-dom';
 import CoinColorPicker from './CoinColorPicker';
-import {Application,Assets,Circle,Container,Graphics,Point,Rectangle,RenderLayer,Sprite,Text} from 'pixi.js';
+import {Application,Assets,Circle,Container,Graphics,Point,Rectangle,RenderLayer,Sprite,TilingSprite,Text} from 'pixi.js';
 import CardRadialWheel,{RadialActionGlyph} from './CardRadialWheel';
 import {makePlaymatRadial} from './PlaymatActionRadial';
 import {RADIAL_ACTIONS} from '../lib/radialWheel';
@@ -100,7 +100,7 @@ import {fallbackDiceResults,type RollFallbackResult} from '../lib/diceFallback';
 import {expandDiceSources} from '../lib/diceSourceExpansion';
 import {DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET,diceRackLocations} from '../lib/diceCoordinates';
 import {tableBookHome} from '../lib/bookDrawerPlacement';
-import {tableMaterialTexture,type TableMaterials} from '../lib/tableMaterials';
+import {customFloorTexture,tableMaterialTexture,type TableMaterials} from '../lib/tableMaterials';
 import {fitActionScreenToWheel,actionScreenContactCenter,ACTION_LCD_HEIGHT} from '../lib/actionScreenFit';
 import {fitMatAttachedRadial,fitSelfMatWithHud,fitBattleRadialZoom,
   EYE_CONTROL_DIAMETER_PX,eyeOpponentReferencePixels} from '../lib/actionRadialFit';
@@ -128,7 +128,7 @@ function layoutActionLcd(node:HTMLDivElement,geometry:{
   node.style.setProperty('--seneternal-lcd-scale',String(scale));
   node.style.transform='none';
 }
-interface Props{tableMaterials:TableMaterials;autoDeselect:boolean;deselectMs:number;cardViewHoldMs:number;handHoldView:boolean;holdSelectStacks:boolean;handPlayMode:boolean;diceHoldMs:number;diceFadeMs:number;latestAction:string;canUndo:boolean;canRedo:boolean;onUndo:()=>void;onRedo:()=>void;onOpenReceipt:()=>void;onInterfaceAction:(type:string,location:string,description:string)=>void;bookDesign:'tiny'|'dragon'|'journal'|'arcane'|'strapped';bookDock:'left'|'right'|'free'|'hidden';bookOffset:{x:number;y:number};onBookMove:(point:{x:number;y:number})=>void;onBookOpen:()=>void;drawer?:ReactNode;wheelMode:'mobile'|'docked'|'hold';state:GameState;seat:number;playerName:string;actorId:string;selected:string|null;onSelect:(id:string|null)=>void;onMove:(id:string,x:number,y:number)=>void;onMoveStack:(id:string,x:number,y:number)=>void;onMoveSelection:(ids:string[],anchorId:string,x:number,y:number)=>void;onDrawMat:()=>void;onDrawReserve:()=>void;onOpenTcgSettings:()=>void;onCardAction:(id:string,action:"tap"|"flip")=>void;onGestureAction:(id:string,action:CardGestureAction)=>void;onRadialAction:(ids:string[],action:RadialAction,destination?:string)=>void;playmat:PlaymatAppearance;labelScale:number;diceAppearance:DiceAppearance;mergeOpacity:number;mergeHoverMs:number;onMergeCenter:(seat:number,boundary:number,merged:boolean)=>void;onViewChange?:(view:{x:number;y:number;scale:number})=>void;coinAppearance:CoinAppearance;customCoinValue:number;customCoinText:string;onCustomCoinText:(text:string)=>void;onCustomCoinValue:(value:number)=>void;onTokenPlace:(value:number,sign:1|-1,x:number,y:number,carrierId?:string,color?:string,coinText?:string)=>void;onCoinModify:(id:string,changes:{delta?:number;color?:string;coinText?:string})=>void;onCoinDuplicate:(id:string)=>void;onTokenAdjust:(ids:string[],value:number,sign:1|-1)=>void;onDicePlace:(sides:number,x:number,y:number)=>void;onDiceThrow:(throws:{sides:number;rolls:number[];x:number;y:number;rotation:number;quaternion?:[number,number,number,number];altitude?:number}[])=>void;
+interface Props{tableMaterials:TableMaterials;customFloorPattern:string|null;autoDeselect:boolean;deselectMs:number;cardViewHoldMs:number;handHoldView:boolean;holdSelectStacks:boolean;handPlayMode:boolean;diceHoldMs:number;diceFadeMs:number;latestAction:string;canUndo:boolean;canRedo:boolean;onUndo:()=>void;onRedo:()=>void;onOpenReceipt:()=>void;onInterfaceAction:(type:string,location:string,description:string)=>void;bookDesign:'tiny'|'dragon'|'journal'|'arcane'|'strapped';bookDock:'left'|'right'|'free'|'hidden';bookOffset:{x:number;y:number};onBookMove:(point:{x:number;y:number})=>void;onBookOpen:()=>void;drawer?:ReactNode;wheelMode:'mobile'|'docked'|'hold';state:GameState;seat:number;playerName:string;actorId:string;selected:string|null;onSelect:(id:string|null)=>void;onMove:(id:string,x:number,y:number)=>void;onMoveStack:(id:string,x:number,y:number)=>void;onMoveSelection:(ids:string[],anchorId:string,x:number,y:number)=>void;onDrawMat:()=>void;onDrawReserve:()=>void;onOpenTcgSettings:()=>void;onCardAction:(id:string,action:"tap"|"flip")=>void;onGestureAction:(id:string,action:CardGestureAction)=>void;onRadialAction:(ids:string[],action:RadialAction,destination?:string)=>void;playmat:PlaymatAppearance;labelScale:number;diceAppearance:DiceAppearance;mergeOpacity:number;mergeHoverMs:number;onMergeCenter:(seat:number,boundary:number,merged:boolean)=>void;onViewChange?:(view:{x:number;y:number;scale:number})=>void;coinAppearance:CoinAppearance;customCoinValue:number;customCoinText:string;onCustomCoinText:(text:string)=>void;onCustomCoinValue:(value:number)=>void;onTokenPlace:(value:number,sign:1|-1,x:number,y:number,carrierId?:string,color?:string,coinText?:string)=>void;onCoinModify:(id:string,changes:{delta?:number;color?:string;coinText?:string})=>void;onCoinDuplicate:(id:string)=>void;onTokenAdjust:(ids:string[],value:number,sign:1|-1)=>void;onDicePlace:(sides:number,x:number,y:number)=>void;onDiceThrow:(throws:{sides:number;rolls:number[];x:number;y:number;rotation:number;quaternion?:[number,number,number,number];altitude?:number}[])=>void;
 onDiceReroll:(id:string,rolls:number[],x:number,y:number,rotation:number,quaternion?:[number,number,number,number],altitude?:number)=>void;readonly?:boolean}
 /** Draw ordering is global across all seats, even when Castle mats overlap.
  * Separate opponent backings from the viewer's mat and every interactable:
@@ -1016,11 +1016,23 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
   selectedEnemy:number|null,
   drawerState:{left:boolean;right:boolean},drawerGroups:Map<number,Container>,drawerTabs:Map<number,Container>,onToggleDrawer:(side:-1|1)=>void,onEyeReady:(button:Container)=>void,
   onCastleReady:(button:Container)=>void,onMergeReady:(button:Container)=>void,handPlayMode:boolean,
-  tableMaterials:TableMaterials,getSolidContacts:BookSolidContacts):Map<number,Container>|null{
+  tableMaterials:TableMaterials,customFloorPattern:string|null,getSolidContacts:BookSolidContacts):Map<number,Container>|null{
   const backdrop=new Graphics().rect(0,0,BOARD_W,BOARD_W).fill(0x142723);
   board.addChild(backdrop);
   const overlay=(surface:keyof TableMaterials,polygon?:number[])=>{
-    const sprite=new Sprite(tableMaterialTexture(tableMaterials[surface]));
+    if(surface==='floor'&&tableMaterials.floor==='custom-pattern'&&customFloorPattern){
+      // The GPU repeats the image without stretching or seams.
+      const tiled=new TilingSprite({
+        texture:customFloorTexture(customFloorPattern),
+        width:BOARD_W,height:BOARD_W
+      });
+      tiled.tileScale.set(.36);
+      tiled.eventMode='none';tiled.alpha=.96;
+      board.addChild(tiled);
+      return;
+    }
+    const id=tableMaterials[surface]==='custom-pattern'?'slate':tableMaterials[surface];
+    const sprite=new Sprite(tableMaterialTexture(id));
     sprite.width=BOARD_W;sprite.height=BOARD_W;sprite.eventMode='none';
     sprite.alpha=surface==='floor'?.86:surface==='rim'?.88:.79;
     board.addChild(sprite);
@@ -1387,7 +1399,7 @@ type EyeView={
   castleSelectedEnemy?:number|null;
 };
 const isBattleView=(kind:EyeView['kind'])=>kind==='versus'||kind==='castle';
-export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,cardViewHoldMs,handHoldView,holdSelectStacks,handPlayMode,diceHoldMs,diceFadeMs,latestAction,canUndo,canRedo,onUndo,onRedo,onOpenReceipt,onInterfaceAction,bookDesign,bookDock,bookOffset,onBookMove,onBookOpen,drawer,wheelMode,state,seat,playerName,actorId,selected,onSelect,onMove,onMoveStack,onMoveSelection,onDrawMat,onDrawReserve,onOpenTcgSettings,onCardAction,onGestureAction,onRadialAction,mergeOpacity,mergeHoverMs,playmat,labelScale,diceAppearance,onMergeCenter,onViewChange,coinAppearance,customCoinValue,customCoinText,onCustomCoinText,onCustomCoinValue,onTokenPlace,onTokenAdjust,onDicePlace,onDiceThrow,onDiceReroll,onCoinModify,onCoinDuplicate,readonly=false}:Props){
+export default function TableCanvas({tableMaterials,customFloorPattern,autoDeselect,deselectMs,cardViewHoldMs,handHoldView,holdSelectStacks,handPlayMode,diceHoldMs,diceFadeMs,latestAction,canUndo,canRedo,onUndo,onRedo,onOpenReceipt,onInterfaceAction,bookDesign,bookDock,bookOffset,onBookMove,onBookOpen,drawer,wheelMode,state,seat,playerName,actorId,selected,onSelect,onMove,onMoveStack,onMoveSelection,onDrawMat,onDrawReserve,onOpenTcgSettings,onCardAction,onGestureAction,onRadialAction,mergeOpacity,mergeHoverMs,playmat,labelScale,diceAppearance,onMergeCenter,onViewChange,coinAppearance,customCoinValue,customCoinText,onCustomCoinText,onCustomCoinValue,onTokenPlace,onTokenAdjust,onDicePlace,onDiceThrow,onDiceReroll,onCoinModify,onCoinDuplicate,readonly=false}:Props){
   const [ready,setReady]=useState(false);
   const [diceQuantities,setDiceQuantities]=useState<Record<number,number>>({});
   // A completed die roll takes LCD priority over a previously queued
@@ -2366,7 +2378,7 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       boxClosed,drawerGroups.current,drawerTabs.current,toggleBox,
       button=>{eyeHitTarget.current=button;},
       button=>{castleHitTarget.current=button;},
-      button=>{mergeHitTargets.current.push(button);},handPlayMode,tableMaterials,
+      button=>{mergeHitTargets.current.push(button);},handPlayMode,tableMaterials,customFloorPattern,
       mat=>{
         const bookWidth=TCG_MAT.cardWidth-8,bookHeight=bookWidth/.76;
         const result:DragObstacle[]=[];
@@ -3318,7 +3330,7 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       for(const {button} of stackBadges)button.remove();
       for(const {el} of shuffleFx)el.remove();
     };
-  },[state,seat,playerName,actorId,selected,selectedIds,readonly,ready,mergeOpacity,mergeHoverMs,playmat,labelScale,tableMaterials,bookDesign,bookDock,bookOffset,eyeView,relations,viewport,coinAppearance,diceAppearance,customCoinValue,customCoinText,coinSources,boxClosed,diceFadeMs,diceHoldMs,handPlayMode,handHoldView]);
+  },[state,seat,playerName,actorId,selected,selectedIds,readonly,ready,mergeOpacity,mergeHoverMs,playmat,labelScale,tableMaterials,customFloorPattern,bookDesign,bookDock,bookOffset,eyeView,relations,viewport,coinAppearance,diceAppearance,customCoinValue,customCoinText,coinSources,boxClosed,diceFadeMs,diceHoldMs,handPlayMode,handHoldView]);
 
   useEffect(()=>{
     if(!ready||!session.current||!mount.current)return;
