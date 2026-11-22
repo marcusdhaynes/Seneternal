@@ -91,7 +91,7 @@ export function roll3DDice(opts:Dice3DOptions):()=>void{
   const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,
     premultipliedAlpha:false,powerPreference:'high-performance'});
   try{
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
   renderer.setSize(w,h,false);
   renderer.setClearColor(0x000000,0);
   const canvas=renderer.domElement;
