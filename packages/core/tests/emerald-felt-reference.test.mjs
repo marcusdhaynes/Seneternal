@@ -18,7 +18,9 @@ test('the supplied emerald felt is available as a Table material and the default
 });
 test('the supplied image is GPU-tiled rather than stretched across the tabletop',()=>{
   const canvas=readFileSync(new URL('../../../apps/web/src/components/TableCanvas.tsx',import.meta.url),'utf8');
-  assert.match(canvas,/const builtin=id==='emerald-felt-tile'/);
+  assert.match(canvas,/id==='emerald-felt-tile'\?440/);
+  // High-resolution materials all repeat instead of stretching one bitmap.
+  assert.match(canvas,/Every finish is a real world-space repeating material/);
   assert.match(canvas,/new TilingSprite\(\{texture,width:BOARD_W,height:BOARD_W\}\)/);
   assert.match(canvas,/preloadEmeraldFeltTexture\(\)/);
 });
