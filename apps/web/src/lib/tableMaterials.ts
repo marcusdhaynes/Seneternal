@@ -1,6 +1,8 @@
 import {Texture} from 'pixi.js';
 import {EMERALD_FELT_REFERENCE_URL} from './emeraldFeltReference';
 import {GRAY_FELT_REFERENCE_URL} from './grayFeltReference';
+import {detailFabric,detailProcedural,normalizeTextureQuality,texturePixelSize,type TextureQuality} from './materialDetail';
+export {normalizeTextureQuality,texturePixelSize,type TextureQuality} from './materialDetail';
 
 /** Independent, GPU-cached materials for the tabletop, its wooden rim and
  * the surrounding floor. Nothing is fetched and no per-frame renderer runs. */
@@ -48,6 +50,18 @@ export function normalizeTableMaterials(value:unknown):TableMaterials{
   };
 }
 const cache=new Map<TableMaterialId,Texture>();
+const detailedCache=new Map<string,Texture>();
+const referenceImages=new Map<TableMaterialId,HTMLImageElement>();
+/** GPU-friendly trilinear/mipmap sampling also eliminates sparkle at zoomed
+ * out angles, while anisotropic sampling retains grain clarity at a tilt. */
+function configureSampling(texture:Texture):Texture{
+  texture.source.magFilter='linear';
+  texture.source.minFilter='linear';
+  texture.source.mipmapFilter='linear';
+  texture.source.maxAnisotropy=8;
+  texture.source.autoGenerateMipmaps=true;
+  return texture;
+}
 let emeraldTexturePromise:Promise<Texture>|null=null;
 let grayTexturePromise:Promise<Texture>|null=null;
 /** Decode the bundled WebP before creating a Pixi texture. Pixi v8's
@@ -65,7 +79,8 @@ export function preloadEmeraldFeltTexture():Promise<Texture>{
       img.onload=()=>resolve();
       img.onerror=()=>reject(Error('Emerald felt texture could not be decoded'));
     });
-    const texture=Texture.from(img);
+    const texture=configureSampling(Texture.from(img));
+    referenceImages.set('emerald-felt-tile',img);
     cache.set('emerald-felt-tile',texture);
     return texture;
   })().catch(error=>{
@@ -89,7 +104,8 @@ export function preloadGrayFeltTexture():Promise<Texture>{
       img.onload=()=>resolve();
       img.onerror=()=>reject(Error('Gray felt texture could not be decoded'));
     });
-    const texture=Texture.from(img);
+    const texture=configureSampling(Texture.from(img));
+    referenceImages.set('gray-felt-tile',img);
     cache.set('gray-felt-tile',texture);
     return texture;
   })().catch(error=>{
@@ -103,13 +119,25 @@ function random(seed:number):()=>number{
   return ()=>{value=(Math.imul(value,1664525)+1013904223)>>>0;return value/4294967296;};
 }
 const clamp=(n:number)=>Math.min(255,Math.max(0,Math.round(n)));
-export function tableMaterialTexture(id:TableMaterialId):Texture{
-  const cached=cache.get(id);if(cached)return cached;
+/** Full material generator. Balanced=1K, High=2K, Ultra=4K.
+ * Individual surfaces are cached and never regenerated per animation frame. */
+export function tableMaterialTexture(
+  id:TableMaterialId,requestedQuality:TextureQuality='high'
+):Texture{
+  const quality=normalizeTextureQuality(requestedQuality);
+  const key=id+':'+quality;
+  const existing=detailedCache.get(key);
+  if(existing&&!existing.destroyed)return existing;
   if(id==='emerald-felt-tile'||id==='gray-felt-tile'){
-    // Startup awaits preloadEmeraldFeltTexture so this is the decoded source,
-    // not an unresolved URL. The fallback is intentionally visible if WebP
-    // fails on a legacy device, rather than rendering a transparent table.
-    return cache.get(id)??Texture.WHITE;
+    const image=referenceImages.get(id);
+    if(!image)return cache.get(id)??Texture.WHITE;
+    // Original supplied artwork remains the albedo. Additional microscopic
+    // felt fibers are drawn at actual 2K/4K resolution instead of scaling
+    // the former 256/512px color map and calling it restored detail.
+    const canvas=detailFabric(image,texturePixelSize(quality),id);
+    const output=configureSampling(Texture.from(canvas));
+    detailedCache.set(key,output);
+    return output;
   }
   const size=1024,canvas=document.createElement('canvas');
   canvas.width=canvas.height=size;
@@ -179,8 +207,9 @@ export function tableMaterialTexture(id:TableMaterialId):Texture{
       ctx.fillStyle='#090a0b18';ctx.fill();
     }
   }
-  const texture=Texture.from(canvas);
-  cache.set(id,texture);
+  const detailed=detailProcedural(canvas,id,texturePixelSize(quality));
+  const texture=configureSampling(Texture.from(detailed));
+  detailedCache.set(key,texture);
   return texture;
 }
 function wanderNoise(value:number,rand:()=>number):number{
@@ -193,4 +222,16 @@ export function customFloorTexture(imageDataUrl:string):Texture{
   if(!/^data:image\/(?:png|webp|jpeg);base64,/.test(imageDataUrl)||
     imageDataUrl.length>3_000_000)throw Error('Unsupported floor tile');
   return Texture.from(imageDataUrl);
+}
+/** Optional memory reclamation after an already-rendered table is replaced.
+ * Disposes only inactive resolutions/materials; active ones stay cached. */
+export function releaseUnusedMaterialTextures(
+  selected:readonly TableMaterialId[],quality:TextureQuality
+):void{
+  const keep=new Set(selected.map(id=>id+':'+quality));
+  for(const [key,texture] of detailedCache){
+    if(keep.has(key))continue;
+    detailedCache.delete(key);
+    texture.destroy(true);
+  }
 }
