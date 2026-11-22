@@ -93,11 +93,13 @@ function faceLabels(geometry:THREE.BufferGeometry,sides:number,r:number,
     normal:face.normal,center:face.center.clone().divideScalar(face.count)
       .addScaledVector(face.normal,.47*relative),value:String(i%sides+1)
   }));
-  const cell=72,cols=Math.min(10,entries.length),rows=Math.ceil(entries.length/cols);
+  // Face atlas is rendered at 2× density to keep tiny white numerals sharp.
+  const density=2,cell=72*density,cols=Math.min(10,entries.length),rows=Math.ceil(entries.length/cols);
   const canvas=document.createElement('canvas');
   canvas.width=cols*cell;canvas.height=rows*cell;
   const ctx=canvas.getContext('2d');
   if(!ctx)return faces;
+  ctx.scale(density,density);
   const theme=diceTheme(themeId);
   const pos:number[]=[],uv:number[]=[];
   const up=new THREE.Vector3(0,0,1);
@@ -106,18 +108,18 @@ function faceLabels(geometry:THREE.BufferGeometry,sides:number,r:number,
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.font='900 '+(entry.value.length>2?37:47)+'px system-ui,sans-serif';
     ctx.lineWidth=7;ctx.strokeStyle=theme.base;
-    ctx.strokeText(entry.value,col*cell+cell/2,row*cell+cell/2+2);
+    ctx.strokeText(entry.value,col*72+36,row*72+38);
     ctx.fillStyle=theme.ink;ctx.fillText(entry.value,
-      col*cell+cell/2,row*cell+cell/2+2);
+      col*72+36,row*72+38);
     const half=sides===2?8.3:sides===100?3.1:sides>=20?4.3:sides>=12?5.2:6.2;
     const halfScaled=half*relative;
     const rotation=new THREE.Quaternion().setFromUnitVectors(up,entry.normal);
     const corners=[[-halfScaled,-halfScaled],[halfScaled,-halfScaled],[halfScaled,halfScaled],[-halfScaled,halfScaled]]
       .map(([x,y])=>new THREE.Vector3(x,y,0)
         .applyQuaternion(rotation).add(entry.center));
-    const u0=(col*cell+4)/canvas.width,u1=((col+1)*cell-4)/canvas.width;
-    const v0=1-((row+1)*cell-4)/canvas.height,
-      v1=1-(row*cell+4)/canvas.height;
+    const u0=(col*cell+8)/canvas.width,u1=((col+1)*cell-8)/canvas.width;
+    const v0=1-((row+1)*cell-8)/canvas.height,
+      v1=1-(row*cell+8)/canvas.height;
     for(const [ix,u,v] of [[0,u0,v0],[1,u1,v0],[2,u1,v1],
       [0,u0,v0],[2,u1,v1],[3,u0,v1]] as [number,number,number][]){
       const p=corners[ix];pos.push(p.x,p.y,p.z);uv.push(u,v);
@@ -125,7 +127,10 @@ function faceLabels(geometry:THREE.BufferGeometry,sides:number,r:number,
   });
   const texture=new THREE.CanvasTexture(canvas);
   texture.colorSpace=THREE.SRGBColorSpace;
-  texture.minFilter=THREE.LinearFilter;
+  texture.generateMipmaps=true;
+  texture.minFilter=THREE.LinearMipmapLinearFilter;
+  texture.magFilter=THREE.LinearFilter;
+  texture.anisotropy=8;
   const labels=new THREE.BufferGeometry();
   labels.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
   labels.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
@@ -141,8 +146,11 @@ function faceLabels(geometry:THREE.BufferGeometry,sides:number,r:number,
 function makeProceduralTexture(themeId:DiceThemeId){
   const theme=diceTheme(themeId);
   const canvas=document.createElement('canvas');
-  canvas.width=128;canvas.height=128;
+  // Die surface grain was just 128px. Render it at 512px while retaining
+  // the same physical color, veins and angular texture scale.
+  canvas.width=512;canvas.height=512;
   const ctx=canvas.getContext('2d')!;
+  ctx.scale(4,4);
   const gradient=ctx.createLinearGradient(0,0,128,128);
   gradient.addColorStop(0,theme.second);
   gradient.addColorStop(.48,theme.base);
@@ -172,10 +180,23 @@ function makeProceduralTexture(themeId:DiceThemeId){
     }
     ctx.globalAlpha=1;
   }
+  // A second native-pixel micrograin layer prevents the former blurred,
+  // uniformly flat appearance when a model is held near the camera.
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.globalAlpha=.12;
+  ctx.fillStyle=theme.edge;
+  for(let i=0;i<18000;i++){
+    const x=random()*512,y=random()*512,r=.25+random()*.55;
+    ctx.fillRect(x,y,r,r);
+  }
+  ctx.globalAlpha=1;
   const tex=new THREE.CanvasTexture(canvas);
   tex.colorSpace=THREE.SRGBColorSpace;
+  tex.generateMipmaps=true;
+  tex.minFilter=THREE.LinearMipmapLinearFilter;
+  tex.magFilter=THREE.LinearFilter;
   tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-  tex.anisotropy=2;
+  tex.anisotropy=8;
   return tex;
 }
 function sphericalUV(geometry:THREE.BufferGeometry){
