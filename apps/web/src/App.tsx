@@ -1,13 +1,14 @@
-import {useEffect,useMemo,useRef,useState,type ChangeEvent} from 'react';
+import {useEffect,useMemo,useRef,useState,type ChangeEvent,type CSSProperties} from 'react';
 import {createPortal} from 'react-dom';
 import {UpdateBanner,UpdatesSection} from './updates';
 import {ArrowLeft,BookOpen,Check,ChevronRight,Code2,Copy,Dices,Download,FlipHorizontal,Globe2,Layers,Link2,Minus,Package,Play,Plus,RotateCw,Save,Search,Settings2,ShieldCheck,Shuffle,SkipForward,Trash2,Upload,Users,Wifi,WifiOff,X,Zap} from 'lucide-react';
 import {applyCommand,createGame,createId,gameFromPack,parseGamePack,replay,expireThrownDice,thrownDieDeadlines,THROWN_DIE_LIFETIME_MS,type Command,type EventRecord,type GameKind,type GamePack,type GameState,type PlayMode,type TableObject,BOARD_CENTER,tcgMatCells,tcgMatLocal,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,isTcgRemoveDrop,cardStackMembers,defaultPlaymatAppearance,normalizePlaymatAppearance,type PlaymatAppearance,type SharedAppearance} from '@seneternal/core';
 import {runLua,SAMPLE_LUA} from '@seneternal/lua';
 import TableCanvas from './components/TableCanvas';
-import {DEFAULT_TABLE_MATERIALS,TABLE_MATERIAL_OPTIONS,normalizeTableMaterials,normalizeTextureQuality,type TableMaterials,type TextureQuality} from './lib/tableMaterials';
+import {DEFAULT_TABLE_MATERIALS,TABLE_MATERIAL_OPTIONS,normalizeTableMaterials,normalizeTextureQuality,materialPreviewColor,generatedPreviewStyle,isGeneratedMaterial,type TableMaterialId,type TableMaterials,type TextureQuality} from './lib/tableMaterials';
 import {EMERALD_FELT_REFERENCE_URL} from './lib/emeraldFeltReference';
 import {GRAY_FELT_REFERENCE_URL} from './lib/grayFeltReference';
+import {GENERATED_MATERIAL_ATLAS_URI} from './lib/generatedMaterialAtlas';
 import {formatActionDisplay} from './lib/actionDisplay';
 import {mergeReceipt,parseReplayFile,receiptForCommand,receiptTimestamp,RECEIPT_SCHEMA,
   type ReceiptRow} from './lib/actionReceipt';
@@ -26,6 +27,20 @@ import {directUpload,downloadText,getPacks,importPackFile,importPackUrl,remember
 
 type Book = 'seneternal'|'games'|'settings';
 type BookDock='left'|'right'|'free'|'hidden';
+function materialSwatchStyle(id:TableMaterialId,custom:string|null):CSSProperties{
+  const base=materialPreviewColor(id);
+  if(isGeneratedMaterial(id))return {...generatedPreviewStyle(id),backgroundColor:base};
+  if(id==='emerald-felt-tile'||id==='gray-felt-tile'){
+    const image=id==='emerald-felt-tile'?EMERALD_FELT_REFERENCE_URL:GRAY_FELT_REFERENCE_URL;
+    return {backgroundColor:base,backgroundImage:`url("${image}")`,backgroundSize:'cover'};
+  }
+  if(id==='custom-pattern'&&custom)
+    return {backgroundColor:base,backgroundImage:`url("${custom}")`,backgroundSize:'cover'};
+  const wood=['walnut','oak','mahogany'].includes(id);
+  return {backgroundColor:base,
+    backgroundImage:wood?'repeating-linear-gradient(2deg,transparent 0px,#1208071e 2px,transparent 5px),linear-gradient(120deg,#ffffff12,transparent 65%)':
+      'radial-gradient(circle at 20% 30%,#ffffff23,transparent 55%),repeating-linear-gradient(30deg,transparent 0px,#0000000d 2px,transparent 5px)'};
+}
 type BookOffset={x:number;y:number};
 const BOOK_POSITION_KEY='seneternal.book.position.v3';
 /** Preserve deliberately moved books while migrating the old default
@@ -200,6 +215,7 @@ export default function App(){
     }catch{return {...DEFAULT_TABLE_MATERIALS};}
   });
   useEffect(()=>{try{localStorage.setItem('seneternal.table.materials.v1',JSON.stringify(tableMaterials));}catch{}},[tableMaterials]);
+  const [materialPreviewSurface,setMaterialPreviewSurface]=useState<keyof TableMaterials>('table');
   const [textureQuality,setTextureQuality]=useState<TextureQuality>(()=>{
     try{return normalizeTextureQuality(localStorage.getItem('seneternal.texture.quality.v1'));}
     catch{return 'high';}
@@ -979,7 +995,8 @@ export default function App(){
               <span>{book==='seneternal'?'THE TABLETOP MANUAL':book==='games'?'GAMES & SESSIONS':'CUSTOMIZATION & CONTROLS'}</span>
               <button className="reader-close" onClick={()=>setBook(null)} aria-label="Close book"><X size={20}/></button>
             </header>
-            <div className={book==='settings'?'reader-content seneternal-settings-content':'reader-content'}>
+            <div className={book==='settings'?'reader-content seneternal-settings-content':'reader-content'}
+              style={book==='settings'?{'--seneternal-material-atlas':`url("${GENERATED_MATERIAL_ATLAS_URI}")`} as CSSProperties:undefined}>
           {book==='seneternal'&&<div className="guide">
             <p className="intro">Your tabletop. Your rules. Your player name and seat tab contains three books.</p>
             <div className="guide-grid">
@@ -1053,16 +1070,7 @@ export default function App(){
                     <label className="seneternal-surface-field" key={surface}>
                       <span className="seneternal-settings-field-title">{surface==='table'?'Table':surface==='rim'?'Rim':'Floor'}</span>
                       <span className="seneternal-surface-preview" aria-hidden="true"
-                        style={{
-                          backgroundImage:tableMaterials[surface]==='emerald-felt-tile'
-                            ?'url('+EMERALD_FELT_REFERENCE_URL+')':
-                            tableMaterials[surface]==='gray-felt-tile'
-                            ?'url('+GRAY_FELT_REFERENCE_URL+')':undefined,
-                          backgroundColor:tableMaterials[surface]==='walnut'?'#735238':
-                            tableMaterials[surface]==='slate'?'#51585c':
-                            tableMaterials[surface]==='marble'?'#ddd8cc':
-                            tableMaterials[surface]==='mahogany'?'#603d30':'#295c48'
-                        }}>
+                        style={materialSwatchStyle(tableMaterials[surface],customFloorPattern)}>
                         <span>{TABLE_MATERIAL_OPTIONS.find(item=>item.id===tableMaterials[surface])?.label??'Custom'}</span>
                       </span>
                       <select aria-label={surface+' material'} value={tableMaterials[surface]}
@@ -1074,6 +1082,40 @@ export default function App(){
                           <option key={material.id} value={material.id}>{material.label}</option>)}
                       </select>
                     </label>)}
+                </div>
+                <div className="seneternal-material-gallery">
+                  <div className="seneternal-material-gallery-heading">
+                    <strong>Material Gallery</strong>
+                    <span>Preview and apply a texture</span>
+                  </div>
+                  <div className="seneternal-material-targets" role="group" aria-label="Material destination">
+                    {(['table','rim','floor'] as const).map(surface=>
+                      <button type="button" key={surface}
+                        aria-pressed={materialPreviewSurface===surface}
+                        className={materialPreviewSurface===surface?'is-active':''}
+                        onClick={()=>setMaterialPreviewSurface(surface)}>
+                        {surface==='table'?'Table':surface==='rim'?'Rim':'Floor'}
+                      </button>)}
+                  </div>
+                  <div className="seneternal-material-options" role="radiogroup"
+                    aria-label={'Choose '+materialPreviewSurface+' texture'}>
+                    {TABLE_MATERIAL_OPTIONS
+                      .filter(material=>material.id!=='custom-pattern'||materialPreviewSurface==='floor')
+                      .slice().sort((a,b)=>Number(isGeneratedMaterial(b.id))-Number(isGeneratedMaterial(a.id)))
+                      .map(material=>{
+                        const checked=tableMaterials[materialPreviewSurface]===material.id;
+                        return <button type="button" role="radio"
+                          key={material.id} aria-checked={checked}
+                          className={'seneternal-material-choice'+(checked?' is-selected':'')}
+                          title={material.label}
+                          onClick={()=>setTableMaterials(current=>({...current,[materialPreviewSurface]:material.id}))}>
+                          <span className="seneternal-material-choice-swatch" aria-hidden="true"
+                            style={materialSwatchStyle(material.id,customFloorPattern)}/>
+                          <span className="seneternal-material-choice-name">{material.label}</span>
+                          {checked&&<Check size={13} aria-hidden="true"/>}
+                        </button>;
+                      })}
+                  </div>
                 </div>
                 <details className="seneternal-settings-fold seneternal-settings-inside">
                   <summary>Custom Floor Image <span className="seneternal-settings-summary-hint">Import a repeating tile</span></summary>
