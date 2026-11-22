@@ -5,7 +5,7 @@ import {ArrowLeft,BookOpen,Check,ChevronRight,Code2,Copy,Dices,Download,FlipHori
 import {applyCommand,createGame,createId,gameFromPack,parseGamePack,replay,expireThrownDice,thrownDieDeadlines,THROWN_DIE_LIFETIME_MS,type Command,type EventRecord,type GameKind,type GamePack,type GameState,type PlayMode,type TableObject,BOARD_CENTER,tcgMatCells,tcgMatLocal,TCG_MAT,TCG_MAT_WIDTH,TCG_MAT_HEIGHT,isTcgRemoveDrop,cardStackMembers,defaultPlaymatAppearance,normalizePlaymatAppearance,type PlaymatAppearance,type SharedAppearance} from '@seneternal/core';
 import {runLua,SAMPLE_LUA} from '@seneternal/lua';
 import TableCanvas from './components/TableCanvas';
-import {DEFAULT_TABLE_MATERIALS,TABLE_MATERIAL_OPTIONS,normalizeTableMaterials,type TableMaterials} from './lib/tableMaterials';
+import {DEFAULT_TABLE_MATERIALS,TABLE_MATERIAL_OPTIONS,normalizeTableMaterials,normalizeTextureQuality,type TableMaterials,type TextureQuality} from './lib/tableMaterials';
 import {EMERALD_FELT_REFERENCE_URL} from './lib/emeraldFeltReference';
 import {GRAY_FELT_REFERENCE_URL} from './lib/grayFeltReference';
 import {formatActionDisplay} from './lib/actionDisplay';
@@ -200,6 +200,11 @@ export default function App(){
     }catch{return {...DEFAULT_TABLE_MATERIALS};}
   });
   useEffect(()=>{try{localStorage.setItem('seneternal.table.materials.v1',JSON.stringify(tableMaterials));}catch{}},[tableMaterials]);
+  const [textureQuality,setTextureQuality]=useState<TextureQuality>(()=>{
+    try{return normalizeTextureQuality(localStorage.getItem('seneternal.texture.quality.v1'));}
+    catch{return 'high';}
+  });
+  useEffect(()=>{try{localStorage.setItem('seneternal.texture.quality.v1',textureQuality);}catch{}},[textureQuality]);
   const [customFloorPattern,setCustomFloorPattern]=useState<string|null>(()=>{
     try{
       const saved=localStorage.getItem('seneternal.floor.repeat-image.v1');
@@ -215,7 +220,7 @@ export default function App(){
     }
     try{
       const bitmap=await createImageBitmap(file);
-      const scale=Math.min(1,512/Math.max(bitmap.width,bitmap.height));
+      const scale=Math.min(1,2048/Math.max(bitmap.width,bitmap.height));
       const canvas=document.createElement('canvas');
       canvas.width=Math.max(1,Math.round(bitmap.width*scale));
       canvas.height=Math.max(1,Math.round(bitmap.height*scale));
@@ -223,10 +228,10 @@ export default function App(){
       if(!context)throw Error('Canvas is unavailable');
       context.drawImage(bitmap,0,0,canvas.width,canvas.height);
       bitmap.close();
-      // Preserve color/edges losslessly if it fits, otherwise use a
-      // high-quality self-contained WebP tile to respect storage limits.
-      const png=canvas.toDataURL('image/png');
-      const tile=png.length<1_800_000?png:canvas.toDataURL('image/webp',.94);
+      // Preserve native source detail up to 2048px instead of discarding
+      // 93.75% of its pixels at the old 512px import limit. WebP avoids
+      // exhausting the browser's small per-origin localStorage allocation.
+      const tile=canvas.toDataURL('image/webp',.94);
       if(tile.length>2_500_000)throw Error('Pattern is too large after resizing');
       localStorage.setItem('seneternal.floor.repeat-image.v1',tile);
       setCustomFloorPattern(tile);
@@ -765,7 +770,7 @@ export default function App(){
         onClick={shareRoom} title="Share invitation"><Link2 size={16}/></button>}
     </div>
     <div className="table-world">
-      <TableCanvas tableMaterials={tableMaterials} customFloorPattern={customFloorPattern} bookDesign={bookDesign} bookDock={bookDock} bookOffset={bookOffset} onBookMove={point=>{
+      <TableCanvas tableMaterials={tableMaterials} textureQuality={textureQuality} customFloorPattern={customFloorPattern} bookDesign={bookDesign} bookDock={bookDock} bookOffset={bookOffset} onBookMove={point=>{
           writeReceipt('Move','Book · '+Math.round(bookOffset.x)+','+Math.round(bookOffset.y)+
             ' → '+Math.round(point.x)+','+Math.round(point.y),'Reposition');
           setBookOffset(point);
@@ -1035,6 +1040,14 @@ export default function App(){
                   <button className="reader-secondary" type="button"
                     onClick={()=>setTableMaterials({...DEFAULT_TABLE_MATERIALS})}>Reset</button>
                 </div>
+                <label className="seneternal-texture-quality">Texture Resolution
+                  <select aria-label="Texture resolution" value={textureQuality}
+                    onChange={e=>setTextureQuality(e.target.value as TextureQuality)}>
+                    <option value="balanced">Balanced · 1024 px</option>
+                    <option value="high">High · 2048 px (Default)</option>
+                    <option value="ultra">Ultra · 4096 px</option>
+                  </select>
+                </label>
                 <div className="seneternal-surface-grid">
                   {(['table','rim','floor'] as const).map(surface=>
                     <label className="seneternal-surface-field" key={surface}>
