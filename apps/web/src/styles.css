@@ -3402,3 +3402,125 @@ body:has(.reader-backdrop) > :is(
     padding:5px;
   }
 }
+
+
+/* Material Gallery: compact, real image-derived swatches. All three surface
+ * destinations share one gallery, so settings do not become an endless list. */
+.reader-open-book .seneternal-settings-content .seneternal-material-gallery{
+  margin:10px 0 2px;
+  padding:9px;
+  background:#fffdf1ad;
+  border:1px solid #b5a47d85;
+  border-radius:7px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-material-gallery-heading{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:8px;
+  font:700 14px/1.2 'Cormorant Garamond',Georgia,serif;
+  color:#4e432f;
+}
+.reader-open-book .seneternal-settings-content .seneternal-material-gallery-heading span{
+  font:500 10px/1.3 ui-sans-serif,system-ui,sans-serif;
+  opacity:.7;
+}
+.reader-open-book .seneternal-settings-content .seneternal-material-targets{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:4px;
+  margin:8px 0;
+}
+.reader-open-book .seneternal-settings-content .seneternal-material-targets button{
+  min-width:0;
+  min-height:26px;
+  padding:4px 5px;
+  border:1px solid #a997755c;
+  border-radius:5px;
+  background:#e9dfc8;
+  color:#4d4233;
+  font:700 11px/1.2 ui-sans-serif,system-ui,sans-serif;
+  cursor:pointer;
+}
+.reader-open-book .seneternal-settings-content .seneternal-material-targets button.is-active{
+  background:#285c46;
+  border-color:#1d4432;
+  color:#ffffff;
+}
+.reader-open-book .seneternal-settings-content .seneternal-material-options{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+  align-content:start;
+  gap:6px;
+  max-height:245px;
+  overflow:auto;
+  padding:2px;
+  scrollbar-width:thin;
+}
+.reader-open-book .seneternal-settings-content button.seneternal-material-choice{
+  display:flex;
+  align-items:stretch;
+  flex-direction:column;
+  position:relative;
+  min-height:94px;
+  padding:4px;
+  gap:4px;
+  background:#f8f2e4;
+  border:1px solid #ae9a7c;
+  border-radius:5px;
+  color:#3d3528;
+  box-shadow:none;
+  cursor:pointer;
+  text-align:left;
+}
+.reader-open-book .seneternal-settings-content button.seneternal-material-choice:hover{
+  border-color:#4b8466;
+  background:#ffffff;
+}
+.reader-open-book .seneternal-settings-content button.seneternal-material-choice.is-selected{
+  border:2px solid #286d4c;
+  padding:3px;
+  background:#e0eee4;
+}
+.reader-open-book .seneternal-settings-content .seneternal-material-choice-swatch{
+  display:block;
+  width:100%;
+  min-height:52px;
+  flex:1 0 52px;
+  background-color:#425248;
+  background-size:cover;
+  background-repeat:repeat;
+  border-radius:3px;
+  border:1px solid #2c302a38;
+  box-sizing:border-box;
+  pointer-events:none;
+}
+.reader-open-book .seneternal-settings-content .seneternal-material-choice-name{
+  font:600 10px/1.2 ui-sans-serif,system-ui,sans-serif;
+  min-height:25px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.reader-open-book .seneternal-settings-content button.seneternal-material-choice>svg{
+  position:absolute;
+  right:5px;
+  top:5px;
+  color:#ffffff;
+  background:#245e40;
+  border-radius:50%;
+  padding:2px;
+  box-sizing:content-box;
+}
+.reader-open-book .seneternal-settings-content :is(
+  .seneternal-material-targets button,.seneternal-material-choice):focus-visible{
+  outline:2px solid #2c8062;
+  outline-offset:2px;
+}
+@media (max-width:560px){
+  .reader-open-book .seneternal-settings-content .seneternal-material-options{
+    grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+    max-height:190px;
+  }
+}
