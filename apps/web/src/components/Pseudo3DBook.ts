@@ -164,6 +164,12 @@ export function makePseudo3DBook(design:TomeDesign,width:number,height:number):C
     let texture=bookCoverTextures.get(design);
     if(!texture){
       texture=Texture.from(canvas);
+      // Preserve the book's fine engraved lettering during camera zoom.
+      texture.source.magFilter='linear';
+      texture.source.minFilter='linear';
+      texture.source.mipmapFilter='linear';
+      texture.source.maxAnisotropy=8;
+      texture.source.autoGenerateMipmaps=true;
       bookCoverTextures.set(design,texture);
     }
     showCover(texture);
