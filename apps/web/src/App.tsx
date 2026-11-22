@@ -183,8 +183,19 @@ export default function App(){
   const [bookDock,setBookDock]=useState<BookDock>(()=>initialBookPlacement().dock);
   const [bookOffset,setBookOffset]=useState<BookOffset>(()=>initialBookPlacement().offset);
   const [tableMaterials,setTableMaterials]=useState<TableMaterials>(()=>{
-    try{return normalizeTableMaterials(JSON.parse(localStorage.getItem('seneternal.table.materials.v1')||'null'));}
-    catch{return {...DEFAULT_TABLE_MATERIALS};}
+    try{
+      const saved=JSON.parse(localStorage.getItem('seneternal.table.materials.v1')||'null');
+      const normalized=normalizeTableMaterials(saved);
+      // A previous release silently saved its three default materials.
+      // Upgrade ONLY that untouched slate-floor combination to the user's
+      // requested emerald tile; preserve every customized material choice.
+      if(saved?.table==='emerald-felt'&&saved?.rim==='walnut'&&saved?.floor==='slate'&&
+        !localStorage.getItem('seneternal.floor.default-tile.migrated.v1')){
+        localStorage.setItem('seneternal.floor.default-tile.migrated.v1','1');
+        return {...normalized,floor:'emerald-felt-tile'};
+      }
+      return normalized;
+    }catch{return {...DEFAULT_TABLE_MATERIALS};}
   });
   useEffect(()=>{try{localStorage.setItem('seneternal.table.materials.v1',JSON.stringify(tableMaterials));}catch{}},[tableMaterials]);
   const [customFloorPattern,setCustomFloorPattern]=useState<string|null>(()=>{
@@ -1021,7 +1032,7 @@ export default function App(){
               <button className="reader-secondary" onClick={()=>{setBookDock('free');setBookOffset({x:0,y:0});}}>Reset Book Position</button>
               <div className="seneternal-table-material-settings">
                 <h3>Table Textures</h3>
-                <p>Choose separate high-detail materials for the playing surface, outer rim and surrounding floor. Procedural surfaces remain lightweight, sharp and available offline.</p>
+                <p>Choose independent materials for Table, Rim and Floor. Emerald Felt · Supplied Repeating Pattern uses your attached image, is available offline, and is the default floor for new setups.</p>
                 {(['table','rim','floor'] as const).map(surface=>
                   <label key={surface}>
                     {surface==='table'?'Table':surface==='rim'?'Rim':'Floor'}
