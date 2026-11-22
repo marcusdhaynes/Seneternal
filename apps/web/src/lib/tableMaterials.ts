@@ -216,12 +216,38 @@ function wanderNoise(value:number,rand:()=>number):number{
   return Math.max(-1,Math.min(1,value+(rand()-.5)*.12));
 }
 
-/** User-supplied exact seamless tile is loaded locally, never uploaded.
- * Texture.from caches per source URL; PNG is preferred for lossless fidelity. */
+/** Decode custom high-resolution imagery before constructing a Pixi sprite.
+ * The old Texture.from(dataURI) path was invalid on Pixi v8 unless the
+ * resource was preloaded. Keep one active custom image per browser session. */
+let activeCustom:{url:string;texture:Texture}|null=null;
+let customPending:Promise<Texture>|null=null;
+let pendingUrl:string|null=null;
+export function preloadCustomFloorTexture(dataUrl:string):Promise<Texture>{
+  if(!/^data:image\/(?:png|webp|jpeg);base64,/.test(dataUrl)||
+    dataUrl.length>3_000_000)return Promise.reject(Error('Unsupported floor tile'));
+  if(activeCustom?.url===dataUrl)return Promise.resolve(activeCustom.texture);
+  if(customPending&&pendingUrl===dataUrl)return customPending;
+  const pending=(async()=>{
+    const img=new Image();
+    img.src=dataUrl;
+    if(typeof img.decode==='function')await img.decode();
+    else await new Promise<void>((resolve,reject)=>{
+      img.onload=()=>resolve();
+      img.onerror=()=>reject(Error('Custom floor texture could not be decoded'));
+    });
+    const texture=configureSampling(Texture.from(img));
+    // Keep the previous source alive until Pixi's old scene is detached.
+    activeCustom={url:dataUrl,texture};
+    return texture;
+  })();
+  pendingUrl=dataUrl;
+  customPending=pending.finally(()=>{
+    if(pendingUrl===dataUrl){pendingUrl=null;customPending=null;}
+  });
+  return customPending;
+}
 export function customFloorTexture(imageDataUrl:string):Texture{
-  if(!/^data:image\/(?:png|webp|jpeg);base64,/.test(imageDataUrl)||
-    imageDataUrl.length>3_000_000)throw Error('Unsupported floor tile');
-  return Texture.from(imageDataUrl);
+  return activeCustom?.url===imageDataUrl?activeCustom.texture:Texture.WHITE;
 }
 /** Optional memory reclamation after an already-rendered table is replaced.
  * Disposes only inactive resolutions/materials; active ones stay cached. */
