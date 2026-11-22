@@ -54,7 +54,7 @@ export function createStaticDice3D(
 ):StaticDice3DRenderer{
   const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,
     powerPreference:'low-power',premultipliedAlpha:false});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.8));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
   renderer.setClearColor(0,0);
   // Independent 3D drawer solids respect the moving Pixi playmat edge.
   renderer.localClippingEnabled=true;
