@@ -3122,3 +3122,37 @@ body:has(.reader-backdrop) > :is(
   text-shadow:none!important;
   filter:none!important;
 }
+
+/* User-supplied floor tile stays readable without stretching the settings
+   panel; the Pixi surface handles world-space repetition independently. */
+.seneternal-floor-pattern-picker{
+  display:grid;
+  gap:6px;
+  font-weight:600;
+}
+.seneternal-floor-pattern-picker input{
+  max-width:100%;
+  font:inherit;
+}
+.seneternal-floor-pattern-preview{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.seneternal-floor-pattern-preview img{
+  display:block;
+  width:84px;
+  height:84px;
+  max-width:100%;
+  object-fit:contain;
+  background:#091b18;
+  border:1px solid #b7a37766;
+  border-radius:5px;
+  image-rendering:auto;
+}
+.seneternal-floor-pattern-preview span{
+  flex:1 1 140px;
+  font-size:.85em;
+  opacity:.85;
+}
