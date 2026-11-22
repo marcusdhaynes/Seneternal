@@ -78,9 +78,9 @@ export function detailProcedural(base:HTMLCanvasElement,id:string,size:number)
   g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
   g.drawImage(base,0,0,size,size);
   const rng=seeded(hashSeed(id));
-  const felt=id.includes('felt'),wood=['walnut','oak','mahogany'].includes(id),
-    marble=id==='marble',stone=id==='slate',
-    leather=id==='leather',glass=id==='obsidian-glass';
+  const felt=id.includes('felt'),wood=['walnut','oak','mahogany'].some(type=>id.includes(type)),
+    marble=id.includes('marble'),stone=id.includes('slate'),
+    brass=id.includes('brass'),leather=id==='leather',glass=id==='obsidian-glass';
   if(felt){
     const count=Math.round(size*size*.018);
     for(let layer=0;layer<2;layer++){
@@ -139,6 +139,20 @@ export function detailProcedural(base:HTMLCanvasElement,id:string,size:number)
         g.moveTo(x+r,y);g.arc(x,y,r,0,6.283185307179586);
       }
       g.fill();
+    }
+  }else if(brass){
+    // Fine directional brushing makes the gold alloy look physically
+    // different from wood grain or felt, while preserving the generated
+    // image's warm antique color beneath the micro-scratches.
+    for(let layer=0;layer<2;layer++){
+      g.beginPath();
+      g.strokeStyle=layer===0?'rgba(255,237,183,.12)':'rgba(31,19,6,.16)';
+      g.lineWidth=layer===0?.38:.75;
+      for(let i=0;i<size*3;i++){
+        const x=rng()*size,y=rng()*size,len=8+rng()*160;
+        wrappedPath(g,size,x,y,len,(rng()-.5)*.8);
+      }
+      g.stroke();
     }
   }else if(leather){
     for(let layer=0;layer<2;layer++){
