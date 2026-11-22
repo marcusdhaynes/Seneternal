@@ -7,7 +7,7 @@ export const DEFAULT_COIN_APPEARANCE:CoinAppearance={
   finish:'polished',shine:75,bevel:65,size:.9
 };
 const fillText=(text:string,size:number,color:number)=>{
-  const obj=new Text({text,resolution:3,style:{
+  const obj=new Text({text,resolution:4,style:{
     fontFamily:'Inter, system-ui, sans-serif',fontSize:size,
     fontWeight:'900',fill:color,align:'center'
   }});
