@@ -35,10 +35,10 @@ function decoratedCover(style:typeof themes[TomeDesign]):THREE.CanvasTexture{
   const canvas=document.createElement('canvas');
   // Paint at 2x and downsample on the actual 3D model, rather than
   // stretching tiny raster letters across the full miniature cover.
-  canvas.width=1536;canvas.height=2048;
+  canvas.width=2304;canvas.height=3072;
   const g=canvas.getContext('2d');
   if(!g)throw Error('Canvas drawing is unavailable');
-  g.scale(2,2);
+  g.scale(3,3);
   const gold=style.foil;
   g.clearRect(0,0,768,1024);
   // Real embossed relief: the dark offset silhouette persists when the
@@ -92,12 +92,14 @@ function decoratedCover(style:typeof themes[TomeDesign]):THREE.CanvasTexture{
   g.fillText('THE TABLETOP COMPANION',384,835);
   g.globalAlpha=1;
   const t=new THREE.CanvasTexture(canvas);
-  t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t;
+  t.colorSpace=THREE.SRGBColorSpace;
+  t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;
+  t.magFilter=THREE.LinearFilter;t.anisotropy=16;return t;
 }
 function renderBook(design:TomeDesign):HTMLCanvasElement{
   const style=themes[design];
   const scene=new THREE.Scene();
-  const width=1200,height=1584;
+  const width=1800,height=2376;
   const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true,powerPreference:'low-power'});
   renderer.setSize(width,height,false);
   renderer.setPixelRatio(1);
