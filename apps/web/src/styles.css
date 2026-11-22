@@ -3156,3 +3156,249 @@ body:has(.reader-backdrop) > :is(
   font-size:.85em;
   opacity:.85;
 }
+
+
+/* 2026 settings revision: a readable, condensed settings folio instead of a
+   long ungrouped column. Everything is scoped to the Settings page. */
+.reader-open-book .seneternal-settings-content{
+  --settings-line:#ab98764f;
+  --settings-surface:#fffcf0b8;
+  --settings-ink:#493c30;
+}
+.reader-open-book .seneternal-settings-content .reader-heading{
+  margin:1px 0 8px;
+}
+.reader-open-book .seneternal-settings-content .reader-heading h2{
+  font-size:clamp(20px,2.1vw,27px);
+  line-height:1.1;
+  margin:0;
+}
+.reader-open-book .seneternal-settings-content .reader-heading p{
+  font-size:12px;
+  line-height:1.4;
+  margin:3px 0;
+}
+.reader-open-book .seneternal-settings-content .reader-block{
+  margin:5px 0;
+  padding:8px 0;
+  border-color:var(--settings-line);
+}
+.reader-open-book .seneternal-settings-content .reader-block h3{
+  font:700 17px/1.2 'Cormorant Garamond',Georgia,serif;
+  margin:0 0 5px;
+}
+.reader-open-book .seneternal-settings-content .reader-block h4{
+  font-size:13px;
+  margin:8px 0 4px;
+}
+.reader-open-book .seneternal-settings-content .reader-block p{
+  margin:3px 0 8px;
+  font-size:11px;
+  line-height:1.45;
+}
+.reader-open-book .seneternal-settings-content .reader-block label{
+  margin:6px 0;
+  gap:4px;
+  font-size:11px;
+  line-height:1.35;
+}
+.reader-open-book .seneternal-settings-content :is(input:not([type=range]):not([type=checkbox]),select,textarea){
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  padding:6px 9px;
+  font-size:12px;
+  line-height:1.25;
+  border-radius:5px;
+}
+.reader-open-book .seneternal-settings-content input[type=checkbox]{
+  flex:none;
+  width:15px!important;
+  height:15px;
+  padding:0;
+  margin:1px 5px 0 0;
+  vertical-align:middle;
+}
+.reader-open-book .seneternal-settings-content .reader-block label:has(> input[type=checkbox]){
+  flex-direction:row;
+  align-items:flex-start;
+  font-weight:600;
+}
+.reader-open-book .seneternal-settings-content input[type=range]{
+  width:100%;
+  height:16px;
+  padding:0;
+  margin:0;
+  accent-color:#407454;
+}
+.reader-open-book .seneternal-settings-content .tool-buttons{
+  gap:5px;
+}
+.reader-open-book .seneternal-settings-content :is(.reader-secondary,.tool-buttons button){
+  min-height:28px;
+  padding:5px 9px;
+  font-size:11px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-fold{
+  display:block;
+  border:1px solid var(--settings-line);
+  border-radius:7px;
+  background:var(--settings-surface);
+  margin:7px 0;
+  padding:0;
+  overflow:clip;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-fold>summary{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-height:34px;
+  padding:7px 11px;
+  cursor:pointer;
+  list-style:none;
+  color:var(--settings-ink);
+  font:700 14px/1.3 'Cormorant Garamond',Georgia,serif;
+  background:linear-gradient(100deg,#eadbc27f,#ffffff27);
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-fold>summary::-webkit-details-marker{
+  display:none;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-fold>summary::after{
+  content:'+';
+  order:3;
+  margin-left:auto;
+  font:700 16px/1 ui-sans-serif,system-ui,sans-serif;
+  color:#48735f;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-fold[open]>summary{
+  border-bottom:1px solid var(--settings-line);
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-fold[open]>summary::after{
+  content:'−';
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-fold>summary:hover{
+  background:#c7a96f36;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-fold-body{
+  padding:7px 11px 10px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-summary-hint{
+  font:500 10px/1.25 ui-sans-serif,system-ui,sans-serif;
+  opacity:.7;
+  white-space:normal;
+}
+.reader-open-book .seneternal-settings-content .seneternal-table-material-settings.seneternal-surface-panel{
+  display:block;
+  padding:10px;
+  margin:8px 0 11px;
+  border:1px solid #a9946f85;
+  border-radius:8px;
+  background:#f5eddbaf;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-section-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:0 0 7px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-section-heading h3{
+  font:700 18px/1.1 'Cormorant Garamond',Georgia,serif;
+  margin:0;
+}
+.reader-open-book .seneternal-settings-content .seneternal-surface-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,127px),1fr));
+  align-items:stretch;
+  gap:7px;
+}
+.reader-open-book .seneternal-settings-content label.seneternal-surface-field{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  gap:5px;
+  margin:0;
+  padding:7px;
+  border:1px solid #ad957177;
+  background:#fffdf0b0;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:700;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-field-title{
+  font-size:11px;
+  color:#4f493d;
+  letter-spacing:.015em;
+}
+.reader-open-book .seneternal-settings-content .seneternal-surface-preview{
+  position:relative;
+  display:grid;
+  place-items:end center;
+  min-height:54px;
+  border:1px solid #382b274d;
+  border-radius:5px;
+  background-size:95px 95px;
+  background-repeat:repeat;
+  overflow:hidden;
+}
+.reader-open-book .seneternal-settings-content .seneternal-surface-preview>span{
+  display:block;
+  width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  box-sizing:border-box;
+  padding:3px 5px;
+  color:white;
+  text-align:center;
+  font:600 9px/1.3 ui-sans-serif,system-ui,sans-serif;
+  background:#091916c4;
+}
+.reader-open-book .seneternal-settings-content .seneternal-surface-field select{
+  width:100%;
+  min-width:0;
+  padding:5px 6px;
+  font-size:10px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-inside{
+  margin:8px 0 0;
+  background:#f8f2e4;
+}
+.reader-open-book .seneternal-settings-content .seneternal-floor-pattern-preview{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-floor-pattern-preview img{
+  width:46px;
+  height:46px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-dice-theme-grid{
+  gap:6px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-dice-theme-card{
+  min-height:0;
+  padding:7px 4px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-dice-per-die{
+  gap:5px;
+}
+.reader-open-book .seneternal-settings-content .seneternal-settings-fold .reader-block:first-child{
+  border-top:none;
+}
+.reader-open-book .reader-volume-navigation .book-tabs button{
+  padding:7px 8px 7px 22px;
+  font-size:clamp(13px,1.6vw,16px);
+}
+@media(max-width:620px){
+  .reader-open-book .seneternal-settings-content .seneternal-settings-summary-hint{
+    font-size:9px;
+  }
+  .reader-open-book .seneternal-settings-content .seneternal-surface-grid{
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,108px),1fr));
+    gap:5px;
+  }
+  .reader-open-book .seneternal-settings-content .seneternal-surface-field{
+    padding:5px;
+  }
+}
