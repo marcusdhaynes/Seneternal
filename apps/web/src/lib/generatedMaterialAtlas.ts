@@ -21,7 +21,7 @@ export function isGeneratedMaterial(id:string):id is GeneratedMaterialId{
 }
 export function generatedPreviewStyle(id:GeneratedMaterialId){
   const {column,row}=GENERATED_MATERIAL_SLOTS[id];
-  return {backgroundImage:`url("${GENERATED_MATERIAL_ATLAS_URI}")`,
+  return {backgroundImage:'var(--seneternal-material-atlas)',
     backgroundSize:'500% 200%',
     backgroundPosition:`${column*25}% ${row*100}%`,
     backgroundRepeat:'no-repeat'};
