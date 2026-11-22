@@ -1020,21 +1020,24 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
   const backdrop=new Graphics().rect(0,0,BOARD_W,BOARD_W).fill(0x142723);
   board.addChild(backdrop);
   const overlay=(surface:keyof TableMaterials,polygon?:number[])=>{
-    if(surface==='floor'&&tableMaterials.floor==='custom-pattern'&&customFloorPattern){
-      // The GPU repeats the image without stretching or seams.
-      const tiled=new TilingSprite({
-        texture:customFloorTexture(customFloorPattern),
-        width:BOARD_W,height:BOARD_W
-      });
-      tiled.tileScale.set(.36);
-      tiled.eventMode='none';tiled.alpha=.96;
-      board.addChild(tiled);
-      return;
+    const id=tableMaterials[surface];
+    const custom=surface==='floor'&&id==='custom-pattern'&&!!customFloorPattern;
+    const builtin=id==='emerald-felt-tile';
+    const resolved=id==='custom-pattern'&&!custom?'slate':id;
+    const texture=custom?customFloorTexture(customFloorPattern!):tableMaterialTexture(resolved);
+    // The uploaded felt is a REAL repeating image (not procedural noise or
+    // a single texture stretched over the whole octagonal tabletop).
+    const sprite=custom||builtin
+      ?new TilingSprite({texture,width:BOARD_W,height:BOARD_W})
+      :new Sprite(texture);
+    sprite.width=BOARD_W;sprite.height=BOARD_W;
+    sprite.eventMode='none';
+    if(sprite instanceof TilingSprite){
+      // A 512px derived tile at this scale gives fine felt grain without
+      // hiding it behind a full-table stretch. It repeats as the camera moves.
+      sprite.tileScale.set(builtin?.72:.36);
     }
-    const id=tableMaterials[surface]==='custom-pattern'?'slate':tableMaterials[surface];
-    const sprite=new Sprite(tableMaterialTexture(id));
-    sprite.width=BOARD_W;sprite.height=BOARD_W;sprite.eventMode='none';
-    sprite.alpha=surface==='floor'?.86:surface==='rim'?.88:.79;
+    sprite.alpha=custom||builtin?1:surface==='floor'?.86:surface==='rim'?.88:.79;
     board.addChild(sprite);
     if(polygon){
       const mask=new Graphics().poly(polygon).fill(0xffffff);
