@@ -22,8 +22,9 @@ function shades(color:string){
     dark:base.clone().multiplyScalar(.31)};
 }
 function faceTexture(value:string,color:string,heads:boolean,appearance:CoinAppearance){
-  const canvas=document.createElement('canvas');canvas.width=canvas.height=512;
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=1536;
   const ctx=canvas.getContext('2d');if(!ctx)throw Error('Coin texture canvas unavailable');
+  ctx.scale(3,3);
   const {base,light,dark}=shades(color);
   const hex=(c:THREE.Color)=>'#'+c.getHexString();
   const gradient=ctx.createRadialGradient(180,150,28,255,255,255);
@@ -61,7 +62,11 @@ function faceTexture(value:string,color:string,heads:boolean,appearance:CoinAppe
     }
   }
   const texture=new THREE.CanvasTexture(canvas);
-  texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=8;
+  texture.colorSpace=THREE.SRGBColorSpace;
+  texture.generateMipmaps=true;
+  texture.magFilter=THREE.LinearFilter;
+  texture.minFilter=THREE.LinearMipmapLinearFilter;
+  texture.anisotropy=16;
   return texture;
 }
 type Resources={geometries:THREE.BufferGeometry[];materials:THREE.Material[];textures:THREE.Texture[]};
@@ -107,8 +112,9 @@ function coinMesh(radius:number,thickness:number,opt:CoinTossOptions,resources:R
   return root;
 }
 function shadowTexture(){
-  const canvas=document.createElement('canvas');canvas.width=canvas.height=128;
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=256;
   const ctx=canvas.getContext('2d');
+  ctx?.scale(2,2);
   if(ctx){const gradient=ctx.createRadialGradient(64,64,6,64,64,62);
     gradient.addColorStop(0,'rgba(0,0,0,.46)');
     gradient.addColorStop(.5,'rgba(0,0,0,.19)');
@@ -134,7 +140,7 @@ export function tossCoin3D(opt:CoinTossOptions):()=>void{
     renderer.dispose();renderer.forceContextLoss();
   };
   try{
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2.5));
     renderer.setSize(width,height,false);renderer.setClearColor(0x000000,0);
     canvas=renderer.domElement;canvas.className='seneternal-coin-3d-layer';
     canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;'+
