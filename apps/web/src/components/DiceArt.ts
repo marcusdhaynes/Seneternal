@@ -15,7 +15,7 @@ const shade=(base:number,mult:number)=>{
   return (channel(16)<<16)|(channel(8)<<8)|channel(0);
 };
 const number=(value:string,size:number,color:number)=>{
-  const t=new Text({text:value,resolution:3,style:{
+  const t=new Text({text:value,resolution:4,style:{
     fontFamily:'Inter,system-ui,sans-serif',fontSize:size,fontWeight:'900',
     fill:color,align:'center',stroke:{color:0x182329,width:.55}}});
   t.anchor.set(.5);t.eventMode='none';return t;
