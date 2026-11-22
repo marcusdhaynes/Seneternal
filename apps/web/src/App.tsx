@@ -6,6 +6,8 @@ import {applyCommand,createGame,createId,gameFromPack,parseGamePack,replay,expir
 import {runLua,SAMPLE_LUA} from '@seneternal/lua';
 import TableCanvas from './components/TableCanvas';
 import {DEFAULT_TABLE_MATERIALS,TABLE_MATERIAL_OPTIONS,normalizeTableMaterials,type TableMaterials} from './lib/tableMaterials';
+import {EMERALD_FELT_REFERENCE_URL} from './lib/emeraldFeltReference';
+import {GRAY_FELT_REFERENCE_URL} from './lib/grayFeltReference';
 import {formatActionDisplay} from './lib/actionDisplay';
 import {mergeReceipt,parseReplayFile,receiptForCommand,receiptTimestamp,RECEIPT_SCHEMA,
   type ReceiptRow} from './lib/actionReceipt';
@@ -1023,46 +1025,81 @@ export default function App(){
             </>}
           </>}
           {book==='settings'&&<>
-            {settingsPage==='appearance'&&<div className="reader-block seneternal-settings-surfaces"><h3>Table, Rim &amp; Floor</h3>
-              <label>Book Design<select value={bookDesign} onChange={e=>setBookDesign(e.target.value as typeof bookDesign)}>
-                <option value="tiny">Tiny Tome · Leather & Brass</option><option value="dragon">Dragon Codex · Azure Enamel</option><option value="journal">Campaign Journal · Crimson</option><option value="arcane">Arcane Notebook · Gold Sigil</option><option value="strapped">Strapped Journal · Aged Hide</option>
-              </select></label>
-              <h4>Book Position</h4>
-              <p>The Seneternal book remains visible on the tabletop in every game and viewing mode. Drag it to reposition it; its location is preserved between sections.</p>
-              <button className="reader-secondary" onClick={()=>{setBookDock('free');setBookOffset({x:0,y:0});}}>Reset Book Position</button>
-              <div className="seneternal-table-material-settings">
-                <h3>Table Textures</h3>
-                <p>Choose independent materials for Table, Rim and Floor. Emerald Felt · Supplied Repeating Pattern uses your attached image, is available offline, and is the default floor for new setups.</p>
-                {(['table','rim','floor'] as const).map(surface=>
-                  <label key={surface}>
-                    {surface==='table'?'Table':surface==='rim'?'Rim':'Floor'}
-                    <select value={tableMaterials[surface]} onChange={e=>
-                      setTableMaterials(current=>({...current,[surface]:e.target.value as TableMaterials[typeof surface]}))}>
-                      {TABLE_MATERIAL_OPTIONS.filter(material=>
-                        material.id!=='custom-pattern'||surface==='floor').map(material=>
-                        <option key={material.id} value={material.id}>{material.label}</option>)}
-                    </select>
-                  </label>)}
-                <label className="seneternal-floor-pattern-picker">
-                  Upload Repeating Floor Pattern (PNG, JPG, WebP)
-                  <input type="file" accept="image/png,image/jpeg,image/webp"
-                    onChange={importFloorPattern}/>
-                </label>
-                {customFloorPattern&&<div className="seneternal-floor-pattern-preview">
-                  <img src={customFloorPattern} alt="Your repeating floor tile"/>
-                  <span>Saved in this browser · repeats seamlessly if the supplied tile is seamless</span>
-                  <button type="button" className="reader-secondary"
-                    onClick={()=>setTableMaterials(current=>({...current,floor:'custom-pattern'}))}>
-                    Use This Floor Pattern
-                  </button>
-                </div>}
-                {floorPatternError&&<p role="alert">{floorPatternError}</p>}
-                {tableMaterials.floor==='custom-pattern'&&!customFloorPattern&&
-                  <p>Choose a pattern image above. Slate displays until one is uploaded.</p>}
-                <button className="reader-secondary" type="button"
-                  onClick={()=>setTableMaterials({...DEFAULT_TABLE_MATERIALS})}>Reset Table Textures</button>
+            {settingsPage==='appearance'&&<>
+              <div className="reader-heading seneternal-settings-heading">
+                <div><h2>Appearance</h2><p>Everything that changes how the table looks. Saved automatically.</p></div>
               </div>
-              </div>}
+              <div className="seneternal-table-material-settings seneternal-surface-panel">
+                <div className="seneternal-settings-section-heading">
+                  <h3>Table Surfaces</h3>
+                  <button className="reader-secondary" type="button"
+                    onClick={()=>setTableMaterials({...DEFAULT_TABLE_MATERIALS})}>Reset</button>
+                </div>
+                <div className="seneternal-surface-grid">
+                  {(['table','rim','floor'] as const).map(surface=>
+                    <label className="seneternal-surface-field" key={surface}>
+                      <span className="seneternal-settings-field-title">{surface==='table'?'Table':surface==='rim'?'Rim':'Floor'}</span>
+                      <span className="seneternal-surface-preview" aria-hidden="true"
+                        style={{
+                          backgroundImage:tableMaterials[surface]==='emerald-felt-tile'
+                            ?'url('+EMERALD_FELT_REFERENCE_URL+')':
+                            tableMaterials[surface]==='gray-felt-tile'
+                            ?'url('+GRAY_FELT_REFERENCE_URL+')':undefined,
+                          backgroundColor:tableMaterials[surface]==='walnut'?'#735238':
+                            tableMaterials[surface]==='slate'?'#51585c':
+                            tableMaterials[surface]==='marble'?'#ddd8cc':
+                            tableMaterials[surface]==='mahogany'?'#603d30':'#295c48'
+                        }}>
+                        <span>{TABLE_MATERIAL_OPTIONS.find(item=>item.id===tableMaterials[surface])?.label??'Custom'}</span>
+                      </span>
+                      <select aria-label={surface+' material'} value={tableMaterials[surface]}
+                        onChange={e=>setTableMaterials(current=>({
+                          ...current,[surface]:e.target.value as TableMaterials[typeof surface]
+                        }))}>
+                        {TABLE_MATERIAL_OPTIONS.filter(material=>
+                          material.id!=='custom-pattern'||surface==='floor').map(material=>
+                          <option key={material.id} value={material.id}>{material.label}</option>)}
+                      </select>
+                    </label>)}
+                </div>
+                <details className="seneternal-settings-fold seneternal-settings-inside">
+                  <summary>Custom Floor Image <span className="seneternal-settings-summary-hint">Import a repeating tile</span></summary>
+                  <div className="seneternal-settings-fold-body">
+                    <label className="seneternal-floor-pattern-picker">
+                      Image (PNG, JPG, WebP)
+                      <input type="file" accept="image/png,image/jpeg,image/webp" onChange={importFloorPattern}/>
+                    </label>
+                    {customFloorPattern&&<div className="seneternal-floor-pattern-preview">
+                      <img src={customFloorPattern} alt="Custom repeating floor material"/>
+                      <button type="button" className="reader-secondary"
+                        onClick={()=>setTableMaterials(current=>({...current,floor:'custom-pattern'}))}>
+                        Use On Floor
+                      </button>
+                    </div>}
+                    {floorPatternError&&<p role="alert">{floorPatternError}</p>}
+                    {tableMaterials.floor==='custom-pattern'&&!customFloorPattern&&
+                      <p>Choose a tile. Slate is displayed until an image is selected.</p>}
+                  </div>
+                </details>
+              </div>
+              <details className="seneternal-settings-fold">
+                <summary>Book <span className="seneternal-settings-summary-hint">Cover and position</span></summary>
+                <div className="seneternal-settings-fold-body reader-block">
+                  <label>Cover Design
+                    <select value={bookDesign} onChange={e=>setBookDesign(e.target.value as typeof bookDesign)}>
+                      <option value="tiny">Tiny Tome · Leather &amp; Brass</option>
+                      <option value="dragon">Dragon Codex · Azure Enamel</option>
+                      <option value="journal">Campaign Journal · Crimson</option>
+                      <option value="arcane">Arcane Notebook · Gold Sigil</option>
+                      <option value="strapped">Strapped Journal · Aged Hide</option>
+                    </select>
+                  </label>
+                  <button type="button" className="reader-secondary"
+                    onClick={()=>{setBookDock('free');setBookOffset({x:0,y:0});}}>Reset Book Position</button>
+                  <p>The book is always visible; drag it anywhere on the table.</p>
+                </div>
+              </details>
+            </>}
             {settingsPage==='general'&&<><div className="reader-heading"><div><h2>Controls &amp; Player</h2><p>Drag, zoom, card gestures and game rules. Appearance is managed separately.</p></div></div>
               <div className="reader-block"><h3>Player</h3><label>Display name<input value={playerName} maxLength={32} onChange={e=>setPlayerName(e.target.value)}/></label><label>My seat<select value={seat} onChange={e=>setSeat(Number(e.target.value))}>{Array.from({length:12},(_,i)=><option key={i} value={i}>Player {String(i+1).padStart(2,'0')}</option>)}</select></label></div>
               <div className="reader-block"><h3>View controls</h3><p>Scroll the mouse wheel or two-finger touchpad to zoom. Pinch with two fingers on a touchscreen. After zooming in, click and drag empty tabletop space (left mouse button) or drag with one finger to pan. The camera cannot move beyond the area visible at startup. At maximum zoom-out, camera panning is locked. Dragging a card moves the card instead. Middle-mouse drag and Shift + scroll also pan. Press + / − to zoom and 0 to reset. Double-clicking does not change the zoom. The Eye on the top line of your Play 03 zone focuses it; hold for 0.25 seconds to choose an opponent. In Opponent Mode, each other visible player's mat has two circular controls whose centers sit directly on the top line of its Play 03 zone, from that player's perspective: Sword (Enemy, across the divider) and Shield (Ally, alongside you, facing the same way). Your own Play 03 zone has an evenly centered Eye/Castle pair directly on its top boundary. The Eye works exactly as before. Tap Castle to open or close the divided battlefield; unclassified seats disappear. Hold Castle for 0.25 seconds to switch BOTH sides together between Single View (one Ally and one Enemy, each with independent left/right cycling arrows) and All View (all Allies and all Enemies in their respective optimized grids). Click an Ally or Enemy mat to focus that player on their side without changing the opposite side's All grid or existing focus. Focus both sides to display only your full-size mat, one Ally, and one Enemy, with each focused player's relation buttons and same-side cycling arrows. Focus is neither All nor Single, and the next Castle hold continues the previous mode toggle. Your mat remains full-size and fixed to the left in both views, with existing spacing preserved; Enemies stay above the divider. Click Sword or Shield on the specific player's mat to change that player's relationship. They are mutually exclusive, toggle off on a second click, and are remembered separately per opponent on this browser. Eye is strictly one-on-one with the selected opponent always across the divide, regardless of Ally or Enemy classification. Castle always shows marked Enemies across from you and marked Allies beside you; All View shows both groups in grids, while Single View shows one player from each group with independent left/right arrows. Without a Sword or Shield selection, a chosen Eye opponent appears across from you by default.  The left and right circular arrows centered on the opponent's exact side borders between rows 2 and 3 cycle through opponents by their full-table seat positions: left counter-clockwise, right clockwise, skipping your seat. Eye and Castle views initially fit the complete playmat and attached action radial. Mouse wheel, touchpad pinch, touch pinch, or + may zoom in; − may zoom back out only to that fitted view, never farther. Drag-to-pan remains locked in opponent views. Eye, Castle, merge buttons and stack counters are all uniformly small (16 pixels), fixed in screen size at every zoom level, and remain attached to their playmat positions. Cards and match controls remain interactive. The player areas fill the screen, and the Eye and Castle remain merge-button-sized along the top line of Play 03. All PLAY and HAND rows have six additional half-slot card anchors between their original seven horizontal positions. Player names and seat numbers stay tucked behind the top and bottom screen edges: hover over a small, semi-transparent caret tab for 0.25 seconds to reveal its compact name/seat label. Tag transparency uses the merge-button setting. They stay open while hovered and retract 1 second after the pointer leaves, unless clicked to pin. Tap the eye again for the full table or hold it to return to your mat alone. Vector mats stay sharp; raster card art is limited by its source image resolution.</p></div>
