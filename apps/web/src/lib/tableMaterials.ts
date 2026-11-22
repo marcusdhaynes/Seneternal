@@ -58,6 +58,9 @@ const colors:Record<TableMaterialId,[number,number,number]>={
   'premium-mahogany':[112,33,19],'brushed-brass':[172,123,43],
   'premium-slate-tiles':[62,63,65],'premium-ivory-marble':[224,215,196]
 };
+export function materialPreviewColor(id:TableMaterialId):string{
+  return '#'+colors[id].map(c=>Math.max(0,Math.min(255,c)).toString(16).padStart(2,'0')).join('');
+}
 export function normalizeTableMaterials(value:unknown):TableMaterials{
   const v=value&&typeof value==='object'?value as Record<string,unknown>:{};
   const valid=(id:unknown):id is TableMaterialId=>
