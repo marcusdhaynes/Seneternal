@@ -187,6 +187,42 @@ export default function App(){
     catch{return {...DEFAULT_TABLE_MATERIALS};}
   });
   useEffect(()=>{try{localStorage.setItem('seneternal.table.materials.v1',JSON.stringify(tableMaterials));}catch{}},[tableMaterials]);
+  const [customFloorPattern,setCustomFloorPattern]=useState<string|null>(()=>{
+    try{
+      const saved=localStorage.getItem('seneternal.floor.repeat-image.v1');
+      return saved?.startsWith('data:image/')&&saved.length<3_000_000?saved:null;
+    }catch{return null;}
+  });
+  const [floorPatternError,setFloorPatternError]=useState('');
+  const importFloorPattern=async(event:ChangeEvent<HTMLInputElement>)=>{
+    const file=event.currentTarget.files?.[0];event.currentTarget.value='';
+    if(!file)return;
+    if(!/^image\/(?:png|jpeg|webp)$/.test(file.type)||file.size>12_000_000){
+      setFloorPatternError('Choose a PNG, JPG or WebP image under 12 MB.');return;
+    }
+    try{
+      const bitmap=await createImageBitmap(file);
+      const scale=Math.min(1,512/Math.max(bitmap.width,bitmap.height));
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.max(1,Math.round(bitmap.width*scale));
+      canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+      const context=canvas.getContext('2d');
+      if(!context)throw Error('Canvas is unavailable');
+      context.drawImage(bitmap,0,0,canvas.width,canvas.height);
+      bitmap.close();
+      // Preserve color/edges losslessly if it fits, otherwise use a
+      // high-quality self-contained WebP tile to respect storage limits.
+      const png=canvas.toDataURL('image/png');
+      const tile=png.length<1_800_000?png:canvas.toDataURL('image/webp',.94);
+      if(tile.length>2_500_000)throw Error('Pattern is too large after resizing');
+      localStorage.setItem('seneternal.floor.repeat-image.v1',tile);
+      setCustomFloorPattern(tile);
+      setTableMaterials(current=>({...current,floor:'custom-pattern'}));
+      setFloorPatternError('');
+    }catch(error){
+      setFloorPatternError('Could not save the floor tile locally: '+String(error));
+    }
+  };
   useEffect(()=>{localStorage.setItem('seneternal.book.design',bookDesign)},[bookDesign]);
   useEffect(()=>{localStorage.setItem('seneternal.book.dock.v2',bookDock)},[bookDock]);
   useEffect(()=>{localStorage.setItem('seneternal.book.offset.v2',JSON.stringify(bookOffset))},[bookOffset]);
@@ -716,7 +752,7 @@ export default function App(){
         onClick={shareRoom} title="Share invitation"><Link2 size={16}/></button>}
     </div>
     <div className="table-world">
-      <TableCanvas tableMaterials={tableMaterials} bookDesign={bookDesign} bookDock={bookDock} bookOffset={bookOffset} onBookMove={point=>{
+      <TableCanvas tableMaterials={tableMaterials} customFloorPattern={customFloorPattern} bookDesign={bookDesign} bookDock={bookDock} bookOffset={bookOffset} onBookMove={point=>{
           writeReceipt('Move','Book · '+Math.round(bookOffset.x)+','+Math.round(bookOffset.y)+
             ' → '+Math.round(point.x)+','+Math.round(point.y),'Reposition');
           setBookOffset(point);
@@ -991,10 +1027,27 @@ export default function App(){
                     {surface==='table'?'Table':surface==='rim'?'Rim':'Floor'}
                     <select value={tableMaterials[surface]} onChange={e=>
                       setTableMaterials(current=>({...current,[surface]:e.target.value as TableMaterials[typeof surface]}))}>
-                      {TABLE_MATERIAL_OPTIONS.map(material=>
+                      {TABLE_MATERIAL_OPTIONS.filter(material=>
+                        material.id!=='custom-pattern'||surface==='floor').map(material=>
                         <option key={material.id} value={material.id}>{material.label}</option>)}
                     </select>
                   </label>)}
+                <label className="seneternal-floor-pattern-picker">
+                  Upload Repeating Floor Pattern (PNG, JPG, WebP)
+                  <input type="file" accept="image/png,image/jpeg,image/webp"
+                    onChange={importFloorPattern}/>
+                </label>
+                {customFloorPattern&&<div className="seneternal-floor-pattern-preview">
+                  <img src={customFloorPattern} alt="Your repeating floor tile"/>
+                  <span>Saved in this browser · repeats seamlessly if the supplied tile is seamless</span>
+                  <button type="button" className="reader-secondary"
+                    onClick={()=>setTableMaterials(current=>({...current,floor:'custom-pattern'}))}>
+                    Use This Floor Pattern
+                  </button>
+                </div>}
+                {floorPatternError&&<p role="alert">{floorPatternError}</p>}
+                {tableMaterials.floor==='custom-pattern'&&!customFloorPattern&&
+                  <p>Choose a pattern image above. Slate displays until one is uploaded.</p>}
                 <button className="reader-secondary" type="button"
                   onClick={()=>setTableMaterials({...DEFAULT_TABLE_MATERIALS})}>Reset Table Textures</button>
               </div>
