@@ -100,7 +100,7 @@ import {fallbackDiceResults,type RollFallbackResult} from '../lib/diceFallback';
 import {expandDiceSources} from '../lib/diceSourceExpansion';
 import {DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET,diceRackLocations} from '../lib/diceCoordinates';
 import {tableBookHome} from '../lib/bookDrawerPlacement';
-import {customFloorTexture,preloadCustomFloorTexture,preloadEmeraldFeltTexture,preloadGrayFeltTexture,releaseUnusedMaterialTextures,tableMaterialTexture,type TableMaterials,type TextureQuality} from '../lib/tableMaterials';
+import {customFloorTexture,preloadCustomFloorTexture,preloadEmeraldFeltTexture,preloadGrayFeltTexture,preloadGeneratedMaterialAtlas,releaseUnusedMaterialTextures,tableMaterialTexture,type TableMaterials,type TextureQuality} from '../lib/tableMaterials';
 // The coin simulator is in the initial bundle. Deploying a new build must
 // never invalidate an already-open table's asynchronously fetched Coin3D hash.
 import {tossCoin3D} from '../lib/Coin3D';
@@ -1035,8 +1035,9 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
     const targetTileWidth=custom?Math.min(800,texture.width*.36):
       id==='gray-felt-tile'?320:
       id==='emerald-felt-tile'?440:
-      id==='walnut'||id==='oak'||id==='mahogany'?910:
-      id==='slate'||id==='marble'?860:720;
+      ['walnut','oak','mahogany'].some(wood=>id.includes(wood))?910:
+      id.includes('slate')||id.includes('marble')?860:
+      id.includes('brass')?670:720;
     // Keep the exact same apparent grain scale in Balanced, High and Ultra:
     // quality controls texels per inch, NOT how big the material pattern is.
     const pixelScale=targetTileWidth/Math.max(1,texture.width);
@@ -2111,7 +2112,7 @@ export default function TableCanvas({tableMaterials,textureQuality,customFloorPa
       // Both user's bundled felt patterns are decoded before first paint.
       // A decode failure for one preset must not hide the other.
       const textureLoads=await Promise.allSettled([
-        preloadEmeraldFeltTexture(),preloadGrayFeltTexture(),
+        preloadEmeraldFeltTexture(),preloadGrayFeltTexture(),preloadGeneratedMaterialAtlas(),
         ...(customFloorPattern?[preloadCustomFloorTexture(customFloorPattern)]:[])
       ]);
       for(const result of textureLoads)if(result.status==='rejected')
