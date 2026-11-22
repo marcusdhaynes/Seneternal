@@ -46,6 +46,31 @@ export function normalizeTableMaterials(value:unknown):TableMaterials{
   };
 }
 const cache=new Map<TableMaterialId,Texture>();
+let emeraldTexturePromise:Promise<Texture>|null=null;
+/** Decode the bundled WebP before creating a Pixi texture. Pixi v8's
+ * Texture.from(URL) only retrieves previously loaded assets, so an unprimed
+ * data URI can silently render empty. Preloading avoids blank table tiles. */
+export function preloadEmeraldFeltTexture():Promise<Texture>{
+  const loaded=cache.get('emerald-felt-tile');
+  if(loaded)return Promise.resolve(loaded);
+  if(emeraldTexturePromise)return emeraldTexturePromise;
+  emeraldTexturePromise=(async()=>{
+    const img=new Image();
+    img.src=EMERALD_FELT_REFERENCE_URL;
+    if(typeof img.decode==='function')await img.decode();
+    else await new Promise<void>((resolve,reject)=>{
+      img.onload=()=>resolve();
+      img.onerror=()=>reject(Error('Emerald felt texture could not be decoded'));
+    });
+    const texture=Texture.from(img);
+    cache.set('emerald-felt-tile',texture);
+    return texture;
+  })().catch(error=>{
+    emeraldTexturePromise=null;
+    throw error;
+  });
+  return emeraldTexturePromise;
+}
 function random(seed:number):()=>number{
   let value=seed>>>0;
   return ()=>{value=(Math.imul(value,1664525)+1013904223)>>>0;return value/4294967296;};
@@ -54,9 +79,10 @@ const clamp=(n:number)=>Math.min(255,Math.max(0,Math.round(n)));
 export function tableMaterialTexture(id:TableMaterialId):Texture{
   const cached=cache.get(id);if(cached)return cached;
   if(id==='emerald-felt-tile'){
-    const texture=Texture.from(EMERALD_FELT_REFERENCE_URL);
-    cache.set(id,texture);
-    return texture;
+    // Startup awaits preloadEmeraldFeltTexture so this is the decoded source,
+    // not an unresolved URL. The fallback is intentionally visible if WebP
+    // fails on a legacy device, rather than rendering a transparent table.
+    return cache.get('emerald-felt-tile')??Texture.WHITE;
   }
   const size=1024,canvas=document.createElement('canvas');
   canvas.width=canvas.height=size;
