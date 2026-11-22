@@ -101,6 +101,9 @@ import {expandDiceSources} from '../lib/diceSourceExpansion';
 import {DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET,diceRackLocations} from '../lib/diceCoordinates';
 import {tableBookHome} from '../lib/bookDrawerPlacement';
 import {customFloorTexture,preloadEmeraldFeltTexture,preloadGrayFeltTexture,tableMaterialTexture,type TableMaterials} from '../lib/tableMaterials';
+// The coin simulator is in the initial bundle. Deploying a new build must
+// never invalidate an already-open table's asynchronously fetched Coin3D hash.
+import {tossCoin3D} from '../lib/Coin3D';
 import {fitActionScreenToWheel,actionScreenContactCenter,ACTION_LCD_HEIGHT} from '../lib/actionScreenFit';
 import {fitMatAttachedRadial,fitSelfMatWithHud,fitBattleRadialZoom,
   EYE_CONTROL_DIAMETER_PX,eyeOpponentReferencePixels} from '../lib/actionRadialFit';
@@ -1783,8 +1786,8 @@ export default function TableCanvas({tableMaterials,customFloorPattern,autoDesel
       setDice3DError('3D coin toss unavailable on this device: '+String(error));
       land({x:center.x*sx,y:center.y*sy,heads:true,rotation:0});
     };
-    void import('../lib/Coin3D').then(({tossCoin3D})=>{
-      if(session.current?.app!==app||completed)return;
+    try{
+      if(session.current?.app!==app||completed)return false;
       stopFlight=tossCoin3D({
         host,width:rect.width,height:rect.height,
         x:center.x*sx,y:center.y*sy,radius,
@@ -1797,7 +1800,7 @@ export default function TableCanvas({tableMaterials,customFloorPattern,autoDesel
       requestAnimationFrame(()=>{
         if(!completed&&!piece.destroyed)piece.visible=false;
       });
-    }).catch(fallback);
+    }catch(error){fallback(error);}
     return true;
   };
 
@@ -3632,9 +3635,9 @@ export default function TableCanvas({tableMaterials,customFloorPattern,autoDesel
         setDice3DError('3D coin toss unavailable on this device: '+String(error));
         land({x:px,y:py,heads:true,rotation:0});
       };
-      // Preserve the visible ghost until Three.js has prepared the scene.
-      // WebGL is lazily loaded and never runs while coins sit on the felt.
-      void import('../lib/Coin3D').then(({tossCoin3D})=>{
+      // The coin simulator was loaded with the initial page, so releasing
+      // a coin does not fetch a versioned JS asset that rsync may replace.
+      try{
         if(session.current?.app!==current.app||committed)return;
         stopFlight=tossCoin3D({
           host,width:rect.width,height:rect.height,x:px,y:py,
@@ -3647,7 +3650,7 @@ export default function TableCanvas({tableMaterials,customFloorPattern,autoDesel
         requestAnimationFrame(()=>{
           if(!committed){d.ghost.visible=false;d.ghostEl.style.display='none';}
         });
-      }).catch(fallback);
+      }catch(error){fallback(error);}
     };
     const move=(event:PointerEvent)=>{
       const d=tokenDrag.current,at=coordinates(event);
