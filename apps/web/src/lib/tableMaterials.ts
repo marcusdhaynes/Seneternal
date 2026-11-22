@@ -4,7 +4,7 @@ import {Texture} from 'pixi.js';
  * the surrounding floor. Nothing is fetched and no per-frame renderer runs. */
 export type TableMaterialId =
   'emerald-felt'|'burgundy-felt'|'midnight-felt'|'walnut'|'oak'|
-  'mahogany'|'slate'|'marble'|'leather'|'obsidian-glass';
+  'mahogany'|'slate'|'marble'|'leather'|'obsidian-glass'|'custom-pattern';
 export interface TableMaterials {
   table:TableMaterialId;
   rim:TableMaterialId;
@@ -23,14 +23,15 @@ export const TABLE_MATERIAL_OPTIONS:{id:TableMaterialId;label:string}[]=[
   {id:'slate',label:'Natural charcoal slate'},
   {id:'marble',label:'Ivory veined marble'},
   {id:'leather',label:'Cognac full-grain leather'},
-  {id:'obsidian-glass',label:'Smoked obsidian glass'}
+  {id:'obsidian-glass',label:'Smoked obsidian glass'},
+  {id:'custom-pattern',label:'My repeating floor pattern'}
 ];
 const colors:Record<TableMaterialId,[number,number,number]>={
   'emerald-felt':[29,77,61], 'burgundy-felt':[96,31,48],
   'midnight-felt':[31,47,75], walnut:[88,56,35],
   oak:[158,112,62], mahogany:[98,39,33], slate:[53,61,65],
   marble:[206,201,182], leather:[120,64,40],
-  'obsidian-glass':[20,29,36]
+  'obsidian-glass':[20,29,36], 'custom-pattern':[53,61,65]
 };
 export function normalizeTableMaterials(value:unknown):TableMaterials{
   const v=value&&typeof value==='object'?value as Record<string,unknown>:{};
@@ -124,4 +125,12 @@ export function tableMaterialTexture(id:TableMaterialId):Texture{
 }
 function wanderNoise(value:number,rand:()=>number):number{
   return Math.max(-1,Math.min(1,value+(rand()-.5)*.12));
+}
+
+/** User-supplied exact seamless tile is loaded locally, never uploaded.
+ * Texture.from caches per source URL; PNG is preferred for lossless fidelity. */
+export function customFloorTexture(imageDataUrl:string):Texture{
+  if(!/^data:image\/(?:png|webp|jpeg);base64,/.test(imageDataUrl)||
+    imageDataUrl.length>3_000_000)throw Error('Unsupported floor tile');
+  return Texture.from(imageDataUrl);
 }
