@@ -1091,9 +1091,27 @@ export default function App(){
               </div>
               <div className="reader-block"><h3>Play mode</h3><div className="tool-buttons">{(['sandbox','turn-based','asynchronous'] as PlayMode[]).map(m=><button className={game.mode===m?'highlight':''} key={m} onClick={()=>takeAction('SET_MODE',{mode:m})}>{m==='sandbox'?'Live Sandbox':m==='turn-based'?'Turn Based':'Asynchronous'}</button>)}</div></div>
               <div className="reader-block"><h3>Current table</h3><p>{nameFor(game.kind)} · {game.objects.length} objects · {history.length} moves</p><button className="reader-secondary" onClick={returnToEmpty}>Clear view and open an empty table</button></div>
-            </>}
-            {settingsPage==='appearance'&&
-              <><div className="reader-block"><h3>Playmat label size</h3>
+            <details className="seneternal-settings-fold"><summary>Dice &amp; Coin Interactions <span className="seneternal-settings-summary-hint">Hold, throw, lifetime</span></summary>
+  <div className="seneternal-settings-fold-body"><div className="reader-block"><h3>Right tray · Dice, flip coin &amp; coin generators</h3>
+                <p>Flip Coin, D04, D06, D08, D10, D12, D20 and D100 are permanent in the right drawer alongside the two coin generators. The book stays visible on the table, independent of the drawers. Tap a die to select one, tap repeatedly to increase its count (maximum 20). Select different dice to combine them. Drag any selected die to throw the entire selection with natural motion, screen and tray wall rebounds, and collisions between the dice. Reaching 20 automatically throws the selection. All selected dice participate in one throw, and their individual rolls are calculated and logged. The centered face displays the combined result; inspect a thrown die for its individual results.</p>
+              </div>
+              <div className="reader-block">
+                <h3>Die interactions</h3>
+                <p>Hold a loose die, move it naturally with the cursor, then release to reroll; it stops against the physical book or another die. A quick click repeats the result bubble. Holding a source die without moving resets that die's selected count to zero. Loose dice slowly fade out after the selected time; source dice stay in the box.</p>
+                <label>Hold to pick up — {(diceHoldMs/1000).toFixed(2)} seconds
+                  <input type="range" min={100} max={1000} step={50} value={diceHoldMs}
+                    onChange={e=>setDiceHoldMs(Number(e.target.value))}/>
+                </label>
+                <p><strong>Loose die &amp; flipcoin lifetime:</strong> 10 seconds.
+                  The result fades near the end, then is permanently removed.
+                  Use Undo or return it to the drawer before the deadline to
+                  remove or recover it. Source generators never disappear.</p>
+              </div></div>
+</details>
+</>}
+            {settingsPage==='appearance'&&<>
+  <details className="seneternal-settings-fold"><summary>Playmat &amp; Trays <span className="seneternal-settings-summary-hint">Labels, wood and artwork</span></summary>
+    <div className="seneternal-settings-fold-body"><div className="reader-block"><h3>Playmat label size</h3>
                 <label htmlFor="playmat-label-scale">Label scale — {Math.round(labelScale*100)}%
                 <input id="playmat-label-scale" type="range" min={75} max={200} step={5}
                   value={Math.round(labelScale*100)} onChange={e=>setLabelScale(Number(e.target.value)/100)}/></label>
@@ -1108,23 +1126,11 @@ export default function App(){
                   <option value="ebony">Ebony</option>
                   <option value="mahogany">Mahogany</option>
                 </select>
-              </div>
-              <div className="reader-block"><h3>Right tray · Dice, flip coin &amp; coin generators</h3>
-                <p>Flip Coin, D04, D06, D08, D10, D12, D20 and D100 are permanent in the right drawer alongside the two coin generators. The book stays visible on the table, independent of the drawers. Tap a die to select one, tap repeatedly to increase its count (maximum 20). Select different dice to combine them. Drag any selected die to throw the entire selection with natural motion, screen and tray wall rebounds, and collisions between the dice. Reaching 20 automatically throws the selection. All selected dice participate in one throw, and their individual rolls are calculated and logged. The centered face displays the combined result; inspect a thrown die for its individual results.</p>
-              </div>
-              <div className="reader-block">
-                <h3>Die interactions</h3>
-                <p>Hold a loose die, move it naturally with the cursor, then release to reroll; it stops against the physical book or another die. A quick click repeats the result bubble. Holding a source die without moving resets that die's selected count to zero. Loose dice slowly fade out after the selected time; source dice stay in the box.</p>
-                <label>Hold to pick up — {(diceHoldMs/1000).toFixed(2)} seconds
-                  <input type="range" min={100} max={1000} step={50} value={diceHoldMs}
-                    onChange={e=>setDiceHoldMs(Number(e.target.value))}/>
-                </label>
-                <p><strong>Loose die &amp; flipcoin lifetime:</strong> 10 seconds.
-                  The result fades near the end, then is permanently removed.
-                  Use Undo or return it to the drawer before the deadline to
-                  remove or recover it. Source generators never disappear.</p>
-              </div>
-              <div className="reader-block seneternal-dice-appearance-settings">
+              </div><PlaymatEditor appearance={playmat} setAppearance={setPlaymat}
+                merges={viewedGame.centerMerges??[]} seat={seat} inform={inform}/></div>
+  </details>
+  <details className="seneternal-settings-fold"><summary>Dice <span className="seneternal-settings-summary-hint">Sets and individual finishes</span></summary>
+    <div className="seneternal-settings-fold-body"><div className="reader-block seneternal-dice-appearance-settings">
                 <h3>Dice Appearance</h3>
                 <p>Choose the finish for every die and the flip coin. Styles use lightweight, procedurally rendered materials—no texture downloads. The same finish appears in the tray, during 3D rolls, and after landing.</p>
                 <div className="seneternal-dice-theme-grid" role="group" aria-label="Dice designs">
@@ -1164,8 +1170,10 @@ export default function App(){
                   onClick={()=>setDiceAppearance({all:DEFAULT_DICE_APPEARANCE.all,overrides:{}})}>
                   Reset dice designs
                 </button>
-              </div>
-              <div className="reader-block"><h3>Token coins</h3>
+              </div></div>
+  </details>
+  <details className="seneternal-settings-fold"><summary>Coins <span className="seneternal-settings-summary-hint">Finish, shine and size</span></summary>
+    <div className="seneternal-settings-fold-body"><div className="reader-block"><h3>Token coins</h3>
                 <p>The upper 1 coin is an editable inscription: click its number and type digits, commas, + or −. It has no radial. The lower 10 coin retains the radial for duplication, arithmetic and color. Drag either to place a matching coin. Small cabinet handles retract each drawer.</p>
                 <label>Editable coin inscription
                   <input type="text" inputMode="text" maxLength={20}
@@ -1192,9 +1200,10 @@ export default function App(){
                 <label>Coin size — {Math.round(coinAppearance.size*100)}%<input type="range" min={.55} max={1.3} step={.05}
                   value={coinAppearance.size} onChange={e=>setCoinAppearance(p=>({...p,size:Number(e.target.value)}))}/></label>
                 <button className="reader-secondary" onClick={()=>setCoinAppearance(DEFAULT_COIN_APPEARANCE)}>Restore coin appearance</button>
-              </div><PlaymatEditor appearance={playmat} setAppearance={setPlaymat}
-                merges={viewedGame.centerMerges??[]} seat={seat} inform={inform}/>
-              <div className="reader-block">
+              </div></div>
+  </details>
+  <details className="seneternal-settings-fold"><summary>Button Appearance <span className="seneternal-settings-summary-hint">Opacity and hover</span></summary>
+    <div className="seneternal-settings-fold-body"><div className="reader-block">
                 <h3>TCG center-section controls</h3>
                 <p>On your playmat, hover over a small circular + button between the four middle sections. After the hover delay, click to combine neighboring sections into a larger, freely usable area. Use Playmat → Card placement to switch between precise snap slots and boundary-contained free placement. Hover and click − to separate the sections again.</p>
                 <label htmlFor="merge-control-opacity">Button transparency — <strong>{Math.round((1-mergeOpacity)*100)}% transparent</strong>
@@ -1209,9 +1218,9 @@ export default function App(){
                 </label>
                 <div className="tool-buttons"><button onClick={()=>{setMergeOpacity(MERGE_OPACITY_DEFAULT);setMergeHoverMs(MERGE_DELAY_DEFAULT);}}>Restore default appearance</button></div>
                 <p>Both preferences are saved in this browser. Merges themselves belong to the table and appear in saved games and replays.</p>
-              </div>
-              </>
-            }
+              </div></div>
+  </details>
+</>}
             {settingsPage==='deckbuilder'&&<div className="reader-block"><h2>Deckbuilder</h2><p>Build, import, and load decks directly onto the table.</p><button className="reader-primary" onClick={()=>{setBook(null);setTcgStudioOpen(true);}}>Open Deckbuilder</button></div>}
             {settingsPage==='multiplayer'&&<div className="seneternal-play-together">
               <div className="reader-heading"><div><h2>Play Together</h2>
