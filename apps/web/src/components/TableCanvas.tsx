@@ -335,9 +335,11 @@ function visibleBookColliders(root:Container,sx:number,sy:number):{left:number;t
   visit(root);
   return colliders;
 }
+type BookSolidContacts=(mat:Container)=>DragObstacle[];
 function placePersistentBook(mat:Container,layers:TablePaintLayers,
   design:Props['bookDesign'],offset:Props['bookOffset'],state:GameState,
-  readonly:boolean,onOpen:()=>void,onMove:Props['onBookMove']):void{
+  readonly:boolean,onOpen:()=>void,onMove:Props['onBookMove'],
+  getSolidContacts:BookSolidContacts):void{
   const width=TCG_MAT.cardWidth-8,height=width/.76;
   const home=tableBookHome(TCG_MAT_WIDTH,TCG_MAT_HEIGHT,width,height);
   const startX=home.x+offset.x,startY=home.y+offset.y;
@@ -345,22 +347,15 @@ function placePersistentBook(mat:Container,layers:TablePaintLayers,
   book.label='seneternal-physical-book';
   book.position.set(startX,startY);
   mat.addChild(book);layers.objects.attach(book);
-  const obstacles:{x:number;y:number;r:number}[]=[];
-  const parent=mat.parent;
-  for(const object of state.objects){
-    if((!object.throwDice&&!['die','miniature','marker','token'].includes(object.kind)&&!object.tokenCoin)||!parent)continue;
-    const local=mat.toLocal(new Point(object.x,object.y),parent);
-    obstacles.push({x:local.x,y:local.y,
-      r:Math.max(8,(object.tokenCoin?11:object.sides===2?12:15)*(object.scale??1))});
-  }
+  // Fixed dice-rack obstacles. Placed coins/dice are read from the live
+  // Pixi objects on each gesture rather than from stale state coordinates.
+  const rack:DragObstacle[]=[];
   if(state.kind==='tcg'){
     const right=TCG_MAT_WIDTH/2+TCG_MAT.cardWidth/2+3;
     const top=-TCG_MAT_HEIGHT/2+TCG_MAT.rowHeight+TCG_MAT.gap;
     for(const position of diceRackLocations(right,top))
-      obstacles.push({x:position.x,y:position.y,r:10});
+      rack.push(bookAgainstDie(position,10,width*.54,height*.47));
   }
-  const colliders=obstacles.map(d=>
-    bookAgainstDie(d,d.r,width*.54,height*.47));
   if(readonly){book.eventMode='none';return;}
   book.on('pointerdown',event=>{
     if(event.button!==0)return;
@@ -383,7 +378,7 @@ function placePersistentBook(mat:Container,layers:TablePaintLayers,
       // movement to a tangential route; it never latches or freezes the book.
       const current={x:book.x,y:book.y};
       const travel=Math.hypot(destination.x-current.x,destination.y-current.y);
-      const next=slideDrag(current,destination,colliders,
+      const next=slideDrag(current,destination,[...rack,...getSolidContacts(mat)],
         Math.max(42,Math.min(2000,travel*2.2+80)));
       book.position.set(next.x,next.y);
     };
@@ -415,7 +410,8 @@ function drawTcgMats(
   hoverTimers:Set<number>,seatLayers:Map<number,Container>|null,
   eyeHoldMs:number,selectedEnemy:number|null,
   drawerState:{left:boolean;right:boolean},drawerGroups:Map<number,Container>,drawerTabs:Map<number,Container>,onToggleDrawer:(side:-1|1)=>void,onEyeReady:(button:Container)=>void,
-  onCastleReady:(button:Container)=>void,onMergeReady:(button:Container)=>void,handPlayMode:boolean
+  onCastleReady:(button:Container)=>void,onMergeReady:(button:Container)=>void,handPlayMode:boolean,
+  getSolidContacts:BookSolidContacts
 ){
   const drawnSeats=seatLayers
     ? [...seatLayers.keys()]
@@ -592,7 +588,7 @@ function drawTcgMats(
       }
     }
     if(seat===viewerSeat){
-      placePersistentBook(mat,layers,bookDesign,bookOffset,state,readonly,onBookOpen,onBookMove);
+      placePersistentBook(mat,layers,bookDesign,bookOffset,state,readonly,onBookOpen,onBookMove,getSolidContacts);
     }
     const cos=Math.cos(topLeft.angle),sin=Math.sin(topLeft.angle);
     // Joined center rows are rendered as ONE pocket. The side columns
@@ -1020,7 +1016,7 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
   selectedEnemy:number|null,
   drawerState:{left:boolean;right:boolean},drawerGroups:Map<number,Container>,drawerTabs:Map<number,Container>,onToggleDrawer:(side:-1|1)=>void,onEyeReady:(button:Container)=>void,
   onCastleReady:(button:Container)=>void,onMergeReady:(button:Container)=>void,handPlayMode:boolean,
-  tableMaterials:TableMaterials):Map<number,Container>|null{
+  tableMaterials:TableMaterials,getSolidContacts:BookSolidContacts):Map<number,Container>|null{
   const backdrop=new Graphics().rect(0,0,BOARD_W,BOARD_W).fill(0x142723);
   board.addChild(backdrop);
   const overlay=(surface:keyof TableMaterials,polygon?:number[])=>{
@@ -1083,14 +1079,14 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
     onToggleRelation,onFocusCastleSeat,duelOpponent,relations,onMerge,
     onEyeTap,onEyeHold,onCastleTap,onCastleHold,onOpenTcgSettings,castleActive,castleMode,
     castleBaseMode,focused,onCycleOpponent,onControlDown,hoverTimers,seatLayers,
-    eyeHoldMs,selectedEnemy,drawerState,drawerGroups,drawerTabs,onToggleDrawer,onEyeReady,onCastleReady,onMergeReady,handPlayMode);
+    eyeHoldMs,selectedEnemy,drawerState,drawerGroups,drawerTabs,onToggleDrawer,onEyeReady,onCastleReady,onMergeReady,handPlayMode,getSolidContacts);
   else{
     // Sandbox, dice, boardgame, RPG, wargame, party and custom all share
     // exactly the same player-seat origin and saved book offset as TCG.
     const at=tcgMatOrigin(seat),holder=new Container();
     holder.position.set(at.x,at.y);holder.rotation=at.angle;
     board.addChild(holder);
-    placePersistentBook(holder,layers,bookDesign,bookOffset,state,readonly,onBookOpen,onBookMove);
+    placePersistentBook(holder,layers,bookDesign,bookOffset,state,readonly,onBookOpen,onBookMove,getSolidContacts);
   }
   for(let i=0;i<12;i++){
     // Retractable HTML edge labels replace physical chair/name blocks
@@ -2370,7 +2366,24 @@ export default function TableCanvas({tableMaterials,autoDeselect,deselectMs,card
       boxClosed,drawerGroups.current,drawerTabs.current,toggleBox,
       button=>{eyeHitTarget.current=button;},
       button=>{castleHitTarget.current=button;},
-      button=>{mergeHitTargets.current.push(button);},handPlayMode,tableMaterials);
+      button=>{mergeHitTargets.current.push(button);},handPlayMode,tableMaterials,
+      mat=>{
+        const bookWidth=TCG_MAT.cardWidth-8,bookHeight=bookWidth/.76;
+        const result:DragObstacle[]=[];
+        for(const [id,piece] of visuals.current){
+          if(piece.destroyed||!piece.visible)continue;
+          const object=currentState.current.objects.find(o=>o.id===id);
+          if(!object||(!object.tokenCoin&&!object.throwDice&&
+            !['die','miniature','marker','token'].includes(object.kind)))continue;
+          const center=mat.toLocal(piece.toGlobal(new Point(0,0)));
+          const unit=mat.toLocal(piece.toGlobal(new Point(1,0)));
+          const scale=Math.hypot(unit.x-center.x,unit.y-center.y);
+          if(!Number.isFinite(scale)||scale<=0)continue;
+          const radius=(object.tokenCoin?17:object.throwDice?15:14)*scale;
+          result.push(bookAgainstDie(center,radius,bookWidth*.54,bookHeight*.47));
+        }
+        return result;
+      });
     duelLayers.current=seatGroups;
     // Permanent native radial, parented to the player's seat/playmat.
     // Its transform is inherited directly from Pixi, without DOM camera
