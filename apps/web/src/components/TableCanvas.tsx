@@ -100,7 +100,7 @@ import {fallbackDiceResults,type RollFallbackResult} from '../lib/diceFallback';
 import {expandDiceSources} from '../lib/diceSourceExpansion';
 import {DICE_SOURCE_RACK_SCALE,DICE_RACK_LABEL_OFFSET,diceRackLocations} from '../lib/diceCoordinates';
 import {tableBookHome} from '../lib/bookDrawerPlacement';
-import {customFloorTexture,preloadEmeraldFeltTexture,tableMaterialTexture,type TableMaterials} from '../lib/tableMaterials';
+import {customFloorTexture,preloadEmeraldFeltTexture,preloadGrayFeltTexture,tableMaterialTexture,type TableMaterials} from '../lib/tableMaterials';
 import {fitActionScreenToWheel,actionScreenContactCenter,ACTION_LCD_HEIGHT} from '../lib/actionScreenFit';
 import {fitMatAttachedRadial,fitSelfMatWithHud,fitBattleRadialZoom,
   EYE_CONTROL_DIAMETER_PX,eyeOpponentReferencePixels} from '../lib/actionRadialFit';
@@ -1022,7 +1022,7 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
   const overlay=(surface:keyof TableMaterials,polygon?:number[])=>{
     const id=tableMaterials[surface];
     const custom=surface==='floor'&&id==='custom-pattern'&&!!customFloorPattern;
-    const builtin=id==='emerald-felt-tile';
+    const builtin=id==='emerald-felt-tile'||id==='gray-felt-tile';
     const resolved=id==='custom-pattern'&&!custom?'slate':id;
     const texture=custom?customFloorTexture(customFloorPattern!):tableMaterialTexture(resolved);
     // The uploaded felt is a REAL repeating image (not procedural noise or
@@ -1033,9 +1033,10 @@ function drawBackground(board:Container,layers:TablePaintLayers,state:GameState,
     sprite.width=BOARD_W;sprite.height=BOARD_W;
     sprite.eventMode='none';
     if(sprite instanceof TilingSprite){
-      // A 512px derived tile at this scale gives fine felt grain without
-      // hiding it behind a full-table stretch. It repeats as the camera moves.
-      sprite.tileScale.set(builtin?.72:.36);
+      // The bundled reference patterns repeat in world space rather than
+      // stretching one image across the play surface. The gray WebP is
+      // 256px, while the existing emerald reference is 512px.
+      sprite.tileScale.set(id==='gray-felt-tile'?.96:builtin?.72:.36);
     }
     sprite.alpha=custom||builtin?1:surface==='floor'?.86:surface==='rim'?.88:.79;
     board.addChild(sprite);
@@ -2095,10 +2096,13 @@ export default function TableCanvas({tableMaterials,customFloorPattern,autoDesel
     const app=new Application();
     (async()=>{
       await app.init({width:BOARD_W,height:BOARD_W,backgroundColor:0x101e1d,antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),preference:'webgl',autoDensity:true});
-      // Load the bundled exact-image material once, before any tabletop
-      // background is composed. Nothing is fetched from the network.
-      try{await preloadEmeraldFeltTexture();}
-      catch(error){console.warn('Bundled felt texture unavailable:',error);}
+      // Both user's bundled felt patterns are decoded before first paint.
+      // A decode failure for one preset must not hide the other.
+      const textureLoads=await Promise.allSettled([
+        preloadEmeraldFeltTexture(),preloadGrayFeltTexture()
+      ]);
+      for(const result of textureLoads)if(result.status==='rejected')
+        console.warn('Bundled felt texture unavailable:',result.reason);
       if(disposed){app.destroy(true);return;}
       const scene=new Container(),board=new Container();board.position.set(BOARD_CENTER,BOARD_CENTER);board.pivot.set(BOARD_CENTER,BOARD_CENTER);
       scene.addChild(board);app.stage.addChild(scene);mount.current?.appendChild(app.canvas);
